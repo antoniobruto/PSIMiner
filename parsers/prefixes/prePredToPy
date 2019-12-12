@@ -1,0 +1,20 @@
+#define yylval predToPylval
+#define yy_create_buffer predToPy_create_buffer
+#define yy_delete_buffer predToPy_delete_buffer
+#define yy_flex_debug predToPy_flex_debug
+#define yy_init_buffer predToPy_init_buffer
+#define yy_flush_buffer predToPy_flush_buffer
+#define yy_load_buffer_state predToPy_load_buffer_state
+#define yy_switch_to_buffer predToPy_switch_to_buffer
+#define yyin predToPyin
+#define yyleng predToPyleng
+#define yylex predToPylex
+#define yylineno predToPylineno
+#define yyout predToPyout
+#define yyrestart predToPyrestart
+#define yytext predToPytext
+#define yywrap predToPywrap
+#define yyalloc predToPyalloc
+#define yyrealloc predToPyrealloc
+#define yyfree predToPyfree
+

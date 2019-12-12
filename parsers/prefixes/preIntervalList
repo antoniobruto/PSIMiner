@@ -1,0 +1,20 @@
+#define yylval intervalListlval
+#define yy_create_buffer intervalList_create_buffer
+#define yy_delete_buffer intervalList_delete_buffer
+#define yy_flex_debug intervalList_flex_debug
+#define yy_init_buffer intervalList_init_buffer
+#define yy_flush_buffer intervalList_flush_buffer
+#define yy_load_buffer_state intervalList_load_buffer_state
+#define yy_switch_to_buffer intervalList_switch_to_buffer
+#define yyin intervalListin
+#define yyleng intervalListleng
+#define yylex intervalListlex
+#define yylineno intervalListlineno
+#define yyout intervalListout
+#define yyrestart intervalListrestart
+#define yytext intervalListtext
+#define yywrap intervalListwrap
+#define yyalloc intervalListalloc
+#define yyrealloc intervalListrealloc
+#define yyfree intervalListfree
+

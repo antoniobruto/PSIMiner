@@ -1,0 +1,20 @@
+#define yylval learnedOPlval
+#define yy_create_buffer learnedOP_create_buffer
+#define yy_delete_buffer learnedOP_delete_buffer
+#define yy_flex_debug learnedOP_flex_debug
+#define yy_init_buffer learnedOP_init_buffer
+#define yy_flush_buffer learnedOP_flush_buffer
+#define yy_load_buffer_state learnedOP_load_buffer_state
+#define yy_switch_to_buffer learnedOP_switch_to_buffer
+#define yyin learnedOPin
+#define yyleng learnedOPleng
+#define yylex learnedOPlex
+#define yylineno learnedOPlineno
+#define yyout learnedOPout
+#define yyrestart learnedOPrestart
+#define yytext learnedOPtext
+#define yywrap learnedOPwrap
+#define yyalloc learnedOPalloc
+#define yyrealloc learnedOPrealloc
+#define yyfree learnedOPfree
+
