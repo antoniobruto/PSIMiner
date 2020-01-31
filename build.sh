@@ -1,13 +1,13 @@
 #clear
 BUILD_DIR=build 
 
-#if [ ! -d "$BUILD_DIR" ]; then
+if [ ! -d "$BUILD_DIR" ]; then
 	# Control will enter here if $BUILD_DIR doesn't exist.
-	#mkdir build  
-#else
-	#rm -rf build  
-	#mkdir build  
-#fi
+	mkdir build  
+else
+	rm -rf build  
+	mkdir build  
+fi
 
 cp -f parsers/*.l build/ 
 cp -f parsers/*.y build/  
