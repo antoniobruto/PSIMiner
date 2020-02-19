@@ -28,6 +28,11 @@ TOOL USAGE:
 The binary of the tool is built in the "build" directory created by 
 build.sh
 
+For TraceFiles:
+It is assumed that there is a time reference in column 1.
+
+The prefix of the name of the assertion file will be the name of the config file.
+
 **************************************************************************
 
 EXAMPLES: Examples are available at:

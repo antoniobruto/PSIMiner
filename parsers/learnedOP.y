@@ -10,7 +10,7 @@
         #include <string.h>
         #include <float.h>
         #include "structs.h"
-        #include "amsMinerStructs.h"
+        #include "psiMinerStructs.h"
         
         //Function Declarations
         void yyerror(char *);
