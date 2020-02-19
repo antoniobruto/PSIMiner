@@ -9,7 +9,7 @@
 	#include <stdlib.h>
 	#include <string.h>
 	#include <float.h>
-	#include "amsMinerStructs.h"
+	#include "psiMinerStructs.h"
 	
 	//Function Declarations
 	void yyerror(char *);

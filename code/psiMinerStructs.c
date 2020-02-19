@@ -30,35 +30,35 @@
 #include <sys/stat.h> /* for file/directory status */
 
 #include "structs.h"
-#include "amsMinerStructs.h"
+#include "psiMinerStructs.h"
 #include "learnedOP.tab.h"
 extern int traceCount;
 extern int targetBias;
 extern int cumulative;
 extern struct listOfIntervalListsStruct* coveredSet;
 extern struct intervalListStruct* coveredList;
-extern struct listOfIntervalListsStruct* intervalSet;
-extern struct listOfIntervalListsStruct** listOfIntervalSets;
-extern double K;
-extern int N;
-extern int targetPORV_id;
+extern struct listOfIntervalListsStruct* intervalSet; //Set of Lists of Intervals for an isolated trace
+extern struct listOfIntervalListsStruct** listOfIntervalSets; // Set of Interval Sets for Multiple Traces - One set per trace - All traces have an index
+extern double K; // Resolution of time between consecutive sub-expressions
+extern int N; //Upperbound for number of sub-expressions in the Sequence Expression
+extern int targetPORV_id; //Index of the target predicate for building the property
 extern int assertCount;
-extern struct treeNode* decisionTree;
-extern int numberOfPORVs;
-extern struct nodeList* assertionList;
+extern struct treeNode* decisionTree; //Root of the Decision Tree built to learn properties
+extern int numberOfPORVs; // Number of Knowledge (Known) Predicates provided by the User
+extern struct nodeList* assertionList; // A list of Decision tree terminal nodes at which a property exists
 extern int strict;
 extern char* assertFileName;
-extern double totalTraceLength;
-extern double totalTrueLength;
-extern double totalFalseLength;
-extern FILE* logFile;
+extern double totalTraceLength; // Sum of trace lengths of all traces
+extern double totalTrueLength; // Sum of true interval lengths of target across all traces
+extern double totalFalseLength; // // Sum of false interval lengths of target across all traces
+extern FILE* logFile;	//File pointer to the MAIN LOG of the tool
 extern FILE* predLogFile;			/*	The Predicate Log for logging learned predicates that are used in the decision process*/
 static int nodeID = 0;
 extern int separationType;
 extern double correlationThreshold;
 extern double supportThreshold;
 
-extern struct PORV* learnedPORVs;
+extern struct PORV* learnedPORVs;	
 extern struct listOfIntervalListsStruct* learnedIntervalSet;
 extern int learnedPORVCount;
 
@@ -74,8 +74,7 @@ extern struct config* inputConfig;
 extern int continueFlag;
 extern int logging;
 static int first=0;
-double* kalamari = NULL;
-int ijit = 0;
+
 extern struct assertionStruct* allAssertions;
 struct intervalListStruct** validLists = NULL;
 static int superFlag=1;
@@ -1885,15 +1884,8 @@ double computeTrueEntropy(struct listOfIntervalListsStruct** target, struct inte
 		fprintf(logFile,"[computeTrueEntropy] pTrue = %lf\n",pTrue);
 		#endif
 		
-		
 		double H = pTrue*(pTrue==0.0?0.0:log2(pTrue));
-		/*if(ijit){
-			fprintf(logFile,"ENDMATCH (%lf):\n",lengthEM);
-			printIntervalListToFilePtr(endMatchList,logFile);
-			fprintf(logFile,"\nTARGET OVERLAP with ENDMATCH (%lf):\n",lengthTargetTrueEM);
-			printIntervalListToFilePtr(trueTargetEndMatchList,logFile);
-			fprintf(logFile,"\nTrueEntropy = %lf\n\n",(-1.0)*H);
-		}*/
+		
 		#ifdef SUP_DEBUG
 		fprintf(logFile,"[computeTrueEntropy] H = %lf\n\n",(-1.0)*H);
 		fprintf(logFile,"[computeTrueEntropy] ENDED normally\n");
@@ -2947,12 +2939,12 @@ int amsMine(struct treeNode* root, int target, int numberOfPORVs, int N, int dep
  	fflush(logFile);
 	#ifdef MINER_DEBUG
 	fprintf(logFile,"\n[amsMine] STARTED - Depth %d\n",depth);
-	fprintf(stdout,"\n[amsMine] STARTED - Depth %d\n",depth);
+	//fprintf(stdout,"\n[amsMine] STARTED - Depth %d\n",depth);
 	fflush(logFile);
 	#endif
-	if(root->id==4){
+	/*if(root->id==4){
 		fprintf(logFile,"\nCHECK WHATS HAPPENING HERE --- ABC ---\n");
-	}
+	}*/
 	//TODO: Cleanup all the dumps of interval sets to the assertion file. Its pointless.
 	if(root && depth>0){
 		
