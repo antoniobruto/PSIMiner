@@ -69,7 +69,7 @@ double tl; //Adding because the pointer doesn't work for moving data between thi
 extern FILE* learnedOPin;
 extern int learnedOPparse(void);
 
-//struct predicateDetail* details = NULL;
+struct predicateDetail* details = NULL;
 //struct predicateDetail* allDetails = NULL;	//Sorted Accumulator of predicates learned
 int logging = 1;	//Logging is 1 if logs are enabled and 0 otherwise
 
