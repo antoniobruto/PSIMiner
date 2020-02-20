@@ -63,13 +63,13 @@ double* traceLengths;
 /*
 learnedOPin = fopen("best_predicates.txt","r");
 learnedOPparse();
-printPredicateDetailListToFilePtr(details,stdout);
+// printPredicateDetailListToFilePtr(details,stdout);
 */
 double tl; //Adding because the pointer doesn't work for moving data between this file and the parser
 extern FILE* learnedOPin;
 extern int learnedOPparse(void);
 
-struct predicateDetail* details = NULL;
+//struct predicateDetail* details = NULL;
 //struct predicateDetail* allDetails = NULL;	//Sorted Accumulator of predicates learned
 int logging = 1;	//Logging is 1 if logs are enabled and 0 otherwise
 
@@ -79,7 +79,7 @@ char* assertFileName;
 int numberOfPORVs = 0;
 double K;
 int N;
-int targetPORV_id;
+//int targetPORV_id;
 int strict = 0;				//TODO: Implement strict pseudo targets
 double totalTraceLength = 0.0;
 double totalTrueLength = 0.0;
@@ -123,7 +123,7 @@ int cumulative = 0;			//	Determine how gain is computed.
 struct assertionStruct* allAssertions=NULL;
 int main(int argc, char *argv[]) {
 	checkCreateLogDir();
-	int target = 1;
+	int targetPORV_id = 1;
         N = 0;              //Number of parts of the sequence 
         K = 0.0;                //Maximum delay seperation
         int i = 0;
@@ -254,11 +254,10 @@ int main(int argc, char *argv[]) {
 		
 		//----------------------------------Choose a target PORV-------------------------------------
                 printf("NUMBER = %d\n",numberOfPORVs);
-                target = getTarget(numberOfPORVs);        //REMOVE LATER
-                targetPORV_id = target;			//TODO: Merge this and the previous lines
+                targetPORV_id = getTarget(numberOfPORVs);        //REMOVE LATER
                 
 		#ifdef MAIN_DEBUG
-		fprintf(logFile,"[AMSMiner] Target PORV ID: P-%d\n",target);
+		fprintf(logFile,"[AMSMiner] Target PORV ID: P-%d\n",targetPORV_id);
 		#endif
                 //--------------------------------------------------------------------------------------------
 			
@@ -302,17 +301,17 @@ int main(int argc, char *argv[]) {
                 //Compute Additional Interval Lists for Sequence Generation: Backward Influence for the Target
                 //Compute Pseudo-Targets
                 //struct listOfIntervalListsStruct* backwardInfluence = prepareBackwardInfluenceTraces(listOfIntervalSets,target,N,K,strict);
-                prepareBackwardInfluenceTraces(listOfIntervalSets,target,N,K,strict);        
+                prepareBackwardInfluenceTraces(listOfIntervalSets,targetPORV_id,N,K,strict);        
                 // At this point target, and numberOfPORVs+1 to numberOfPORVs+(N-1) are the target interval lists
                 
-		printTreeNodeToFilePtr(root,logFile);
+		printTreeNodeToFilePtr(root,logFile,targetPORV_id);
 		fflush(logFile);
 		
 		int recreate_iterator = 0;
 		for(recreate_iterator=0;recreate_iterator<RECREATE_COUNT;recreate_iterator++){
-			prepareRoot(root,listOfIntervalSets,target,numberOfPORVs,N);                
-			amsMine(root,target,numberOfPORVs,N,depth);
-			printTree(root);
+			prepareRoot(root,listOfIntervalSets,targetPORV_id,numberOfPORVs,N);                
+			amsMine(root,targetPORV_id,numberOfPORVs,N,depth,targetPORV_id);
+			printTree(root,targetPORV_id);
 			purgeTruthListForTreeNode(root);
 		}
 		
