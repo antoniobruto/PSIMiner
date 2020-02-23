@@ -233,11 +233,11 @@ double computeEntropy(struct listOfIntervalListsStruct** target, struct interval
 double computeTrueEntropy(struct listOfIntervalListsStruct** target, struct intervalListStruct** endMatchList);
 double computeFalseEntropy(struct listOfIntervalListsStruct** target, struct intervalListStruct** endMatchList);
 double computeOverlapEntropy(struct listOfIntervalListsStruct** target, struct intervalListStruct** endMatchList);
-double computeBinaryEntropy(struct listOfIntervalListsStruct** localIntervalSet, struct truthAssignmentListStruct* constraintList, int predicate_id, int pos);
+double computeBinaryEntropy(struct listOfIntervalListsStruct** localIntervalSet, struct truthAssignmentListStruct* constraintList, int predicate_id, int pos, int targetPORV_id);
 
 //Gain
-void computeAllGains(struct listOfIntervalListsStruct** localIntervalSet, int target, int *trueFalseFlag, double* bestGain, int i, int j, int PORVCount, struct treeNode* currentNode, double* falseEntropy, double* trueEntropy);
-struct treeNode* findBestGain(struct listOfIntervalListsStruct** localIntervalSets, int target, int PORVCount, int N, struct treeNode* currentNode);
+void computeAllGains(struct listOfIntervalListsStruct** localIntervalSet, int target, int *trueFalseFlag, double* bestGain, int i, int j, int PORVCount, struct treeNode* currentNode, double* falseEntropy, double* trueEntropy,int targetPORV_id);
+struct treeNode* findBestGain(struct listOfIntervalListsStruct** localIntervalSets, int target, int PORVCount, int N, struct treeNode* currentNode, int targetPORV_id);
 
 struct listOfIntervalListsStruct* computeConstrainedIntervalSet(struct listOfIntervalListsStruct* list, int predicate_id, int truth, struct truthAssignmentListStruct* constraintList);
 
@@ -251,11 +251,11 @@ struct intervalStruct* minkowskiIntervalDiff(struct intervalStruct* interval1, s
 struct intervalListStruct* minkowskiSumList(struct intervalListStruct* list, double l, double r);
 struct intervalListStruct* minkowskiDiffList(struct intervalListStruct* list, double l, double r);
 
-int amsMine(struct treeNode* root,int target, int numberOfPORVs, int N,int depth);
-void printTreeNode(struct treeNode* node);
-void printTreeNodeToFile(struct treeNode* node,int depth);
-void printTreeNodeToFilePtr(struct treeNode* root,FILE* fp);
-void printTree(struct treeNode* node);
+int amsMine(struct treeNode* root,int target, int numberOfPORVs, int N,int depth,int targetPORV_id);
+void printTreeNode(struct treeNode* node,int targetPORV_id);
+void printTreeNodeToFile(struct treeNode* node,int depth,int targetPORV_id);
+void printTreeNodeToFilePtr(struct treeNode* root,FILE* fp,int targetPORV_id);
+void printTree(struct treeNode* node, int targetPORV_id);
 
 FILE* processInput(int argc, char* argv[], int* N, double* K, int* depth, int repeatFlag);
 FILE* processConfig(int argc, char* argv[]);
@@ -273,13 +273,13 @@ struct intervalListStruct* computeForwardInfluenceForAnAssertionForTruth(struct 
 int cfileexists(const char * filename);
 
 //Support and Correlation
-double getCorrelation(struct truthAssignmentListStruct* truthList, struct intervalListStruct* targetList);
-double getCorrelationForTruth(struct truthAssignmentListStruct* truthList, struct intervalListStruct* targetList, int truth);
+double getCorrelation(struct truthAssignmentListStruct* truthList, struct intervalListStruct* targetList, int targetPORV_id);
+double getCorrelationForTruth(struct truthAssignmentListStruct* truthList, struct intervalListStruct* targetList, int truth, int targetPORV_id);
 
-double getSupport(struct truthAssignmentListStruct* truthList, struct intervalListStruct* targetList);
+double getSupport(struct truthAssignmentListStruct* truthList, struct intervalListStruct* targetList, int targetPORV_id);
 
-int testCorrelationSupport(struct truthAssignmentListStruct* truthList, struct intervalListStruct* targetList);	//Returns 0 or 1 depending on whether the prefix has support and correlation quantities above thresholds.
-int testCorrelationSupportForTruth(struct truthAssignmentListStruct* truthList, int truth);
+int testCorrelationSupport(struct truthAssignmentListStruct* truthList, struct intervalListStruct* targetList, int targetPORV_id);	//Returns 0 or 1 depending on whether the prefix has support and correlation quantities above thresholds.
+int testCorrelationSupportForTruth(struct truthAssignmentListStruct* truthList, int truth, int targetPORV_id);
 
 //Pretty Printers for Assertions
 struct intervalListStruct** computeBuckets(struct treeNode* node);
@@ -288,9 +288,9 @@ struct intervalStruct* computeSeparationAnyMatch(struct intervalListStruct** buc
 struct intervalStruct* computeBucketSeparation(struct intervalListStruct** bucket,struct intervalListStruct** list2, int pos1, int pos2, int smallestBucketID);
 struct intervalStruct* widenIntervalSet(struct intervalListStruct* list);
 //void printAssertionWithTruthToFile(FILE* fp, struct intervalListStruct* targetList, struct intervalListStruct* bucket[], int bucketCount, int truth, struct treeNode* node);
-void printAssertionWithTruthToFile(FILE* fp, struct intervalListStruct** targetList, struct intervalListStruct** bucket, int bucketCount, int truth, struct treeNode* node,int position);
-void writeAssertionWithTruthToStruct(struct assertionStruct* assertion, struct intervalListStruct** targetList, struct intervalListStruct** bucket, int bucketCount, int truth, struct treeNode* node,int position);
-void printAssertions(struct treeNode* node, FILE* fp);
+void printAssertionWithTruthToFile(FILE* fp, struct intervalListStruct** targetList, struct intervalListStruct** bucket, int bucketCount, int truth, struct treeNode* node,int position, int targetPORV_id);
+void writeAssertionWithTruthToStruct(struct assertionStruct* assertion, struct intervalListStruct** targetList, struct intervalListStruct** bucket, int bucketCount, int truth, struct treeNode* node,int position, int targetPORV_id);
+void printAssertions(struct treeNode* node, FILE* fp, int targetPORV_id);
 
 void printFloatArrayToFile(double* array, int size, FILE* fp);
 void printFloat2DArraryToFile(int size1, int size2, double array[][size2], FILE* fp);
