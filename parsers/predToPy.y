@@ -1,49 +1,52 @@
 %{
-        //#define YACC_DEBUG_ON
-        
-        #ifndef MAX_STR_LENGTH
-                #define MAX_STR_LENGTH 10240
-        #endif
-        
-        #include <stdio.h>
-        #include <stdlib.h>
-        #include <string.h>
-        #include <float.h>
-        #include "structs.h"
-        
-        //Function Declarations
-        void yyerror(char *);
-        
-        //External Objects
-        extern int yylex();
-        extern int predToPy_lineNo,predToPy_charPos,yyleng,yylineno,yychar,predToPy_oldPos;
-        extern char line[MAX_STR_LENGTH],oldLine[MAX_STR_LENGTH];
-        extern FILE *yyin;
-        extern char* yytext;
+	//#define YACC_DEBUG_ON
+	
+	#ifndef MAX_STR_LENGTH
+			#define MAX_STR_LENGTH 10240
+	#endif
+	
+	#include <stdio.h>
+	#include <stdlib.h>
+	#include <string.h>
+	#include <float.h>
+	#include "structs.h"
+	
+	//Function Declarations
+	void yyerror(char *);
+	
+	//External Objects
+	extern int yylex();
+	extern int predToPy_lineNo,predToPy_charPos,yyleng,yylineno,yychar,predToPy_oldPos;
+	extern char line[MAX_STR_LENGTH],oldLine[MAX_STR_LENGTH];
+	extern FILE *yyin;
+	extern char* yytext;
 	extern int predToPy_multiLine;
-        extern struct file* predicateMap;
-        extern struct identifier* idList;
+	extern struct file* predicateMap;
+	extern struct identifier* idList;
 	extern struct config* inputConfig;
 	extern struct identifier* traceFileNames;
-        char* traceFileName = NULL;
-        int errNo,err1No,err2No,err3No,err4No,err5No,err6No;
-        int currentMatch;
-        int porvID = 1;
-        char EF_dummy[1] = {'\0'};
-        char predicateLine[MAX_STR_LENGTH];
-        int tc = 0;
-        //Error Types : Will be eventually useful when the parsers show detailed, helpful parse error messages
-        enum errorType {
-                //BLOCK_NO_NEWLINE = 1,
-                IF_NO_TEST = 2,
-                IF_NO_COLON = 3,
-                TEST_EQ_EXPR = 4,
-                WHILE_NO_COLON = 5,
-                WHILE_NO_TEST = 6,
-                PRINT_INVALID = 7,
-                TEST_NO_LOGICAL = 8,
-                EXPR_INVALID = 9
-        };
+	
+	//Local Objects
+	char* traceFileName = NULL;
+	int errNo,err1No,err2No,err3No,err4No,err5No,err6No;
+	int currentMatch;
+	int porvID = 1;
+	char EF_dummy[1] = {'\0'};
+	char predicateLine[MAX_STR_LENGTH];
+	int traceCount = 0;
+	
+	//Error Types : Will be eventually useful when the parsers show detailed, helpful parse error messages
+	enum errorType {
+		//BLOCK_NO_NEWLINE = 1,
+		IF_NO_TEST = 2,
+		IF_NO_COLON = 3,
+		TEST_EQ_EXPR = 4,
+		WHILE_NO_COLON = 5,
+		WHILE_NO_TEST = 6,
+		PRINT_INVALID = 7,
+		TEST_NO_LOGICAL = 8,
+		EXPR_INVALID = 9
+	};
 %}
 
 //Lexical Tokens
@@ -54,22 +57,22 @@
 
 //Data Types Used for Tokens and Reduction Rules
 %union {
-                char string[MAX_STR_LENGTH];
-                struct identifier* id;                
-                struct PORV* porvType;
-                struct eventType* event;
-                struct expressionList* exprList;
-                struct expression* expr;
-                struct term* disjnct;
-                struct config* inputs;
-                int code;
-        }
-        
+	char string[MAX_STR_LENGTH];
+	struct identifier* id;
+	struct PORV* porvType;
+	//struct eventType* event;
+	struct expressionList* exprList;
+	struct expression* expr;
+	struct term* disjnct;
+	struct config* inputs;
+	int code;
+}
+
 %type <string> rational arithExpr arithStatement traceFile traceFileList sequenceLength delayResolution bestGainCount tempMax tempMin treeDepth learningType traceCT;
 %type <id> variableMapList variableMap;
-%type <event> eventExpr;
+//%type <event> eventExpr;
 %type <porvType> porv predicateList;
-%type <code> ineq eventType startExpr;
+%type <code> ineq  startExpr; //eventType
 %type <exprList> expressList namedExpressionLine;
 %type <expr> expressionLine;
 %type <disjnct> disjunct;
@@ -101,11 +104,11 @@ inputList:
 							if(!inputConfig){
 								inputConfig = createConfig();
 							} 
-							if(tc>0){
+							if(traceCount>0){
 								printf("Trace Count was defined multiple times, considering the latest\n");
 							}
 							inputConfig->traceCount = atoi($2);
-							tc = atoi($2);
+							traceCount = atoi($2);
 						}
 	|	inputList traceFile		{	
 							#ifdef YACC_DEBUG_ON 
@@ -281,11 +284,11 @@ inputList:
 								inputConfig = createConfig();
 							} 
 							
-							if(tc>0){
+							if(traceCount>0){
 								printf("Trace Count was defined multiple times, considering the latest\n");
 							}
 							inputConfig->traceCount = atoi($1);
-							tc = atoi($1);;
+							traceCount = atoi($1);;
 						
 						}
 	;
@@ -314,10 +317,10 @@ traceFile: TRACEFILE EEQ traceFileList	{
 traceFileList: traceFileList COMMA ATOM 
 					{
 						#ifdef YACC_DEBUG_ON 
-                                                        printf("PARSER: Matched traceFileList statement\n");
-                                                #endif
-                                                
-                                                if(!inputConfig || inputConfig->traceCount<=0){
+								printf("PARSER: Matched traceFileList statement\n");
+						#endif
+
+						if(!inputConfig || inputConfig->traceCount<=0){
 							printf("\nError in the configuration. A positive trace count is required\n");
 							exit(0);
 						}
@@ -326,7 +329,7 @@ traceFileList: traceFileList COMMA ATOM
 							inputConfig = createConfig();
 						}
 						
-						if(tc == 0){
+						if(traceCount == 0){
 							printf("\nError, you have more traces than the count you have specified\n");
 							exit(0);
 						}
@@ -336,23 +339,24 @@ traceFileList: traceFileList COMMA ATOM
 						} else {
 							inputConfig->traceFileNames = addToIdentifierList(inputConfig->traceFileNames,$3);
 						}
-						tc--;
-                                                strcpy($$,$3); 
+						traceCount--;
+						strcpy($$,$3);
 					}
 		| ATOM 	{
-												#ifdef YACC_DEBUG_ON 
-                                                        printf("PARSER: Matched traceFile statement\n");
-                                                #endif
-                                                if(!inputConfig || inputConfig->traceCount<=0){
-							printf("\nError in the configuration. A positive trace count is required\n");
-							exit(0);
-						} 
+						#ifdef YACC_DEBUG_ON 
+							printf("PARSER: Matched traceFile statement\n");
+						#endif
+						
+						if(!inputConfig || inputConfig->traceCount<=0){
+						printf("\nError in the configuration. A positive trace count is required\n");
+						exit(0);
+						}
 						
 						if(!inputConfig){
 							inputConfig = createConfig();
 						}
 						
-						if(tc == 0){
+						if(traceCount == 0){
 							printf("\nError, you have more traces than the count you have specified\n");
 							exit(0);
 						}
@@ -362,57 +366,57 @@ traceFileList: traceFileList COMMA ATOM
 						} else {
 							inputConfig->traceFileNames = addToIdentifierList(inputConfig->traceFileNames,$1);
 						}
-						tc--;
-                                                //printf("[%s]\n",$2);
-                                                strcpy($$,$1); 
+						traceCount--;
+						//printf("[%s]\n",$2);
+						strcpy($$,$1);
 					};
 	
 sequenceLength: SEQLENGTH EEQ rational {
-					        #ifdef YACC_DEBUG_ON 
-                                                        printf("PARSER: Matched sequenceLength statement\n");
-                                                #endif
-                                                //printf("[%s]\n",$2);
-                                                strcpy($$,$3); 
+						#ifdef YACC_DEBUG_ON 
+								printf("PARSER: Matched sequenceLength statement\n");
+						#endif
+						//printf("[%s]\n",$2);
+						strcpy($$,$3); 
 					};
 	
 delayResolution: DELAYRES EEQ rational {
-					        #ifdef YACC_DEBUG_ON 
-                                                        printf("PARSER: Matched delayResolution statement\n");
-                                                #endif
-                                                //printf("[%s]\n",$2);
-                                                strcpy($$,$3); 
+						#ifdef YACC_DEBUG_ON 
+								printf("PARSER: Matched delayResolution statement\n");
+						#endif
+						//printf("[%s]\n",$2);
+						strcpy($$,$3); 
 					};
 	
 treeDepth: DEPTH EEQ rational 		{
-					        #ifdef YACC_DEBUG_ON 
-                                                        printf("PARSER: Matched treeDepth statement\n");
-                                                #endif
-                                                //printf("[%s]\n",$2);
-                                                strcpy($$,$3); 
+						#ifdef YACC_DEBUG_ON 
+								printf("PARSER: Matched treeDepth statement\n");
+						#endif
+						//printf("[%s]\n",$2);
+						strcpy($$,$3); 
 					};
 
 bestGainCount: BESTCOUNT EEQ rational 	{
-					        #ifdef YACC_DEBUG_ON 
-                                                        printf("PARSER: Matched bestGainCount statement\n");
-                                                #endif
-                                                //printf("[%s]\n",$2);
-                                                strcpy($$,$3); 
+						#ifdef YACC_DEBUG_ON 
+								printf("PARSER: Matched bestGainCount statement\n");
+						#endif
+						//printf("[%s]\n",$2);
+						strcpy($$,$3); 
 					};
 	
 tempMax:  TMAX EEQ rational 		{
-					        #ifdef YACC_DEBUG_ON 
-                                                        printf("PARSER: Matched tempMax statement\n");
-                                                #endif
-                                                //printf("[%s]\n",$2);
-                                                strcpy($$,$3); 
+						#ifdef YACC_DEBUG_ON 
+								printf("PARSER: Matched tempMax statement\n");
+						#endif
+						//printf("[%s]\n",$2);
+						strcpy($$,$3); 
 					};
 	
 tempMin: TMIN EEQ rational 		{
-					        #ifdef YACC_DEBUG_ON 
-                                                        printf("PARSER: Matched tempMin statement\n");
-                                                #endif
-                                                //printf("[%s]\n",$2);
-                                                strcpy($$,$3); 
+						#ifdef YACC_DEBUG_ON 
+								printf("PARSER: Matched tempMin statement\n");
+						#endif
+						//printf("[%s]\n",$2);
+						strcpy($$,$3); 
 					};
 	
 predicateSpec:
@@ -421,7 +425,7 @@ predicateSpec:
                                                                         printf("PARSER: Matched File\n");
                                                                 #endif
                                                                 if(!predicateMap)
-									predicateMap = createFile();
+																	predicateMap = createFile();
                                                                 predicateMap->start = $1;
                                                                 predicateMap->varList = $2;
                                                                 predicateMap->porvList = $5;
@@ -429,10 +433,9 @@ predicateSpec:
                                                                 //printPredicateMap(predicateMap);
                                                                 struct identifier* id = inputConfig->traceFileNames;
                                                                 while(id){
-									preparePy(predicateMap,id->name);
-									booleanize();
-                                                                
-									id = id->next;
+																	preparePy(predicateMap,id->name);
+																	booleanize();
+																	id = id->next;
                                                                 }
                                                                 //preparePy(predicateMap,traceFileName);
                                                                 //booleanize();
@@ -443,7 +446,7 @@ predicateSpec:
                                                                         printf("PARSER: Matched File\n");
                                                                 #endif
                                                                 if(!predicateMap)
-									predicateMap = createFile();
+																	predicateMap = createFile();
                                                                 predicateMap->start = 0;
                                                                 predicateMap->varList = $1;
                                                                 predicateMap->porvList = $4;
@@ -451,10 +454,9 @@ predicateSpec:
                                                                 //printPredicateMap(predicateMap);                                                                
                                                                 struct identifier* id = inputConfig->traceFileNames;
                                                                 while(id){
-									preparePy(predicateMap,id->name);
-									booleanize();
-                                                                
-									id = id->next;
+																	preparePy(predicateMap,id->name);
+																	booleanize();
+																	id = id->next;
                                                                 }
                                                                 //preparePy(predicateMap,traceFileName);
                                                                 //booleanize();
@@ -462,12 +464,12 @@ predicateSpec:
                                                             }
         ;
 
-startExpr: START rational               {      
+startExpr: START rational               {
                                                 #ifdef YACC_DEBUG_ON 
                                                         printf("PARSER: Matched start statement\n");
                                                 #endif
                                                 //printf("[%s]\n",$2);
-                                                $$ = atoi($2);         
+                                                $$ = atoi($2);
                                         }
         ;
 
@@ -476,7 +478,6 @@ variableMapList: variableMapList variableMap {
                                                         printf("PARSER: Matched variableMapList\n");
                                                 #endif
                                                 $$=addIdentifierToList($1,$2);
-                                                
                                         }
 
         |variableMap                    {
@@ -485,9 +486,7 @@ variableMapList: variableMapList variableMap {
                                                 #endif
                                                 $$=$1;
                                         }
-        ;  
-        
-        
+        ;
 variableMap:
         ATOM rational rational          {
                                                 #ifdef YACC_DEBUG_ON 
@@ -533,54 +532,54 @@ predicateList: predicateList porv       {
                                         }
       ;
 
-porv:   ATOM ineq arithExpr                {       
-                                                        #ifdef YACC_DEBUG_ON 
-                                                                printf("PARSER: porv: ATOM ineq arithExpr\n");
-                                                        #endif
-                                                        if(idList==NULL){
-                                                                printf("ERROR: No variables declared\n");
-                                                                exit(0);
-                                                        }
-                                                        int atomID = getIdentifierID(idList,$1);
-                                                        if(atomID==0){
-                                                                printf("ERROR: No variable with name [%s] declared\n",$1);
-                                                                exit(0);
-                                                        }
-                                                        char temp[MAX_STR_LENGTH];
-                                                        int col = getIdentifierCol(idList,atomID);
-                                                        if(col==-1){
-                                                                printf("ERROR: col val is -1: atomID value mismatch\n");
-                                                                exit(0);
-                                                        }
-                                                        sprintf(temp,"float(row[%d])",col-1);                                                        
-                                                        $$ = createPORV(createCondition(temp,$3,$2),porvID++,atomID);                                                        
-                                                        
-                                                        if(!predicateMap)
-									predicateMap = createFile();
+porv:   ATOM ineq arithExpr             {
+											#ifdef YACC_DEBUG_ON 
+													printf("PARSER: porv: ATOM ineq arithExpr\n");
+											#endif
+											if(idList==NULL){
+													printf("ERROR: No variables declared\n");
+													exit(0);
+											}
+											int atomID = getIdentifierID(idList,$1);
+											if(atomID==0){
+													printf("ERROR: No variable with name [%s] declared\n",$1);
+													exit(0);
+											}
+											char temp[MAX_STR_LENGTH];
+											int col = getIdentifierCol(idList,atomID);
+											if(col==-1){
+													printf("ERROR: col val is -1: atomID value mismatch\n");
+													exit(0);
+											}
+											sprintf(temp,"float(row[%d])",col-1);                                                        
+											$$ = createPORV(createCondition(temp,$3,$2),porvID++,atomID); 
+											if(!predicateMap)
+												predicateMap = createFile();
 
-							strcpy(predicateLine,oldLine);
-                                                        if(strlen(trim(predicateLine))>0){
-								//printf("PORV ----- [%s]\n",predicateLine);
-								struct identifier* tempID = createIdentifier(predicateLine);
-								tempID->col = porvID-1;
-								tempID->timeCol = 0;
-								predicateMap->predicates = addIdentifierToList(predicateMap->predicates,tempID);
-								tempID = NULL;                   
-                                                        }
-                                                        
-                                                }
+											strcpy(predicateLine,oldLine);
+											if(strlen(trim(predicateLine))>0){
+												//printf("PORV ----- [%s]\n",predicateLine);
+												struct identifier* tempID = createIdentifier(predicateLine);
+												tempID->col = porvID-1;
+												tempID->timeCol = 0;
+												predicateMap->predicates = addIdentifierToList(predicateMap->predicates,tempID);
+												tempID = NULL;
+											}
+										}
         ;
 
+/*
 eventExpr:
         eventType OPENROUND porv CLOSEROUND   {
                                                         #ifdef YACC_DEBUG_ON 
                                                                 printf("PARSER: eventExpr: eventType FOPENROUND porv FCLOSEROUND\n");
                                                         #endif
-                                                        
+
                                                         $$=createEvent($1,$3);
                                                         //$$=createCondition($1->name,EF_dummy,-1);//strcpy($$,$1);
                                                 }
         ;
+*/
 
 ineq:
         LT                                     {       
@@ -616,7 +615,8 @@ ineq:
                                                         $$ = 0;//$$=createCondition($1->name,EF_dummy,-1);//strcpy($$,$1);
                                                 }
         ;
-        
+
+/*
 eventType:
         ATPOSEDGE                              {       
                                                         #ifdef YACC_DEBUG_ON 
@@ -636,52 +636,46 @@ eventType:
                                                         #ifdef YACC_DEBUG_ON 
                                                                 printf("PARSER: eventType: FATANYEDGE [  %s  ]\n",$1);
                                                         #endif
-                                                        
+
                                                         $$ = 0;
                                                         //$$=createCondition($1->name,EF_dummy,-1);//strcpy($$,$1);
                                                 }
         ;
+*/
 
 arithExpr:
-        arithStatement ARITHOP arithExpr               {       
-                                                                #ifdef YACC_DEBUG_ON 
-                                                                        printf("PARSER: Complex Arith Expr\n"); 
-                                                                #endif
-                                                                sprintf($$,"%s %s %s",$1,$2,$3);
-                                                                
-                                                                //strcat($2,$3);strcat($1,$2);strcpy($$,$1);
-                                                        }
-        | arithStatement                                {
-                                                                #ifdef YACC_DEBUG_ON 
-                                                                        printf("PARSER: Simple Arith Statement\n");
-                                                                #endif
-                                                                
-                                                                strcpy($$,$1);
-                                                                
-                                                                //strcpy($$,$1);
-                                                        }
-        
+        arithStatement ARITHOP arithExpr		{
+													#ifdef YACC_DEBUG_ON 
+															printf("PARSER: Complex Arith Expr\n"); 
+													#endif
+													sprintf($$,"%s %s %s",$1,$2,$3);
+												}
+        | arithStatement						{
+													#ifdef YACC_DEBUG_ON 
+															printf("PARSER: Simple Arith Statement\n");
+													#endif
+													strcpy($$,$1);
+												}
         ;
 
 arithStatement:
-          ATOM                                         {       
-                                                                #ifdef YACC_DEBUG_ON 
-                                                                        printf("PARSER: Linear Expr is an ID\n");
-                                                               
-                                                                #endif
-                                                                int atomID = getIdentifierID(idList,$1);
-                                                                if(atomID==0){
-                                                                        printf("ERROR: No variable with name [%s] declared\n",$1);
-                                                                        exit(0);
-                                                                }
-                                                                int col = getIdentifierCol(idList,atomID);
-                                                                if(col==-1){
-                                                                        printf("ERROR: col val is -1: atomID value mismatch\n");
-                                                                        exit(0);
-                                                                }
-                                                                sprintf($$,"float(row[%d])",col-1);
-                                                                //strcpy($$,$1);                                                               
-                                                        }
+		ATOM									{
+													#ifdef YACC_DEBUG_ON 
+															printf("PARSER: Linear Expr is an ID\n");
+													#endif
+													int atomID = getIdentifierID(idList,$1);
+													if(atomID==0){
+															printf("ERROR: No variable with name [%s] declared\n",$1);
+															exit(0);
+													}
+													int col = getIdentifierCol(idList,atomID);
+													if(col==-1){
+															printf("ERROR: col val is -1: atomID value mismatch\n");
+															exit(0);
+													}
+													sprintf($$,"float(row[%d])",col-1);
+													//strcpy($$,$1);                                                               
+												}
         | ARITHOP ATOM                                {
                                                                 #ifdef YACC_DEBUG_ON 
                                                                         printf("PARSER: Linear Expr is an ID\n");
@@ -753,7 +747,8 @@ disjunct: disjunct BOR rational				{
 							}
 	;
 	
-endPList: PEND						{	if(predToPy_multiLine){
+endPList: PEND				{	
+								if(predToPy_multiLine){
 									if(!predicateMap)
 										predicateMap = createFile();
 
