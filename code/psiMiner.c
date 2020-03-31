@@ -45,6 +45,7 @@ struct identifier* idList = NULL;
 struct config* inputConfig = NULL;
 
 struct PORV* learnedPORVs = NULL;
+//struct listOfIntervalListsStruct** learnedIntervalSets = NULL;
 struct listOfIntervalListsStruct* learnedIntervalSet = NULL;
 int learnedPORVCount = 0;
 int continueFlag = 0;
@@ -122,6 +123,9 @@ FILE* predLogFile;			/*	The Predicate Log for logging learned predicates that ar
 int cumulative = 0;			//	Determine how gain is computed.
 struct assertionStruct* allAssertions=NULL;
 int main(int argc, char *argv[]) {
+	//Declarations
+	struct listOfIntervalListsStruct** learnedIntervalSets = NULL;
+	
 	checkCreateLogDir();
 	int targetPORV_id = 1;
 	N = 0;              //Number of parts of the sequence 
@@ -169,15 +173,19 @@ int main(int argc, char *argv[]) {
 		
 		N = inputConfig->N+1;
 		K = inputConfig->K;
+		traceCount = inputConfig->traceCount;
 		
 		listOfIntervalSets = (struct listOfIntervalListsStruct**)malloc(sizeof(struct listOfIntervalListsStruct*)*(inputConfig->traceCount));
 		bzero(listOfIntervalSets,sizeof(struct listOfIntervalListsStruct*)*(inputConfig->traceCount));
+		
+		learnedIntervalSets = (struct listOfIntervalListsStruct**)malloc(sizeof(struct listOfIntervalListsStruct*)*(traceCount));
+		bzero(learnedIntervalSets,sizeof(struct listOfIntervalListsStruct*)*(traceCount));
 		
 		traceLengths = (double*)malloc(sizeof(double)*inputConfig->traceCount);
 		
 		depth = getDepth(inputConfig);
 		char* tempF;
-				assertFileName = (char*)malloc(sizeof(char)*(strlen(argv[1])+50));
+		assertFileName = (char*)malloc(sizeof(char)*(strlen(argv[1])+50));
 		strcpy(assertFileName,argv[1]);
 		tempF = assertFileName;
 		while(*tempF!='\0' && *tempF!='.'){
@@ -273,7 +281,7 @@ int main(int argc, char *argv[]) {
 		//Prepare Decision Tree Root Node
 		struct treeNode* root = createTreeNode(
 												NULL,//Truth List
-												listOfIntervalSets,//IntervalSet
+												listOfIntervalSets,learnedIntervalSets,//IntervalSets
 												0,0,totalTraceLength,NULL,NULL);
 			
 		decisionTree = root; //TODO: This and the previous line may be combined.
@@ -289,8 +297,8 @@ int main(int argc, char *argv[]) {
 		
 		int recreate_iterator = 0;
 		for(recreate_iterator=0;recreate_iterator<RECREATE_COUNT;recreate_iterator++){
-			prepareRoot(root,listOfIntervalSets,targetPORV_id,numberOfPORVs,N);                
-			amsMine(root,targetPORV_id,numberOfPORVs,N,depth,targetPORV_id);
+			prepareRoot(root,listOfIntervalSets,learnedIntervalSets,targetPORV_id,numberOfPORVs,N);                
+			amsMine(root,targetPORV_id,numberOfPORVs,N,depth,targetPORV_id,learnedIntervalSets);
 			printTree(root,targetPORV_id);
 			purgeTruthListForTreeNode(root);
 		}

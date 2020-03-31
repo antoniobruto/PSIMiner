@@ -103,14 +103,26 @@
                                 return BUCKET;
                         }
                         
-"intervals"		{       learnedOP_multiLine=0;
+"intervals_begin"		{       
+								learnedOP_multiLine=0;
                                 #ifdef LEX_DEBUG_ON
-                                printf("lex: keyword [intervals]\n");
+                                printf("lex: keyword [intervals_begin]\n");
                                 #endif
                                 learnedOP_charPos+=yyleng;
                                 strcat(learnedOP_line,yytext);
                                 strcpy(yylval.string,yytext);
-                                return INTERVALS;
+                                return INTERVALS_BEGIN;
+                        }
+
+"intervals_end"		{
+								learnedOP_multiLine=0;
+                                #ifdef LEX_DEBUG_ON
+                                printf("lex: keyword [intervals_end]\n");
+                                #endif
+                                learnedOP_charPos+=yyleng;
+                                strcat(learnedOP_line,yytext);
+                                strcpy(yylval.string,yytext);
+                                return INTERVALS_END;
                         }
 
 "{"		{	
