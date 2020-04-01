@@ -278,20 +278,6 @@ void deleteConditionList(struct condition* node){
 	}
 }
 
-struct condition* createIdentityResets(struct identifier* root){
-	struct condition* reset = NULL;
-	struct identifier* temp = root;
-	char nameD[MAX_STR_LENGTH];
-	
-	
-	while(temp!=NULL){
-		sprintf(nameD,"%s'",temp->name);
-		reset = addToConditionList(reset,nameD,temp->name,0);
-		temp = temp->next;
-	}
-	return reset;
-}
-
 void printCondition(struct condition* cond){
 	if(cond!=NULL){
 		//printf("[%p] %s %s %s ",cond,cond->LHS,operatorMap(cond->op),cond->RHS);	

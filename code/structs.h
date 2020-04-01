@@ -112,12 +112,13 @@ struct condition* createCondition(char *LHS, char* RHS, int op);
 struct condition* addConditionToList(struct condition* root, struct condition* cond);
 struct condition* addToConditionList(struct condition* root, char *LHS, char* RHS, int op);
 struct condition* duplicateConditionList(struct condition* root);
-struct condition* createIdentityResets(struct identifier* root);
+
 void printCondition(struct condition* cond);
 void printConditionList(struct condition* cond);
 void printConditionToFilePtr(struct condition* cond,FILE* fp);
 void printConditionToString(struct condition* cond, char* fp);
 void printConditionListToFilePtr(struct condition* cond, FILE* fp);
+
 struct condition* reverseConditionList(struct condition* root);
 int conditionCompare(struct condition* cond, char* LHS, char* RHS);
 int inConditionList(struct condition* list, char* LHS, char* RHS);

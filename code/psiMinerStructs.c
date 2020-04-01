@@ -65,7 +65,7 @@ extern int learnedPORVCount;
 extern struct file* predicateMap;
 extern struct identifier* idList;
 
-extern int learnPredicates;
+extern int learnMode;
 extern struct predicateDetail* details;
 
 extern FILE* learnedOPin;
@@ -2620,7 +2620,7 @@ struct treeNode* findBestGain(struct listOfIntervalListsStruct** localIntervalSe
 		bj=0;
 		bt=0;
 		
-		if(learnPredicates<=2){
+		if(learnMode<=2){
 			//Evaluate Knowledge
 			//Loop through all predicate - temporal positions and determine which combination produces the best gain.
 			for(i=0;i<N;i++){//For each potential target
@@ -2725,8 +2725,8 @@ struct treeNode* findBestGain(struct listOfIntervalListsStruct** localIntervalSe
 		*/
 		//fprintf(stdout,"HERE FG 7\n");fflush(stdout);
 		//If best gain from knowledge is zero (Level 0) or if the learn level is non-zero
-		//if(bg<=0.0 || learnPredicates>0){ 
-		if((bg<=0.0 && learnPredicates==1) || learnPredicates>1){
+		//if(bg<=0.0 || learnMode>0){ 
+		if((bg<=0.0 && learnMode==1) || learnMode>1){
 			//LEARN SOMETHING NEW :-)
 			
 			//Initialize Objects
@@ -2766,7 +2766,7 @@ struct treeNode* findBestGain(struct listOfIntervalListsStruct** localIntervalSe
 			details = NULL;
 			if(details){
 				//Is what was learned worthwhile? If so advise to make a decision on the learned predicate.
-				/*if( details->gain > 0.0 && ( (learnPredicates>=2) || (learnPredicates==1 && bg==0.0) ) ){//details->gain>bg) ) ){
+				/*if( details->gain > 0.0 && ( (learnMode>=2) || (learnMode==1 && bg==0.0) ) ){//details->gain>bg) ) ){
 					int atomID = getIdentifierID(idList,details->predicate->porv->LHS);
 					if(atomID==0){
 						printf("ERROR: No variable with name [%s] declared\n",details->predicate->porv->LHS);
@@ -2795,7 +2795,7 @@ struct treeNode* findBestGain(struct listOfIntervalListsStruct** localIntervalSe
 					addToIndexCoupleList(&(currentNode->explored),pred_target);
 					
 				}*/
-			} else if(learnPredicates<=2) {
+			} else if(learnMode<=2) {
 				currentNode->targetInfluence = bi;
 				currentNode->splittingPredicate_id = bj+1;
 				currentNode->predType = 0;
@@ -2804,7 +2804,7 @@ struct treeNode* findBestGain(struct listOfIntervalListsStruct** localIntervalSe
 				
 				addToIndexCoupleList(&(currentNode->explored),createIndexCouple(currentNode->targetInfluence,currentNode->splittingPredicate_id));
 				
-			} else {// Nothing new to be learned  - learnPredicates == 3
+			} else {// Nothing new to be learned  - learnMode == 3
 				currentNode->splittingPredicate_id = -1;
 				return currentNode;
 			}
@@ -4824,15 +4824,18 @@ void writeAssertionWithTruthToStruct(struct assertionStruct* assertion, struct i
 			bzero(forwardInfList,sizeof(struct intervalListStruct*)*traceCount);
 			
 			int i;
+			double totalEvidence = 0.0;
 			double totalOverlap = 0.0;
 			for(i=0;i<traceCount;i++){
 				forwardInfList[i] = forwardInfluence(endMatch[i],position,K,targetList[i]);
+				totalEvidence += lengthOfIntervalList(forwardInfList[i]);
+				
 				struct intervalListStruct* overlap = intersectIntervalList(getListAtPosition(listOfIntervalSets[i],targetPORV_id)->falseList,forwardInfList[i]);
-				totalOverlap = lengthOfIntervalList(overlap);
+				totalOverlap += lengthOfIntervalList(overlap);
 			}
 			
 			correlation = totalOverlap/totalFalseLength;
-			support = totalOverlap/totalTraceLength;
+			support = totalEvidence/totalTraceLength;
 			
 		} else {
 			//fprintf(fp,"Internal (3) : Position %d\n",position);
@@ -4842,15 +4845,18 @@ void writeAssertionWithTruthToStruct(struct assertionStruct* assertion, struct i
 			bzero(forwardInfList,sizeof(struct intervalListStruct*)*traceCount);
 			
 			int i;
+			double totalEvidence = 0.0;
 			double totalOverlap = 0.0;
 			for(i=0;i<traceCount;i++){
 				forwardInfList[i] = forwardInfluence(endMatch[i],position,K,targetList[i]);
+				totalEvidence += lengthOfIntervalList(forwardInfList[i]);
+				
 				struct intervalListStruct* overlap = intersectIntervalList(getListAtPosition(listOfIntervalSets[i],targetPORV_id)->trueList,forwardInfList[i]);
-				totalOverlap = lengthOfIntervalList(overlap);
+				totalOverlap += lengthOfIntervalList(overlap);
 			}
 			
 			correlation = totalOverlap/totalTrueLength;
-			support = totalOverlap/totalTraceLength;
+			support = totalEvidence/totalTraceLength;
 		}
 		
 		fprintf(logFile,"SUPPORT = [%lf]\n",support*100.0);
@@ -5019,14 +5025,17 @@ void printAssertionWithTruthToFile(FILE* fp, struct intervalListStruct** targetL
 			
 			int i;
 			double totalOverlap = 0.0;
+			double totalEvidence = 0.0;
 			for(i=0;i<traceCount;i++){
 				forwardInfList[i] = forwardInfluence(endMatch[i],position,K,targetList[i]);
+				totalEvidence += lengthOfIntervalList(forwardInfList[i]);
+				
 				struct intervalListStruct* overlap = intersectIntervalList(getListAtPosition(listOfIntervalSets[i],targetPORV_id)->falseList,forwardInfList[i]);
-				totalOverlap = lengthOfIntervalList(overlap);
+				totalOverlap += lengthOfIntervalList(overlap);
 			}
 			
 			correlation = totalOverlap/totalFalseLength;
-			support = totalOverlap/totalTraceLength;
+			support = totalEvidence/totalTraceLength;
 			
 		} else {
 			//fprintf(fp,"Internal (3) : Position %d\n",position);
@@ -5037,14 +5046,17 @@ void printAssertionWithTruthToFile(FILE* fp, struct intervalListStruct** targetL
 			
 			int i;
 			double totalOverlap = 0.0;
+			double totalEvidence = 0.0;
 			for(i=0;i<traceCount;i++){
 				forwardInfList[i] = forwardInfluence(endMatch[i],position,K,targetList[i]);
+				totalEvidence += lengthOfIntervalList(forwardInfList[i]);
+				
 				struct intervalListStruct* overlap = intersectIntervalList(getListAtPosition(listOfIntervalSets[i],targetPORV_id)->trueList,forwardInfList[i]);
-				totalOverlap = lengthOfIntervalList(overlap);
+				totalOverlap += lengthOfIntervalList(overlap);
 			}
 			
 			correlation = totalOverlap/totalTrueLength;
-			support = totalOverlap/totalTraceLength;
+			support = totalEvidence/totalTraceLength;
 		}
 			
 		fprintf(logFile,"SUPPORT = [%lf]\n",support*100.0);
