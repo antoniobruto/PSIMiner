@@ -27,6 +27,7 @@
 #define epsilon 0.0001
 
 int timeCol = 0;
+extern FILE* logFile;
 /*-----------------------Operator Maps-------------------------*/
 
 char* operatorMap(int op){	
@@ -1227,14 +1228,18 @@ int getExpressionCount(struct expressionList* exprList){
 }
 
 struct expressionList* getExpressionAtPosition(struct expressionList *exprList, int position){
+	fprintf(logFile,"[getExpressionAtPosition] STARTED\n");fflush(logFile);
 	if(exprList){
 		int count = 0;
 		while(exprList){
 			count++;
-			if(count==position)
+			if(count==position){
+				fprintf(logFile,"[getExpressionAtPosition] ENDED\n");fflush(logFile);
 				return exprList;
+			}
 			exprList = exprList->next;
 		}
+		fprintf(logFile,"[getExpressionAtPosition] ENDED\n");fflush(logFile);
 		return NULL;
 	}
 }

@@ -75,7 +75,7 @@ struct file{
         int start;
         struct identifier* varList;
         struct PORV* porvList;
-	struct identifier* predicates;
+		struct identifier* predicates;
         struct expressionList* exprList;
 };
 
