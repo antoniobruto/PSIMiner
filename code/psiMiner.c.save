@@ -122,8 +122,9 @@ FILE* predLogFile;			/*	The Predicate Log for logging learned predicates that ar
 
 int cumulative = 0;			//	Determine how gain is computed.
 struct assertionStruct* allAssertions=NULL;
-void copyContents(struct treeNode* root, struct treeNode* newRoot){
-	newRoot->truthList = duplicateTruthAssignmentList(root->truthList);
+void copyContents(struct treeNode* root, struct treeNode* newRoot)
+{
+	newRoot->truthList = root->truthList;
 	newRoot->listOfIntervalSets = root->listOfIntervalSets;
 	newRoot->mean = root->mean;
 	newRoot->error = root->error;
@@ -133,10 +134,10 @@ void copyContents(struct treeNode* root, struct treeNode* newRoot){
 	newRoot->id = root->id;
 	newRoot->truthValue = root->truthValue;
 	newRoot->predType = root->predType;
-	newRoot->learnedPredicates =  root->learnedPredicates;
+	newRoot->learnedPredicates = root->learnedPredicates;
 }
-
-struct treeNode* duplicateTree(struct treeNode* root, int ind){
+struct treeNode* duplicateTree(struct treeNode* root, int ind)
+{
 	if(root == NULL) return NULL;
 	printf("@ ");
 	struct treeNode* duproot = createTreeNode(
@@ -356,8 +357,8 @@ int main(int argc, char *argv[]) {
                 
 		printTreeNodeToFilePtr(root,logFile,targetPORV_id);
 		fflush(logFile);
-		struct intervalListStruct* trueList = NULL;
-		struct listOfIntervalListsStruct* targetList =  NULL;
+		
+
 		//edited (store targetList PORVID )
 
 		struct expressionList* tempList = predicateMap->targetList;
@@ -417,22 +418,24 @@ int main(int argc, char *argv[]) {
 		                                                0,0,totalTraceLength,NULL,NULL);
 			printf("Total true Length = %lf\n",totalTrueLength);
 		        prepareBackwardInfluenceTraces(listOfIntervalSets,targetPORVID[i],N,K,strict);
-			/*struct truthAssignmentListStruct* truthList = createAss();
-			printTruthList(truthList);
-			struct intervalListStruct** endMatchIntervalList = endMatchesForPrefix(truthList);
-	for(int i=0;i<traceCount;i++){
-			printf("i=%d\n",i);
-			printIntervalList(endMatchIntervalList[i]);
-		}
-	//exit(0);
-    int mininmumBucketID = getSmallestBucketID(truthList);
+		/*	printf("1\n");
+			//struct truthAssignmentStruct* tempTruth = createTruthAssignment(3, 1, 1);
+			printf("1\n");
+			struct truthAssignmentListStruct* tempTruthList = createAss();
+			printf("1\n");
+			printTruthList(tempTruthList);
+			struct intervalListStruct** endMatchIntervalList = endMatchesForPrefix(tempTruthList);
+        /*for(int i=0;i<traceCount;i++){
+                        printListOfIntervalLists(endMatchIntervalList[i]);
+                }
+    int mininmumBucketID = getSmallestBucketID(root->truthList);
     int targetID = mininmumBucketID==0?7:(numberOfPORVs+mininmumBucketID);
     double trueMean, falseMean, Htrue, Hfalse,mean, error;
     double intervalLength = 0.0;
     if(endMatchIntervalList){
         intervalLength = lengthOfIntervalLists(endMatchIntervalList);
     }
-	printf("IL=%lf\n",intervalLength);
+        printf("IL=%lf\n",intervalLength);
     int dominantTruth;
     trueMean = computeMean(listOfIntervalSets,targetID,intervalLength,endMatchIntervalList);
     falseMean = computeFalseMean(listOfIntervalSets,targetID,intervalLength,endMatchIntervalList);
@@ -441,20 +444,22 @@ int main(int argc, char *argv[]) {
     dominantTruth = Htrue<=Hfalse?1:0;//error(trueMean)<error(falseMean)?1:0;
     mean = dominantTruth==0?falseMean:trueMean;
     error = computeEntropy(getListsAtPosition(listOfIntervalSets,targetID),(endMatchIntervalList));
-	printf("mean=%lf\n",mean);
-			exit(0);*/
+	printf("mean=%lf\n",mean);			
+    exit(0);*/
+/*for(int k=0;k<traceCount;k++)
+                        {
+				//printf("for trace=%d\n",k);
+				printListOfIntervalLists(listOfIntervalSets[k]);
+                                printf("before=%d for trace=%d\n",printLengthOfIntervalLists(listOfIntervalSets[k]),k);
+                                deleteExtraLists(listOfIntervalSets[k],numberOfPORVs);
+                                printf("after=%d for trace=%d\n",printLengthOfIntervalLists(listOfIntervalSets[k]),k);
+                        }*/
 			prepareRoot(newroot,listOfIntervalSets,pseudoTargetLists,targetPORVID[i],numberOfPORVs,numTargets,N);
 			printf("spid=%d\n",newroot->splittingPredicate_id);
 			//exit(0);
 			printf("calling amsMine for target= %d\n",targetPORVID[i]);
-			
-			FILE* aFile = fopen(assertFileName,"a");				
-			fprintf(aFile,"\n****************** TARGET [%d] ********************\n",targetPORVID[i]);
-			fclose(aFile);
-			amsMine(newroot,pseudoTargetLists,targetPORVID[i],numberOfPORVs,numTargets,N,depthOrig,targetPORVID[i]);
+		        amsMine(newroot,pseudoTargetLists,targetPORVID[i],numberOfPORVs,numTargets,N,depthOrig,targetPORVID[i]);
 			printf("completed amsMine for target= %d\n",targetPORVID[i]);
-			
-			//exit(0);
 			printTruthList(newroot->right->truthList);
 			for(int k=0;k<traceCount;k++)
                         {
@@ -465,8 +470,8 @@ int main(int argc, char *argv[]) {
 			//newRoot-> = (struct treeNode**)malloc(sizeof(struct treeNode*)*(numTargets));
 			listTree[i][i] = newroot;
 			//printTruthList(newroot);
-			for(j=0;j<numTargets;j++)
-		    {
+		        for(j=0;j<numTargets;j++)
+		        {
 			    if(j != i)
 			    {
 				    struct treeNode* duproot;
@@ -482,11 +487,6 @@ int main(int argc, char *argv[]) {
 						printIntervalList(endMatchIntervalList[k]);
 						}*/
 				    printf("calling amsMine2 for target= %d\n",targetPORVID[j]);
-					
-					FILE* aFile = fopen(assertFileName,"a");				
-					fprintf(aFile,"\n******** RELATED ASSERTIONS FOR TARGET [%d] ********\n",targetPORVID[j]);
-					fclose(aFile);
-				
 				    amsMine2(newroot, duproot,pseudoTargetLists, targetPORVID[j], numberOfPORVs,numTargets, N, depthOrig, depthDup,1,listOfIntervalSets);
 				    for(int k=0;k<traceCount;k++)
 		                    {
@@ -494,7 +494,7 @@ int main(int argc, char *argv[]) {
 		                        deleteExtraLists(listOfIntervalSets[k],numberOfPORVs);
 		                        printf("after=%d for trace=%d\n",printLengthOfIntervalLists(listOfIntervalSets[k]),k);
 		                    }
-					//exit(0);
+					exit(0);
 			    }
 		        }
 		        //printTree(newroot);
@@ -557,30 +557,10 @@ int main(int argc, char *argv[]) {
 	fflush(predLogFile);
 	fclose(predLogFile);
 	
-	/*FILE* assertFile = fopen(assertFileName,"w");
-	while(temp){
-		
-		if(((int)strlen(temp->assertion))>0){
-			fprintf(assertFile,"\n%s",temp->assertion);
-			fprintf(assertFile,"SUPPORT = %lf\n",temp->support);
-			fprintf(assertFile,"CORRELATION = %lf\n",temp->correlation);
-			
-			fprintf(assertFile,"\n%s",temp->assertion);
-			fprintf(assertFile,"SUPPORT = %lf\n",temp->support);
-			fprintf(assertFile,"CORRELATION = %lf\n",temp->correlation);
-		}
-		temp = temp->next;
-	}
-	fclose(assertFile);
-	*/
 	struct assertionStruct* temp = allAssertions;
 	while(temp){
 		
 		if(((int)strlen(temp->assertion))>0){
-			fprintf(stdout,"\n%s",temp->assertion);
-			fprintf(stdout,"SUPPORT = %lf\n",temp->support);
-			fprintf(stdout,"CORRELATION = %lf\n",temp->correlation);
-			
 			fprintf(stdout,"\n%s",temp->assertion);
 			fprintf(stdout,"SUPPORT = %lf\n",temp->support);
 			fprintf(stdout,"CORRELATION = %lf\n",temp->correlation);

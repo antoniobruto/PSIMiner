@@ -5,8 +5,8 @@ BUILD_DIR=build
 	# Control will enter here if $BUILD_DIR doesn't exist.
 #	mkdir build  
 #else
-#	rm -rf build  
-#	mkdir build  
+	#rm -rf build  
+	#mkdir build  
 #fi
 
 cp -f parsers/*.l build/ 
@@ -51,7 +51,7 @@ cat prePredToPy|cat - predToPy.tab.c > temp.c && mv temp.c predToPy.tab.c
 cat prelearnedOP|cat - lex.learnedOP.c > temp.c && mv temp.c lex.learnedOP.c 
 cat prelearnedOP|cat - learnedOP.tab.c > temp.c && mv temp.c learnedOP.tab.c 
 
-gcc -w structs.c psiMinerStructs.c  lex.predToPy.c predToPy.tab.c lex.intervalList.c intervalList.tab.c lex.learnedOP.c learnedOP.tab.c psiMiner.c  -o psiMiner -lm 
+gcc structs.c psiMinerStructs.c  lex.predToPy.c predToPy.tab.c lex.intervalList.c intervalList.tab.c lex.learnedOP.c learnedOP.tab.c psiMiner.c  -o psiMiner -lm 
 #gcc  structs.c amsMinerStructs.c  amsMiner.c lex.predToPy.c predToPy.tab.c lex.intervalList.c intervalList.tab.c -o amsMiner -lm
 #Use -fno-access-control for g++
 
