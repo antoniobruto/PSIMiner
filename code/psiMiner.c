@@ -457,11 +457,11 @@ int main(int argc, char *argv[]) {
 			//exit(0);
 			printTruthList(newroot->right->truthList);
 			for(int k=0;k<traceCount;k++)
-                        {
-                                printf("before=%d for trace=%d\n",printLengthOfIntervalLists(listOfIntervalSets[k]),k);
-                                deleteExtraLists(listOfIntervalSets[k],numberOfPORVs);
-                                printf("after=%d for trace=%d\n",printLengthOfIntervalLists(listOfIntervalSets[k]),k);
-                        }
+			{
+				printf("before=%d for trace=%d\n",printLengthOfIntervalLists(listOfIntervalSets[k]),k);
+				deleteExtraLists(listOfIntervalSets[k],numberOfPORVs);
+				printf("after=%d for trace=%d\n",printLengthOfIntervalLists(listOfIntervalSets[k]),k);
+			}
 			//newRoot-> = (struct treeNode**)malloc(sizeof(struct treeNode*)*(numTargets));
 			listTree[i][i] = newroot;
 			//printTruthList(newroot);
@@ -481,7 +481,7 @@ int main(int argc, char *argv[]) {
 					/*for(int k=0;k<traceCount;k++){
 						printIntervalList(endMatchIntervalList[k]);
 						}*/
-				    printf("calling amsMine2 for target= %d\n",targetPORVID[j]);
+				    printf("[PSIMiner]------------------------ [ Calling amsMine2 for target= %d ] --------------------------\n",targetPORVID[j]);
 					
 					FILE* aFile = fopen(assertFileName,"a");				
 					fprintf(aFile,"\n******** RELATED ASSERTIONS FOR TARGET [%d] ********\n",targetPORVID[j]);
@@ -553,7 +553,7 @@ int main(int argc, char *argv[]) {
         #endif
         fclose(fcov);
 	fflush(logFile);
-        fclose(logFile);
+	fclose(logFile);
 	fflush(predLogFile);
 	fclose(predLogFile);
 	
@@ -581,9 +581,9 @@ int main(int argc, char *argv[]) {
 			fprintf(stdout,"SUPPORT = %lf\n",temp->support);
 			fprintf(stdout,"CORRELATION = %lf\n",temp->correlation);
 			
-			fprintf(stdout,"\n%s",temp->assertion);
-			fprintf(stdout,"SUPPORT = %lf\n",temp->support);
-			fprintf(stdout,"CORRELATION = %lf\n",temp->correlation);
+			//fprintf(stdout,"\n%s",temp->assertion);
+			//fprintf(stdout,"SUPPORT = %lf\n",temp->support);
+			//fprintf(stdout,"CORRELATION = %lf\n",temp->correlation);
 		}
 		temp = temp->next;
 	}
