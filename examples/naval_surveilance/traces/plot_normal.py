@@ -14,6 +14,6 @@ with open('normal.csv','r') as csvfile:
 plt.plot(x,y, label='Loaded from file!')
 plt.xlabel('x')
 plt.ylabel('y')
-plt.title('Interesting Graph\nCheck it out')
+plt.title('Naval Surveilance Data\nNormal')
 plt.legend()
 plt.show()
