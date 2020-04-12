@@ -17,6 +17,9 @@
 	#define MAX_STR_LENGTH 10240
 #endif
 
+#define NUM_DIGITS 2
+#define SMALL_DBL 1e-2
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -1169,22 +1172,22 @@ int writeTruthListForIndex(struct truthAssignmentListStruct* root, int index, ch
  * Returns 0 if there are no predicates at the index position and 1 otherwise
  */
 int printTruthListForIndex(struct truthAssignmentListStruct* root, int index, FILE* fp, int andprinter){
-        if(root && fp){
-		//Remember if there is anything at the index to print.
+	if(root && fp){
+	//Remember if there is anything at the index to print.
 		int flag = 0;
 		
-                while(root){
-                        if(root->asgmt->position > index) {
-                                root = root->next; continue;
-                        } else if(root->asgmt->position == index){
+		while(root){
+			if(root->asgmt->position > index) {
+				root = root->next; continue;
+			} else if(root->asgmt->position == index){
 				if(flag==0 && andprinter!=0){
 					fprintf(fp," && ");	
 				}
 				char* exprName = NULL;
 				if(root->asgmt->type == 0)
 					exprName = getExpressionAtPosition(predicateMap->exprList,root->asgmt->predicate_id)->id;
-				
-                                if(root->asgmt->truth){
+			
+				if(root->asgmt->truth){
 					if(root->asgmt->type){
 						struct PORV* pred = getPORV(learnedPORVs,root->asgmt->predicate_id);
 						printConditionToFilePtr(pred->porv,fp);
@@ -1193,7 +1196,7 @@ int printTruthListForIndex(struct truthAssignmentListStruct* root, int index, FI
 					} else {
 						fprintf(fp,"P%d",root->asgmt->predicate_id);
 					}
-                                } else {
+				} else {
 					if(root->asgmt->type){
 						struct PORV* pred = getPORV(learnedPORVs,root->asgmt->predicate_id);
 						fprintf(fp,"!("); printConditionToFilePtr(pred->porv,fp);fprintf(fp,")");
@@ -1202,20 +1205,20 @@ int printTruthListForIndex(struct truthAssignmentListStruct* root, int index, FI
 					} else {
 						fprintf(fp,"!P%d",root->asgmt->predicate_id);
 					}
-                                }                                
-                                flag = 1;
-                        }
-                        if(root->next && root->asgmt->position == index  && root->next->asgmt->position == index){
-                                fprintf(fp," && ");
-                        }
-                        if(root->next && root->next->asgmt->position < index){
-                                return flag;
-                        }
-                        root = root->next;
-                }                
-                return flag;
-        }
-        //printf("Truth List Is Empty\n");
+				}
+				flag = 1;
+			}
+			if(root->next && root->asgmt->position == index  && root->next->asgmt->position == index){
+				fprintf(fp," && ");
+			}
+			if(root->next && root->next->asgmt->position < index){
+					return flag;
+			}
+			root = root->next;
+		}
+		return flag;
+	}
+	//printf("Truth List Is Empty\n");
 }
 
 void printSequencePositions(struct treeNode* root){
@@ -2695,7 +2698,7 @@ struct treeNode* findBestGain(struct listOfIntervalListsStruct** localIntervalSe
 					if(j==target-1 || predicateInList(currentNode->truthList,j+1)) continue; 	//TODO: Make more specific
 					
 					if(indexInList(currentNode->explored,j+1,i)==1) continue;
-					printf("buck=%d pred=%d\n",i,j+1);
+					//printf("buck=%d pred=%d\n",i,j+1);
 					#ifdef SUP_DEBUG
 					fprintf(logFile,"[findBestGain] Computing Gain For PORV P[%d] with Target at position [%d] \n",j+1,i);fflush(logFile);
 					#endif
@@ -5205,6 +5208,13 @@ void printAssertionWithTruthToFile(FILE* fp, struct intervalListStruct** targetL
 		
 		double support = 0.0;
 		double correlation = 0.0;
+		double totalFalseLength = 0.0;
+		double totalTrueLength = 0.0;
+		int i =0;
+		for(i=0;i<traceCount;i++){
+			totalFalseLength += lengthOfIntervalList(getListAtPosition(listOfIntervalSets[i],targetPORV_id)->falseList);
+			totalTrueLength += lengthOfIntervalList(getListAtPosition(listOfIntervalSets[i],targetPORV_id)->trueList);
+		}
 		
 		if(truth==0){
 			//fprintf(fp,"Internal (2) : Position %d\n",position);
@@ -5232,7 +5242,6 @@ void printAssertionWithTruthToFile(FILE* fp, struct intervalListStruct** targetL
 			
 			correlation = totalOverlap/totalFalseLength;
 			support = totalEvidence/totalTraceLength;
-			
 		} else {
 			//fprintf(fp,"Internal (3) : Position %d\n",position);
 			//printTruthListToFilePtr(node->truthList,fp);fprintf(fp,"\n");	
@@ -5265,14 +5274,14 @@ void printAssertionWithTruthToFile(FILE* fp, struct intervalListStruct** targetL
 		#endif
 		
 		if(correlation == 0.0){ return; }
-                if(bucketCount==0){
-                        printTruthListForIndex(node->truthList,0,fp,0);
+		if(bucketCount==0){
+			printTruthListForIndex(node->truthList,0,fp,0);
 			if(node->truthList == NULL){	//For a VALID or UNSAT target
 				fprintf(fp,"TRUE ");
 			}
 			char *targetName = getPredicateName(targetPORV_id);
 			
-                        if(!truth){
+			if(!truth){
 				if(targetName){
 					fprintf(fp,"|=> !%s\n",targetName);
 				} else {
@@ -5289,17 +5298,17 @@ void printAssertionWithTruthToFile(FILE* fp, struct intervalListStruct** targetL
 			fprintf(fp,"SUPPORT\t\t= [%lf]\n",support*100.0);
 			fprintf(fp,"CORRELATION\t= [%lf]\n",correlation*100.0);
 			
-                        #ifdef SUP_DEBUG
-				fprintf(logFile,"[printAssertionWithTruthToFile] ENDED\n");
-                        #endif
+			#ifdef SUP_DEBUG
+			fprintf(logFile,"[printAssertionWithTruthToFile] ENDED\n");
+			#endif
 			
-                        return;
-                }
+			return;
+		}
                 
-                //Compute Bucket Separation Intervals
-                struct intervalStruct* bucketSepIntervals[bucketCount];	//Store separation intervals
-                bzero(bucketSepIntervals,sizeof(struct intervalStruct*)*bucketCount);
-		int i;
+		//Compute Bucket Separation Intervals
+		struct intervalStruct* bucketSepIntervals[bucketCount];	//Store separation intervals
+		bzero(bucketSepIntervals,sizeof(struct intervalStruct*)*bucketCount);
+		//int i;
 		
 		//printTruthListToFilePtr(node->truthList,logFile);
 		
@@ -5307,40 +5316,39 @@ void printAssertionWithTruthToFile(FILE* fp, struct intervalListStruct** targetL
 		//fprintf(logFile,"SBI=%d\n",smallestBucketID);
 		//int deltaPosition = smallestBucketID-position;
 		//if(deltaPosition<0)
-                for(i=bucketCount;i>=0;i--){
-                        //Compute the seperataion
+		for(i=bucketCount;i>=0;i--){
+			//Compute the seperataion
 			bucketSepIntervals[i] = computeBucketSeparation(bucket,targetList,i,position,smallestBucketID);
                         
-                        #ifdef SUP_DEBUG
-                        fprintf(logFile,"\n[printAssertionWithTruthToFile] Bucket %d\n",i);
-			fflush(logFile);
-                        if(bucket[i]) {
-				fprintf(logFile,"\n[printAssertionWithTruthToFile] Bucket Interval List: ");
-				printIntervalListToFilePtr(bucket[i],logFile);
-				fprintf(logFile,"\n");
-			}
-			fflush(logFile);
-			if(bucketSepIntervals[i]!=NULL){
-				fprintf(logFile,"[printAssertionWithTruthToFile] For bucket %d Seperation [%lf:%lf]\n",i,bucketSepIntervals[i]->l,bucketSepIntervals[i]->r);                                
-			} else fprintf(logFile,"[printAssertionWithTruthToFile] For bucket %d Seperation [0 : 0]\n",i);
-                        #endif
-                }      
-                fflush(logFile);
-                
+			#ifdef SUP_DEBUG
+				fprintf(logFile,"\n[printAssertionWithTruthToFile] Bucket %d\n",i);
+				fflush(logFile);
+				if(bucket[i]) {
+					fprintf(logFile,"\n[printAssertionWithTruthToFile] Bucket Interval List: ");
+					printIntervalListToFilePtr(bucket[i],logFile);
+					fprintf(logFile,"\n");
+				}
+				fflush(logFile);
+				if(bucketSepIntervals[i]!=NULL){
+					fprintf(logFile,"[printAssertionWithTruthToFile] For bucket %d Seperation [%lf:%lf]\n",i,bucketSepIntervals[i]->l,bucketSepIntervals[i]->r);                                
+				} else fprintf(logFile,"[printAssertionWithTruthToFile] For bucket %d Seperation [0 : 0]\n",i);
+				#endif
+		}
+		fflush(logFile);
+		
 		i = bucketCount;
-                int flag = 0;
+		int flag = 0;
 		int allNull = 1;
 		
 		while(i>=0){
 			if(bucketSepIntervals[i]==NULL){
-				//fprintf(logFile,"\nNull for Bucket [%i]\n",i);
-				//fprintf(fp,"\nNull for Bucket [%i]\n",i);
-                                if(i==0){
-                                        printTruthListForIndex(node->truthList,0,fp,0);
-                                } else {
-                                        i--;continue;
-                                }
-                                
+			//fprintf(logFile,"\nNull for Bucket [%i]\n",i);
+			//fprintf(fp,"\nNull for Bucket [%i]\n",i);
+				if(i==0){
+					printTruthListForIndex(node->truthList,0,fp,0);
+				} else {
+					i--;continue;
+				}
 			} else if(bucketSepIntervals[i]!=NULL && i==smallestBucketID){
 				//fprintf(logFile,"\nNot-Null for Bucket [%i] - smallest\n",i);
 				allNull = 0;
@@ -5350,7 +5358,20 @@ void printAssertionWithTruthToFile(FILE* fp, struct intervalListStruct** targetL
 				//fprintf(logFile,"\nNot-Null for Bucket [%i]\n",i);
 				allNull = 0;
 				printTruthListForIndex(node->truthList,i,fp,0);
-				fprintf(fp," ##[ %e : %e ] ",bucketSepIntervals[i]->l,bucketSepIntervals[i]->r);
+				//fprintf(fp," ##[ %e : %e ] ",bucketSepIntervals[i]->l,bucketSepIntervals[i]->r);
+				fprintf(fp," ##[ ");
+				if(bucketSepIntervals[i]->l>0.0 && bucketSepIntervals[i]->l < SMALL_DBL){
+					fprintf(fp,"%e : ",bucketSepIntervals[i]->l);
+				} else {
+					fprintf(fp,"%lf : ",newPrecision(bucketSepIntervals[i]->l,NUM_DIGITS));
+				}
+				if(bucketSepIntervals[i]->r>0.0 && bucketSepIntervals[i]->r < SMALL_DBL){
+					fprintf(fp,"%e",bucketSepIntervals[i]->r);
+				} else {
+					fprintf(fp,"%lf",newPrecision(bucketSepIntervals[i]->r,NUM_DIGITS));
+				}
+				fprintf(fp," ] ");
+				
 // 				if(i>=1){
 //                                         int j = i-1;
 // 					while(bucketSepIntervals[j]==NULL && j>0){
@@ -5386,11 +5407,24 @@ void printAssertionWithTruthToFile(FILE* fp, struct intervalListStruct** targetL
 			sprintf(newTargetName,"P%d\n",targetPORV_id);
 		}
                 
-                if(smallestBucketID>0 && allNull==0){
+		if(smallestBucketID>0 && allNull==0){
+			fprintf(fp,"|=> ##[ ");
+			if(bucketSepIntervals[smallestBucketID]->l>0.0 && bucketSepIntervals[smallestBucketID]->l < SMALL_DBL){
+				fprintf(fp,"%e : ",bucketSepIntervals[i]->l);
+			} else {
+				fprintf(fp,"%lf : ",newPrecision(bucketSepIntervals[smallestBucketID]->l,NUM_DIGITS));
+			}
+			if(bucketSepIntervals[smallestBucketID]->r>0.0 && bucketSepIntervals[smallestBucketID]->r < SMALL_DBL){
+				fprintf(fp,"%e",bucketSepIntervals[smallestBucketID]->r);
+			} else {
+				fprintf(fp,"%lf",newPrecision(bucketSepIntervals[smallestBucketID]->r,NUM_DIGITS));
+			}
+			fprintf(fp," ] ");
+			
 			if(!truth)
-				fprintf(fp,"|=> ##[ %e : %e ] !%s\n",bucketSepIntervals[smallestBucketID]->l,bucketSepIntervals[smallestBucketID]->r,newTargetName);
+				fprintf(fp,"!%s\n",bucketSepIntervals[smallestBucketID]->l,bucketSepIntervals[smallestBucketID]->r,newTargetName);
 			else
-				fprintf(fp,"|=> ##[ %e : %e ] %s\n",bucketSepIntervals[smallestBucketID]->l,bucketSepIntervals[smallestBucketID]->r,newTargetName);
+				fprintf(fp,"%s\n",bucketSepIntervals[smallestBucketID]->l,bucketSepIntervals[smallestBucketID]->r,newTargetName);
 			
 			fflush(fp);
 			fprintf(fp,"SUPPORT\t\t= [%lf]\n",support*100.0);
@@ -5429,19 +5463,20 @@ void printAssertions(struct treeNode* node, FILE* fp, int targetPORV_id){
 		}
 	#endif
 	if(node && fp){
-			#ifdef SUP_DEBUG
-				printTreeNodeToFilePtr(node, logFile,targetPORV_id);
-				fflush(logFile);
-			#endif
+		#ifdef SUP_DEBUG
+			printTreeNodeToFilePtr(node, logFile,targetPORV_id);
+			fflush(logFile);
+		#endif
 
 		sortTruthAssignmentList(&node->truthList);
 
 		struct truthAssignmentListStruct* constraintList = node->truthList;
-                int bucketCount = 0;
-		
+		int bucketCount = 0;
+		printTruthListToFilePtr(constraintList,fp);
 		#ifdef SUP_DEBUG
 			fprintf(logFile,"*******************CONSTRAINT LIST PTR [%p]***********************\n",constraintList);
 			printTruthListToFilePtr(constraintList,logFile);
+			printTruthListToFilePtr(constraintList,fp);
 			//REMOVING THIS FFLUSH CAN CAUSE A SEGFAULT: AND I HAVE NO IDEA WHY :-( 
 			fflush(logFile);
 		#endif
@@ -6036,4 +6071,10 @@ int checkCreateLogDir(){
 			exit(0);
 		}
 	}
+}
+
+
+double newPrecision(double n, double i) 
+{ 
+    return floor(pow(10,i)*n)/pow(10,i); 
 }

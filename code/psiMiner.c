@@ -387,12 +387,11 @@ int main(int argc, char *argv[]) {
 		}
 		for(i=0;i<numTargets;i++) 
 		{
-			
-			totalTrueLengthList[i] = 0;
+			totalTrueLengthList[i] = 0.0;
 			for(int k=0;k<traceCount;k++)
 				totalTrueLengthList[i] += lengthOfIntervalList(getListAtPosition(listOfIntervalSets[k],targetPORVID[i])->trueList);
 			totalFalseLengthList[i] = totalTraceLength-totalTrueLengthList[i];
-			printf("%d\n",targetPORVID[i]);
+			//printf("%d\n",targetPORVID[i]);
 			//prepareBackwardInfluenceTraces2(listOfIntervalSets,pseudoTargetLists,targetPORVID[i],N,K,strict,numberOfPORVs,numTargets);
 		}
 		/*printListOfIntervalLists(pseudoTargetLists[0][0]);
@@ -409,97 +408,116 @@ int main(int argc, char *argv[]) {
 		{
 		    for(i=0;i<numTargets;i++)
 		    {
-			totalTrueLength=totalTrueLengthList[i];
-			totalFalseLength=totalFalseLengthList[i];
-		        struct treeNode* newroot = createTreeNode(
-		                                                NULL,//Truth List
-		                                                listOfIntervalSets,//IntervalSet
-		                                                0,0,totalTraceLength,NULL,NULL);
-			printf("Total true Length = %lf\n",totalTrueLength);
-		        prepareBackwardInfluenceTraces(listOfIntervalSets,targetPORVID[i],N,K,strict);
-			/*struct truthAssignmentListStruct* truthList = createAss();
-			printTruthList(truthList);
-			struct intervalListStruct** endMatchIntervalList = endMatchesForPrefix(truthList);
-	for(int i=0;i<traceCount;i++){
-			printf("i=%d\n",i);
-			printIntervalList(endMatchIntervalList[i]);
-		}
-	//exit(0);
-    int mininmumBucketID = getSmallestBucketID(truthList);
-    int targetID = mininmumBucketID==0?7:(numberOfPORVs+mininmumBucketID);
-    double trueMean, falseMean, Htrue, Hfalse,mean, error;
-    double intervalLength = 0.0;
-    if(endMatchIntervalList){
-        intervalLength = lengthOfIntervalLists(endMatchIntervalList);
-    }
-	printf("IL=%lf\n",intervalLength);
-    int dominantTruth;
-    trueMean = computeMean(listOfIntervalSets,targetID,intervalLength,endMatchIntervalList);
-    falseMean = computeFalseMean(listOfIntervalSets,targetID,intervalLength,endMatchIntervalList);
-    Htrue = computeTrueEntropy(getListsAtPosition(listOfIntervalSets,targetID),endMatchIntervalList);
-    Hfalse = computeFalseEntropy(getListsAtPosition(listOfIntervalSets,targetID),endMatchIntervalList);
-    dominantTruth = Htrue<=Hfalse?1:0;//error(trueMean)<error(falseMean)?1:0;
-    mean = dominantTruth==0?falseMean:trueMean;
-    error = computeEntropy(getListsAtPosition(listOfIntervalSets,targetID),(endMatchIntervalList));
-	printf("mean=%lf\n",mean);
-			exit(0);*/
-			prepareRoot(newroot,listOfIntervalSets,pseudoTargetLists,targetPORVID[i],numberOfPORVs,numTargets,N);
-			printf("spid=%d\n",newroot->splittingPredicate_id);
-			//exit(0);
-			printf("calling amsMine for target= %d\n",targetPORVID[i]);
-			
-			FILE* aFile = fopen(assertFileName,"a");				
-			fprintf(aFile,"\n****************** TARGET [%d] ********************\n",targetPORVID[i]);
-			fclose(aFile);
-			amsMine(newroot,pseudoTargetLists,targetPORVID[i],numberOfPORVs,numTargets,N,depthOrig,targetPORVID[i]);
-			printf("completed amsMine for target= %d\n",targetPORVID[i]);
-			
-			//exit(0);
-			printTruthList(newroot->right->truthList);
-			for(int k=0;k<traceCount;k++)
-			{
-				printf("before=%d for trace=%d\n",printLengthOfIntervalLists(listOfIntervalSets[k]),k);
-				deleteExtraLists(listOfIntervalSets[k],numberOfPORVs);
-				printf("after=%d for trace=%d\n",printLengthOfIntervalLists(listOfIntervalSets[k]),k);
-			}
-			//newRoot-> = (struct treeNode**)malloc(sizeof(struct treeNode*)*(numTargets));
-			listTree[i][i] = newroot;
-			//printTruthList(newroot);
-			for(j=0;j<numTargets;j++)
-		    {
-			    if(j != i)
-			    {
-				    struct treeNode* duproot;
-					prepareBackwardInfluenceTraces(listOfIntervalSets,targetPORVID[j],N,K,strict);
-				    //newroot->originalToDup = (struct treeNode**)malloc(sizeof(struct treeNode*)*(numTargets));
-					//printf("1\n");
-				    duproot = duplicateTree(newroot, j); //maintain correspondence here
-					//printf("1\n");
-				    listTree[i][j] = duproot;
-					//printf("1\n");
-					    //struct intervalListStruct** endMatchIntervalList = endMatchesForPrefix(root->truthList);
-					/*for(int k=0;k<traceCount;k++){
-						printIntervalList(endMatchIntervalList[k]);
-						}*/
-				    printf("[PSIMiner]------------------------ [ Calling amsMine2 for target= %d ] --------------------------\n",targetPORVID[j]);
-					
-					FILE* aFile = fopen(assertFileName,"a");				
-					fprintf(aFile,"\n******** RELATED ASSERTIONS FOR TARGET [%d] ********\n",targetPORVID[j]);
-					fclose(aFile);
+				totalTrueLength=totalTrueLengthList[i];
+				totalFalseLength=totalFalseLengthList[i];
+				struct treeNode* newroot = createTreeNode(
+														NULL,//Truth List
+														listOfIntervalSets,//IntervalSet
+														0,0,totalTraceLength,NULL,NULL);
+				printf("Total true Length = %lf\n",totalTrueLength);
+				prepareBackwardInfluenceTraces(listOfIntervalSets,targetPORVID[i],N,K,strict);
+				/*struct truthAssignmentListStruct* truthList = createAss();
+				printTruthList(truthList);
+				struct intervalListStruct** endMatchIntervalList = endMatchesForPrefix(truthList);
+				for(int i=0;i<traceCount;i++){
+					printf("i=%d\n",i);
+					printIntervalList(endMatchIntervalList[i]);
+				}
+				//exit(0);
+				int mininmumBucketID = getSmallestBucketID(truthList);
+				int targetID = mininmumBucketID==0?7:(numberOfPORVs+mininmumBucketID);
+				double trueMean, falseMean, Htrue, Hfalse,mean, error;
+				double intervalLength = 0.0;
+				if(endMatchIntervalList){
+					intervalLength = lengthOfIntervalLists(endMatchIntervalList);
+				}
+				printf("IL=%lf\n",intervalLength);
+				int dominantTruth;
+				trueMean = computeMean(listOfIntervalSets,targetID,intervalLength,endMatchIntervalList);
+				falseMean = computeFalseMean(listOfIntervalSets,targetID,intervalLength,endMatchIntervalList);
+				Htrue = computeTrueEntropy(getListsAtPosition(listOfIntervalSets,targetID),endMatchIntervalList);
+				Hfalse = computeFalseEntropy(getListsAtPosition(listOfIntervalSets,targetID),endMatchIntervalList);
+				dominantTruth = Htrue<=Hfalse?1:0;//error(trueMean)<error(falseMean)?1:0;
+				mean = dominantTruth==0?falseMean:trueMean;
+				error = computeEntropy(getListsAtPosition(listOfIntervalSets,targetID),(endMatchIntervalList));
+				printf("mean=%lf\n",mean);
+				exit(0);*/
+				prepareRoot(newroot,listOfIntervalSets,pseudoTargetLists,targetPORVID[i],numberOfPORVs,numTargets,N);
+				printf("[PSIMiner] spid=%d\n",newroot->splittingPredicate_id);
+				//exit(0);
+				printf("[PSIMiner] Calling PSI-Miner for target= %d\n",targetPORVID[i]);
 				
-				    amsMine2(newroot, duproot,pseudoTargetLists, targetPORVID[j], numberOfPORVs,numTargets, N, depthOrig, depthDup,1,listOfIntervalSets);
-				    for(int k=0;k<traceCount;k++)
-		                    {
-		                        printf("before=%d for trace=%d\n",printLengthOfIntervalLists(listOfIntervalSets[k]),k);
-		                        deleteExtraLists(listOfIntervalSets[k],numberOfPORVs);
-		                        printf("after=%d for trace=%d\n",printLengthOfIntervalLists(listOfIntervalSets[k]),k);
-		                    }
-					//exit(0);
-			    }
-		        }
-		        //printTree(newroot);
-		        purgeTruthListForTreeNode(newroot); 
-		    }
+				FILE* aFile = fopen(assertFileName,"a");
+				char *targetName = getPredicateName(targetPORVID[j]);
+				char newTargetName[MAX_STR_LENGTH]; 
+				if(targetName){
+					sprintf(newTargetName,"%s",targetName);
+				} else {
+					sprintf(newTargetName,"P%d",targetPORVID[j]);
+				}
+				
+				fprintf(aFile,"\n****************** TARGET [%s] ********************\n",newTargetName);
+				fclose(aFile);
+				amsMine(newroot,pseudoTargetLists,targetPORVID[i],numberOfPORVs,numTargets,N,depthOrig,targetPORVID[i]);
+				printf("[PSIMiner] Completed PSI-Mining for target= %d\n",targetPORVID[i]);
+				
+				//exit(0);
+				printTruthList(newroot->right->truthList);
+				for(int k=0;k<traceCount;k++)
+				{
+					//printf("before=%d for trace=%d\n",printLengthOfIntervalLists(listOfIntervalSets[k]),k);
+					deleteExtraLists(listOfIntervalSets[k],numberOfPORVs);
+					//printf("after=%d for trace=%d\n",printLengthOfIntervalLists(listOfIntervalSets[k]),k);
+				}
+				//newRoot-> = (struct treeNode**)malloc(sizeof(struct treeNode*)*(numTargets));
+				listTree[i][i] = newroot;
+				//printTruthList(newroot);
+				for(j=0;j<numTargets;j++)
+				{
+					if(j != i)
+					{
+						struct treeNode* duproot;
+						prepareBackwardInfluenceTraces(listOfIntervalSets,targetPORVID[j],N,K,strict);
+						//newroot->originalToDup = (struct treeNode**)malloc(sizeof(struct treeNode*)*(numTargets));
+						//printf("1\n");
+						duproot = duplicateTree(newroot, j); //maintain correspondence here
+						totalTrueLength=totalTrueLengthList[j];
+						totalFalseLength=totalFalseLengthList[j];
+						//printf("1\n");
+						listTree[i][j] = duproot;
+						//printf("1\n");
+							//struct intervalListStruct** endMatchIntervalList = endMatchesForPrefix(root->truthList);
+						/*for(int k=0;k<traceCount;k++){
+							printIntervalList(endMatchIntervalList[k]);
+							}*/
+						printf("[PSIMiner] ------------------------ [ Calling amsMine2 for target= %d ] --------------------------\n",targetPORVID[j]);
+						
+						FILE* aFile = fopen(assertFileName,"a");
+						
+						char *targetName = getPredicateName(targetPORVID[j]);
+						char newTargetName[MAX_STR_LENGTH]; 
+						if(targetName){
+							sprintf(newTargetName,"%s",targetName);
+						} else {
+							sprintf(newTargetName,"P%d",targetPORVID[j]);
+						}
+
+						fprintf(aFile,"\n******** RELATED ASSERTIONS FOR TARGET [%s] ********\n",newTargetName);
+						fclose(aFile);
+					
+						amsMine2(newroot, duproot,pseudoTargetLists, targetPORVID[j], numberOfPORVs,numTargets, N, depthOrig, depthDup,1,listOfIntervalSets);
+						for(int k=0;k<traceCount;k++)
+						{
+							//printf("before=%d for trace=%d\n",printLengthOfIntervalLists(listOfIntervalSets[k]),k);
+							deleteExtraLists(listOfIntervalSets[k],numberOfPORVs);
+							//printf("after=%d for trace=%d\n",printLengthOfIntervalLists(listOfIntervalSets[k]),k);
+						}
+						//exit(0);
+					}
+				}
+				//printTree(newroot);
+				purgeTruthListForTreeNode(newroot); 
+			}
 		}
 
                 /*

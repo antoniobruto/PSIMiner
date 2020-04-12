@@ -145,6 +145,7 @@ struct truthAssignmentListStruct* duplicateTruthAssignmentList(struct truthAssig
 int predicateInList(struct truthAssignmentListStruct* root, int predicate);
 void printTruthList(struct truthAssignmentListStruct* root);
 int  printTruthListForIndex(struct truthAssignmentListStruct* root, int index, FILE* fp, int andprinter);
+char* getPredicateName(int id);
 int  writeTruthListForIndex(struct truthAssignmentListStruct* root, int index, char* str, int andprinter);
 void printTruthListToFile(struct truthAssignmentListStruct* root);
 void printTruthListToFilePtr(struct truthAssignmentListStruct* root, FILE* fp);
@@ -337,4 +338,5 @@ int amsMine2(struct treeNode* original, struct treeNode* duproot,struct listOfIn
 
 
 int checkCreateLogDir();
+double newPrecision(double n, double i);
 #endif
