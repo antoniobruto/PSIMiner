@@ -1,0 +1,32 @@
+___________________________________________________
+
+                   DECISION TREE
+________________________________________________________
+
+---------------------TREE NODE ID [2]----------------------
+TRUTH LIST  : 
+{KP1 [1] }
+
+TARGET INFLUENCE	= 0
+ON PORV	= 2
+TRACE LENGTH	= 16.990000
+MEAN	= 0.000000
+ERROR	= 0.000000
+---------------------TREE NODE ID [1]----------------------
+TRUTH LIST  : 
+{~KP1 [1] }
+
+TARGET INFLUENCE	= 1
+ON PORV	= 2
+TRACE LENGTH	= 73.010000
+MEAN	= 1.000000
+ERROR	= 0.000000
+---------------------TREE NODE ID [0]----------------------
+TRUTH LIST  : 
+Truth List Is Empty
+
+TARGET INFLUENCE	= 1
+ON PORV	= 1
+TRACE LENGTH	= 90.000000
+MEAN	= 0.995556
+ERROR	= 0.041126
