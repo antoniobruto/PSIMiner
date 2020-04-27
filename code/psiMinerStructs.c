@@ -5332,7 +5332,7 @@ void printAssertionWithTruthToFile(FILE* fp, struct intervalListStruct** targetL
 				if(bucketSepIntervals[i]!=NULL){
 					fprintf(logFile,"[printAssertionWithTruthToFile] For bucket %d Seperation [%lf:%lf]\n",i,bucketSepIntervals[i]->l,bucketSepIntervals[i]->r);                                
 				} else fprintf(logFile,"[printAssertionWithTruthToFile] For bucket %d Seperation [0 : 0]\n",i);
-				#endif
+			#endif
 		}
 		fflush(logFile);
 		
