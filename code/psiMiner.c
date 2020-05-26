@@ -116,11 +116,12 @@ int learnMode = 0;		/*
 								Only use learned predicates	
 					*/
 
-FILE* logFile;				/*	The Log File used for logging function calls	*/
-FILE* predLogFile;			/*	The Predicate Log for logging learned predicates that are used in the decision process*/
+FILE* logFile = NULL;				/*	The Log File used for logging function calls	*/
+FILE* predLogFile = NULL;			/*	The Predicate Log for logging learned predicates that are used in the decision process*/
 
 int cumulative = 0;			//	Determine how gain is computed.
 struct assertionStruct* allAssertions=NULL;
+
 int main(int argc, char *argv[]) {
 	checkCreateLogDir();
 	int targetPORV_id = 1;
@@ -138,12 +139,12 @@ int main(int argc, char *argv[]) {
 	time_t t = time(NULL);
 	struct tm *tm = localtime(&t);
 	
-	char log_filename[MAX_STR_LENGTH];
-	sprintf(log_filename,"logs/log_%d%d%d%d%d%d.txt", tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
+	//char log_filename[MAX_STR_LENGTH];
+	//sprintf(log_filename,"logs/log_%d%d%d%d%d%d.txt", tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
 	char predlog_filename[MAX_STR_LENGTH];
 	sprintf(predlog_filename,"logs/predLog_%d%d%d%d%d%d.txt", tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
 	
-	logFile = fopen(log_filename,"w");
+	//logFile = fopen(log_filename,"w");
 	predLogFile = fopen(predlog_filename,"w");
 	
 	/*
@@ -165,7 +166,7 @@ int main(int argc, char *argv[]) {
 		//--------------------------------------------------------------
 		
 		learnMode = getLearnType(inputConfig);
-		printf("Learning Mode = %d\n",learnMode);
+		//printf("Learning Mode = %d\n",learnMode);
 		
 		N = inputConfig->N+1;
 		K = inputConfig->K;
@@ -189,7 +190,7 @@ int main(int argc, char *argv[]) {
 		
 		//---------------------------------Parsing Interval Sets--------------------------------------
 		#ifdef MAIN_DEBUG
-		fprintf(logFile,"[AMSMiner] Parsing Intervals.\n");fflush(logFile);
+		fprintf(getLogFilePtr(),"[PSIMiner] Parsing Intervals.\n");fflush(getLogFilePtr());
 		#endif
 		setbuf(stdout, NULL);
 		
@@ -228,7 +229,7 @@ int main(int argc, char *argv[]) {
 		numberOfPORVs = countLists(listOfIntervalSets[0]);
 				
 		#ifdef MAIN_DEBUG
-			fprintf(logFile,"[AMSMiner] Number of PORVs = %d\n",numberOfPORVs);
+			fprintf(getLogFilePtr(),"[PSIMiner] Number of PORVs = %d\n",numberOfPORVs);
 		#endif
 		
 		printPredicateList(predicateMap);
@@ -238,7 +239,7 @@ int main(int argc, char *argv[]) {
 		targetPORV_id = getTarget(numberOfPORVs);        //REMOVE LATER
 				
 		#ifdef MAIN_DEBUG
-			fprintf(logFile,"[AMSMiner] Target PORV ID: P-%d\n",targetPORV_id);
+			fprintf(getLogFilePtr(),"[PSIMiner] Target PORV ID: P-%d\n",targetPORV_id);
 		#endif
 				//--------------------------------------------------------------------------------------------
 			
@@ -284,8 +285,8 @@ int main(int argc, char *argv[]) {
 		prepareBackwardInfluenceTraces(listOfIntervalSets,targetPORV_id,N,K,strict);        
 		// At this point target, and numberOfPORVs+1 to numberOfPORVs+(N-1) are the target interval lists
 			
-		printTreeNodeToFilePtr(root,logFile,targetPORV_id);
-		fflush(logFile);
+		printTreeNodeToFilePtr(root,getLogFilePtr(),targetPORV_id);
+		fflush(getLogFilePtr());
 		
 		int recreate_iterator = 0;
 		for(recreate_iterator=0;recreate_iterator<RECREATE_COUNT;recreate_iterator++){
@@ -313,8 +314,8 @@ int main(int argc, char *argv[]) {
 	}
 	#endif
 	fclose(fcov);
-	fflush(logFile);
-	fclose(logFile);
+	fflush(getLogFilePtr());
+	fclose(getLogFilePtr());
 	fflush(predLogFile);
 	fclose(predLogFile);
 	

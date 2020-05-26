@@ -324,4 +324,5 @@ struct intervalListStruct** endMatchesForPrefix(struct truthAssignmentListStruct
 struct intervalListStruct** createValidLists();
 
 int checkCreateLogDir();
+FILE* getLogFilePtr();
 #endif

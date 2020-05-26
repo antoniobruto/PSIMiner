@@ -21,7 +21,7 @@
 #include <sys/types.h> /* for pid_t */
 #include <sys/wait.h> /* for wait */
 #include <sys/time.h> /* for time */
-
+#include <sys/stat.h> /* for file statistics */
 #include "structs.h"
 
 #define epsilon 0.0001
@@ -71,9 +71,9 @@ void printConfig(struct config* inputConfig){
 		printf("Max Temperature     = %lf\n",inputConfig->tmax);
 		printf("Min Temperature     = %lf\n",inputConfig->tmin);
 		printf("Trace Count         = %d\n",inputConfig->traceCount);
-		printf("Trace File Names    = "); printIdentifierList(inputConfig->traceFileNames);printf("\n");
-		printf("Data File Name      = %s\n",inputConfig->intervalSetFileName);
-		printf("Learn Type          = %d\n",inputConfig->learnType);
+		printf("Trace File Names    = "); printIdentifierList(inputConfig->traceFileNames);//printf("\n");
+		//printf("Data File Name      = %s\n",inputConfig->intervalSetFileName);
+		printf("Learning Mode          = %s\n",inputConfig->learnType==0?"Knowledge Only":(inputConfig->learnType==1?"Learn only if required":(inputConfig->learnType==2?"Best of both worlds":"Use only learned knowledge")));
 		printf("----------------------------------------------------\n");
 	}
 }
@@ -1573,4 +1573,15 @@ void booleanize(){
                 
         }
 
+}
+
+off_t getFileSize(const char *fileName){
+	if(fileName){
+		struct stat st;
+		
+		if(stat(fileName, &st)==0){
+			return st.st_size;
+		}
+	}
+	return -1;
 }

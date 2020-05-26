@@ -202,4 +202,5 @@ void printImports(FILE* fp);
 void printCSV(FILE* fp,struct file* predicateMap,char* csvFile);
 
 void booleanize();
+off_t getFileSize(const char *fileName);
 #endif

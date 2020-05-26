@@ -13,6 +13,8 @@
 //#define TREE_DEBUG
 //#define VERBOSE_LOW
 
+#define MAX_LOG_FILE_SIZE_MB 100
+
 #ifndef MAX_STR_LENGTH
 	#define MAX_STR_LENGTH 10240
 #endif
@@ -28,6 +30,7 @@
 #include <sys/wait.h> /* for wait */
 #include <sys/time.h> /* for time */
 #include <sys/stat.h> /* for file/directory status */
+#include <time.h>
 
 #include "structs.h"
 #include "psiMinerStructs.h"
@@ -82,14 +85,14 @@ static int superFlag=1;
 /*
 struct identifier* createIdentifier(unsigned int state){
 	#ifdef DEBUG_ON 
-	fprintf(logFile,"[createIdentifier] STARTED\n");
+	fprintf(getLogFilePtr(),"[createIdentifier] STARTED\n");
 	#endif
 	
 	struct identifier* ID = (struct identifier*)malloc(sizeof(struct identifier));
 	ID->next = NULL;
 	ID->state = state;
 	#ifdef DEBUG_ON 
-	fprintf(logFile,"[createIdentifier] CRETED NODE\n");
+	fprintf(getLogFilePtr(),"[createIdentifier] CRETED NODE\n");
 	#endif
 		
 	return ID;
@@ -97,38 +100,38 @@ struct identifier* createIdentifier(unsigned int state){
 
 struct identifier* addIdentifierToList(struct identifier* root, struct identifier* ID){
 	#ifdef DEBUG_ON 
-	fprintf(logFile,"[addIdentifierToList] STARTED\n");
+	fprintf(getLogFilePtr(),"[addIdentifierToList] STARTED\n");
 	#endif
 	
 	struct identifier* temp = root;
 	
 	if(root!=NULL){
 		#ifdef DEBUG_ON 
-		fprintf(logFile,"[addIdentifierToList] ID LIST NOT EMPTY\n");
+		fprintf(getLogFilePtr(),"[addIdentifierToList] ID LIST NOT EMPTY\n");
 		#endif
 		
 		while(temp->next!=NULL){
 			temp=temp->next;
 		}
 		#ifdef DEBUG_ON 
-		fprintf(logFile,"[addIdentifierToList] ADDING TO ID LIST\n");
+		fprintf(getLogFilePtr(),"[addIdentifierToList] ADDING TO ID LIST\n");
 		#endif
 		
 		temp->next = ID;
 	} else {
 		#ifdef DEBUG_ON 
-		fprintf(logFile,"[addIdentifierToList] ID LIST EMPTY\n");
-		fprintf(logFile,"[addIdentifierToList] ADDING TO ID LIST\n");
+		fprintf(getLogFilePtr(),"[addIdentifierToList] ID LIST EMPTY\n");
+		fprintf(getLogFilePtr(),"[addIdentifierToList] ADDING TO ID LIST\n");
 		#endif
 		
 		root = ID;
 		#ifdef DEBUG_ON 
-		fprintf(logFile,"[addIdentifierToList] ROOT CHANGED: ROOT->NAME = %s\n",root->name);
+		fprintf(getLogFilePtr(),"[addIdentifierToList] ROOT CHANGED: ROOT->NAME = %s\n",root->name);
 		#endif
 		
 	}
 	#ifdef DEBUG_ON 
-	fprintf(logFile,"[addIdentifierToList] ADDED IDENTIFIER [%s]\n",ID->name);
+	fprintf(getLogFilePtr(),"[addIdentifierToList] ADDED IDENTIFIER [%s]\n",ID->name);
 	#endif
 	
 	return root;
@@ -136,7 +139,7 @@ struct identifier* addIdentifierToList(struct identifier* root, struct identifie
 
 struct identifier* addToIdentifierList(struct identifier* root, unsigned int state){
 	#ifdef DEBUG_ON 
-	fprintf(logFile,"[addToIdentifierList] STARTED\n");
+	fprintf(getLogFilePtr(),"[addToIdentifierList] STARTED\n");
 	#endif
 	
 	struct identifier* ID = (struct identifier*)malloc(sizeof(struct identifier));
@@ -144,36 +147,36 @@ struct identifier* addToIdentifierList(struct identifier* root, unsigned int sta
 	ID->next = NULL;
 	ID->state = state;
 	#ifdef DEBUG_ON 
-	fprintf(logFile,"[addToIdentifierList] CRETED NODE\n");
+	fprintf(getLogFilePtr(),"[addToIdentifierList] CRETED NODE\n");
 	#endif
 	
 	if(root!=NULL){
 		#ifdef DEBUG_ON 
-		fprintf(logFile,"[addToIdentifierList] ID LIST NOT EMPTY\n");
+		fprintf(getLogFilePtr(),"[addToIdentifierList] ID LIST NOT EMPTY\n");
 		#endif
 		
 		while(temp->next!=NULL){
 			temp=temp->next;
 		}
 		#ifdef DEBUG_ON 
-		fprintf(logFile,"[addToIdentifierList] ADDING TO ID LIST\n");
+		fprintf(getLogFilePtr(),"[addToIdentifierList] ADDING TO ID LIST\n");
 		#endif
 		
 		temp->next = ID;
 	} else {
 		#ifdef DEBUG_ON 
-		fprintf(logFile,"[addToIdentifierList] ID LIST EMPTY\n");
-		fprintf(logFile,"[addToIdentifierList] ADDING TO ID LIST\n");
+		fprintf(getLogFilePtr(),"[addToIdentifierList] ID LIST EMPTY\n");
+		fprintf(getLogFilePtr(),"[addToIdentifierList] ADDING TO ID LIST\n");
 		#endif
 		
 		root = ID;
 		#ifdef DEBUG_ON 
-		fprintf(logFile,"[addToIdentifierList] ROOT CHANGED: ROOT->NAME = %s\n",root->name);
+		fprintf(getLogFilePtr(),"[addToIdentifierList] ROOT CHANGED: ROOT->NAME = %s\n",root->name);
 		#endif
 		
 	}
 	#ifdef DEBUG_ON 
-	fprintf(logFile,"[addToIdentifierList] ADDED IDENTIFIER [%s]\n",id);
+	fprintf(getLogFilePtr(),"[addToIdentifierList] ADDED IDENTIFIER [%s]\n",id);
 	#endif
 	
 	return root;
@@ -194,7 +197,7 @@ int getIdentifierID(struct identifier* list,unsigned int state ){
 
 struct identifier* duplicateIdentifierList(struct identifier* root){
 	#ifdef DEBUG_ON 
-	fprintf(logFile,"[duplicateIdentifierList] STARTED\n");
+	fprintf(getLogFilePtr(),"[duplicateIdentifierList] STARTED\n");
 	#endif
 	
 	struct identifier* temp = root;
@@ -204,7 +207,7 @@ struct identifier* duplicateIdentifierList(struct identifier* root){
 		temp = temp->next;
 	}
 	#ifdef DEBUG_ON 
-	fprintf(logFile,"[duplicateIdentifierList] COMPLETED\n");
+	fprintf(getLogFilePtr(),"[duplicateIdentifierList] COMPLETED\n");
 	#endif
 	
 	return newRoot;
@@ -219,7 +222,7 @@ void freeIdentifierList(struct identifier* id){
 
 void printIdentifier(struct identifier* id){
 	if(id!=NULL){
-		//fprintf(logFile,"[%p] %s %s %s ",cond,cond->LHS,operatorMap(cond->op),cond->RHS);
+		//fprintf(getLogFilePtr(),"[%p] %s %s %s ",cond,cond->LHS,operatorMap(cond->op),cond->RHS);
 		printf("Addrs: %p\n",id);
 		printf("Name: %s\n",id->state);	
 		printf("Next: %p\n\n",id->next);
@@ -388,7 +391,7 @@ void printIntervalListToFilePtr(struct intervalListStruct* list,FILE* fp){
 
 void deleteIntervalList(struct intervalListStruct* list){
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[deleteIntervalList] STARTED\n");fflush(logFile);
+	fprintf(getLogFilePtr(),"[deleteIntervalList] STARTED\n");fflush(getLogFilePtr());
 	#endif
 	if(list){
 		if(list->next){
@@ -399,25 +402,25 @@ void deleteIntervalList(struct intervalListStruct* list){
 		free(list);
 	}
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[deleteIntervalList] ENDED\n");fflush(logFile);
+	fprintf(getLogFilePtr(),"[deleteIntervalList] ENDED\n");fflush(getLogFilePtr());
 	#endif
 }
 
 struct intervalListStruct* flattenIntervalList(struct intervalListStruct* list){
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[flattenIntervalList] STARTED\n");fflush(logFile);
+	fprintf(getLogFilePtr(),"[flattenIntervalList] STARTED\n");fflush(getLogFilePtr());
 	#endif
 	
 	if(list){
 		#ifdef VERBOSE_LOW
-		fprintf(logFile,"Flattening: "); printIntervalListToFilePtr(list,logFile);fprintf(logFile,"\n");fflush(logFile);
+		fprintf(getLogFilePtr(),"Flattening: "); printIntervalListToFilePtr(list,getLogFilePtr());fprintf(getLogFilePtr(),"\n");fflush(getLogFilePtr());
 		#endif
 		
 		struct intervalListStruct* iterator = list;
 		while(iterator->next!=NULL){
 			if(iterator->next->interval->l <= iterator->interval->r){ //If there is an overlap
 				#ifdef VERBOSE_LOW
-				fprintf(logFile,"[flattenIntervalList] Merging: "); printIntervalToFilePtr(iterator->interval,logFile); fprintf(logFile," and "); printIntervalToFilePtr(iterator->next->interval,logFile);fprintf(logFile,"\n");fflush(logFile);
+				fprintf(getLogFilePtr(),"[flattenIntervalList] Merging: "); printIntervalToFilePtr(iterator->interval,getLogFilePtr()); fprintf(getLogFilePtr()," and "); printIntervalToFilePtr(iterator->next->interval,getLogFilePtr());fprintf(getLogFilePtr(),"\n");fflush(getLogFilePtr());
 				#endif
 				
 				iterator->interval->r = (iterator->next->interval->r > iterator->interval->r)? iterator->next->interval->r : iterator->interval->r; //Expand to include the next interval
@@ -435,13 +438,13 @@ struct intervalListStruct* flattenIntervalList(struct intervalListStruct* list){
 		}
 		
 		#ifdef VERBOSE_LOW
-		fprintf(logFile,"[flattenIntervalList] ENDED\n");fflush(logFile);
+		fprintf(getLogFilePtr(),"[flattenIntervalList] ENDED\n");fflush(getLogFilePtr());
 		#endif
 		
 		return list;
 	}
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[flattenIntervalList] ENDED with NULL\n");fflush(logFile);
+	fprintf(getLogFilePtr(),"[flattenIntervalList] ENDED with NULL\n");fflush(getLogFilePtr());
 	#endif
 	
 	return NULL;
@@ -449,12 +452,12 @@ struct intervalListStruct* flattenIntervalList(struct intervalListStruct* list){
 
 struct intervalListStruct* unionIntervalLists(struct intervalListStruct* list1, struct intervalListStruct* list2){
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[unionIntervalLists] STARTED\n");fflush(logFile);
+	fprintf(getLogFilePtr(),"[unionIntervalLists] STARTED\n");fflush(getLogFilePtr());
         #endif
         
         if(list1 && list2){
 		#ifdef VERBOSE_LOW
-		fprintf(logFile,"Flattening: "); //printIntervalList(list);
+		fprintf(getLogFilePtr(),"Flattening: "); //printIntervalList(list);
                 #endif
                 
                 struct intervalListStruct* list = NULL;
@@ -480,14 +483,14 @@ struct intervalListStruct* unionIntervalLists(struct intervalListStruct* list1, 
                 list = flattenIntervalList(list);
                 
 		#ifdef VERBOSE_LOW
-		fprintf(logFile,"[unionIntervalLists] ENDED\n");fflush(logFile);
+		fprintf(getLogFilePtr(),"[unionIntervalLists] ENDED\n");fflush(getLogFilePtr());
                 #endif
                 
                 return list;
         } else {
                 if(list1==NULL && list2==NULL){
 			#ifdef VERBOSE_LOW
-			fprintf(logFile,"[unionIntervalLists] ENDED with NULL\n");fflush(logFile);
+			fprintf(getLogFilePtr(),"[unionIntervalLists] ENDED with NULL\n");fflush(getLogFilePtr());
                         #endif
                         return NULL;
                 }
@@ -499,7 +502,7 @@ struct intervalListStruct* unionIntervalLists(struct intervalListStruct* list1, 
                 }
         }
         #ifdef VERBOSE_LOW
-        fprintf(logFile,"[unionIntervalLists] ENDED with NULL\n");fflush(logFile);
+        fprintf(getLogFilePtr(),"[unionIntervalLists] ENDED with NULL\n");fflush(getLogFilePtr());
         #endif
         
         return NULL;
@@ -507,7 +510,7 @@ struct intervalListStruct* unionIntervalLists(struct intervalListStruct* list1, 
 
 struct intervalListStruct* mergeIntervalLists(struct intervalListStruct* list1, struct intervalListStruct* list2){
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[unionIntervalLists] STARTED\n");fflush(logFile);
+	fprintf(getLogFilePtr(),"[unionIntervalLists] STARTED\n");fflush(getLogFilePtr());
         #endif
         
         if(list1 && list2){
@@ -555,14 +558,14 @@ struct intervalListStruct* mergeIntervalLists(struct intervalListStruct* list1, 
                 list = flattenIntervalList(list);
                 
 		#ifdef VERBOSE_LOW
-		fprintf(logFile,"[unionIntervalLists] ENDED\n");fflush(logFile);
+		fprintf(getLogFilePtr(),"[unionIntervalLists] ENDED\n");fflush(getLogFilePtr());
                 #endif
                 
                 return list;
         } else {
                 if(list1==NULL && list2==NULL){
 			#ifdef VERBOSE_LOW
-			fprintf(logFile,"[unionIntervalLists] ENDED with NULL\n");fflush(logFile);
+			fprintf(getLogFilePtr(),"[unionIntervalLists] ENDED with NULL\n");fflush(getLogFilePtr());
                         #endif
                         return NULL;
                 }
@@ -574,7 +577,7 @@ struct intervalListStruct* mergeIntervalLists(struct intervalListStruct* list1, 
                 }
         }
         #ifdef VERBOSE_LOW
-        fprintf(logFile,"[unionIntervalLists] ENDED with NULL\n");fflush(logFile);
+        fprintf(getLogFilePtr(),"[unionIntervalLists] ENDED with NULL\n");fflush(getLogFilePtr());
         #endif
         
         return NULL;
@@ -604,7 +607,7 @@ struct listOfIntervalListsStruct* createListOfIntervalLists(struct intervalListS
 
 void addToListOfIntervalLists(struct listOfIntervalListsStruct** root, struct listOfIntervalListsStruct* listItem){
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[addToListOfIntervalLists] STARTED\n");fflush(logFile);
+	fprintf(getLogFilePtr(),"[addToListOfIntervalLists] STARTED\n");fflush(getLogFilePtr());
         #endif
         if(*root){
 		struct listOfIntervalListsStruct* iterator = getLastListOfIntervalsInList(*root);
@@ -613,24 +616,24 @@ void addToListOfIntervalLists(struct listOfIntervalListsStruct** root, struct li
 		*root = listItem;
 	}
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[addToListOfIntervalLists] ENDED\n");fflush(logFile);
+	fprintf(getLogFilePtr(),"[addToListOfIntervalLists] ENDED\n");fflush(getLogFilePtr());
         #endif
 }
 
 struct listOfIntervalListsStruct* addListToListOfIntervalLists(struct listOfIntervalListsStruct* root, struct listOfIntervalListsStruct* listItem){
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[addListToListOfIntervalLists] STARTED\n");fflush(logFile);
+	fprintf(getLogFilePtr(),"[addListToListOfIntervalLists] STARTED\n");fflush(getLogFilePtr());
         #endif
 	if(root){
 		struct listOfIntervalListsStruct* iterator = getLastListOfIntervalsInList(root);
 		iterator->nextList = listItem;
 		#ifdef VERBOSE_LOW
-		fprintf(logFile,"[addListToListOfIntervalLists] ENDED\n");fflush(logFile);
+		fprintf(getLogFilePtr(),"[addListToListOfIntervalLists] ENDED\n");fflush(getLogFilePtr());
                 #endif
                 return root;
 	} else {
 		#ifdef VERBOSE_LOW
-		fprintf(logFile,"[addListToListOfIntervalLists] ENDED\n");fflush(logFile);
+		fprintf(getLogFilePtr(),"[addListToListOfIntervalLists] ENDED\n");fflush(getLogFilePtr());
                 #endif
 		return listItem;
 	}
@@ -638,7 +641,7 @@ struct listOfIntervalListsStruct* addListToListOfIntervalLists(struct listOfInte
 
 struct listOfIntervalListsStruct* getLastListOfIntervalsInList(struct listOfIntervalListsStruct* root){
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[getLastListOfIntervalsInList] STARTED\n");fflush(logFile);
+	fprintf(getLogFilePtr(),"[getLastListOfIntervalsInList] STARTED\n");fflush(getLogFilePtr());
         #endif
         if(root){
 		while(root->nextList){
@@ -646,7 +649,7 @@ struct listOfIntervalListsStruct* getLastListOfIntervalsInList(struct listOfInte
 		}
 	}
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[getLastListOfIntervalsInList] ENDED\n");fflush(logFile);
+	fprintf(getLogFilePtr(),"[getLastListOfIntervalsInList] ENDED\n");fflush(getLogFilePtr());
         #endif
 	return root;
 }
@@ -813,7 +816,7 @@ struct intervalStruct* intersectIntervals(struct intervalStruct* interval1, stru
 
 struct intervalListStruct* intersectIntervalList(struct intervalListStruct* list1, struct intervalListStruct* list2){
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[intersectIntervalList] STARTED\n");fflush(logFile);
+	fprintf(getLogFilePtr(),"[intersectIntervalList] STARTED\n");fflush(getLogFilePtr());
 	#endif
 	
 	if(list1 && list2){
@@ -823,9 +826,9 @@ struct intervalListStruct* intersectIntervalList(struct intervalListStruct* list
 		struct intervalStruct* t_interval;
 		
 		#ifdef VERBOSE_LOW
-		fprintf(logFile,"[intersectIntervalList] Intersecting the lists:\n");fflush(logFile);
-		fprintf(logFile,"[intersectIntervalList] List-1 = "); printIntervalListToFilePtr(list1,logFile);fprintf(logFile,"\n");fflush(logFile);
-		fprintf(logFile,"[intersectIntervalList] List-2 = "); printIntervalListToFilePtr(list2,logFile);fprintf(logFile,"\n");fflush(logFile);
+		fprintf(getLogFilePtr(),"[intersectIntervalList] Intersecting the lists:\n");fflush(getLogFilePtr());
+		fprintf(getLogFilePtr(),"[intersectIntervalList] List-1 = "); printIntervalListToFilePtr(list1,getLogFilePtr());fprintf(getLogFilePtr(),"\n");fflush(getLogFilePtr());
+		fprintf(getLogFilePtr(),"[intersectIntervalList] List-2 = "); printIntervalListToFilePtr(list2,getLogFilePtr());fprintf(getLogFilePtr(),"\n");fflush(getLogFilePtr());
 		#endif
 		
 		while(iterator1){
@@ -850,17 +853,17 @@ struct intervalListStruct* intersectIntervalList(struct intervalListStruct* list
 		}
 		
 		#ifdef VERBOSE_LOW
-			fprintf(logFile,"[intersectIntervalList] Result = "); fflush(logFile);
-			printIntervalListToFilePtr(list,logFile);
-			fprintf(logFile,"\n");
-			fprintf(logFile,"[intersectIntervalList] ENDED\n");fflush(logFile);
+			fprintf(getLogFilePtr(),"[intersectIntervalList] Result = "); fflush(getLogFilePtr());
+			printIntervalListToFilePtr(list,getLogFilePtr());
+			fprintf(getLogFilePtr(),"\n");
+			fprintf(getLogFilePtr(),"[intersectIntervalList] ENDED\n");fflush(getLogFilePtr());
 		#endif
 		
 		list = flattenIntervalList(list);
 		return list;
 	}
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[intersectIntervalList] ENDED with NULL\n");fflush(logFile);
+	fprintf(getLogFilePtr(),"[intersectIntervalList] ENDED with NULL\n");fflush(getLogFilePtr());
 	#endif
 	
 	return NULL;
@@ -868,7 +871,7 @@ struct intervalListStruct* intersectIntervalList(struct intervalListStruct* list
 
 struct listOfIntervalListsStruct* intersectIntervalSet(struct listOfIntervalListsStruct* intervalSet1, struct intervalListStruct* intervalList2){
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[intersectIntervalSet] STARTED\n");fflush(logFile);
+	fprintf(getLogFilePtr(),"[intersectIntervalSet] STARTED\n");fflush(getLogFilePtr());
 	#endif
 	
 	if(intervalSet1 && intervalList2){
@@ -885,13 +888,13 @@ struct listOfIntervalListsStruct* intersectIntervalSet(struct listOfIntervalList
 			intervalSet1 = intervalSet1->nextList;
 		}
 		#ifdef VERBOSE_LOW
-		fprintf(logFile,"[intersectIntervalSet] ENDED\n");fflush(logFile);
+		fprintf(getLogFilePtr(),"[intersectIntervalSet] ENDED\n");fflush(getLogFilePtr());
 		#endif
 		
 		return tempIntervalSet;
 	}
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[intersectIntervalSet] ENDED with NULL\n");fflush(logFile);
+	fprintf(getLogFilePtr(),"[intersectIntervalSet] ENDED with NULL\n");fflush(getLogFilePtr());
 	#endif
 	
 	return NULL;
@@ -939,7 +942,7 @@ struct truthAssignmentListStruct* getLastListOfTruthAssignmentList(struct truthA
 
 struct truthAssignmentListStruct* duplicateTruthAssignmentList(struct truthAssignmentListStruct* root){
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[duplicateTruthAssignmentList] STARTED\n");
+	fprintf(getLogFilePtr(),"[duplicateTruthAssignmentList] STARTED\n");
 	#endif
 	if(root){
 		struct truthAssignmentListStruct* newRoot = NULL;
@@ -950,37 +953,37 @@ struct truthAssignmentListStruct* duplicateTruthAssignmentList(struct truthAssig
 			root = root->next;
 		}
 		#ifdef VERBOSE_LOW
-		fprintf(logFile,"[duplicateTruthAssignmentList] ENDED\n");
+		fprintf(getLogFilePtr(),"[duplicateTruthAssignmentList] ENDED\n");
 		#endif
 		return newRoot;
 	}
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[duplicateTruthAssignmentList] ENDED\n");
+	fprintf(getLogFilePtr(),"[duplicateTruthAssignmentList] ENDED\n");
 	#endif
 	return NULL;
 }
 
 int predicateInList(struct truthAssignmentListStruct* root, int predicate){
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[predicateInList] STARTED\n");
+	fprintf(getLogFilePtr(),"[predicateInList] STARTED\n");
 	#endif
 	if(root){
 		while(root){
 			if(root->asgmt->predicate_id == predicate){
 				#ifdef VERBOSE_LOW
-				fprintf(logFile,"[predicateInList] ENDED - IS in list\n");
+				fprintf(getLogFilePtr(),"[predicateInList] ENDED - IS in list\n");
 				#endif
 				return 1;
 			}
 			root = root->next;
 		}
 		#ifdef VERBOSE_LOW
-		fprintf(logFile,"[predicateInList] ENDED - NOT in list\n");
+		fprintf(getLogFilePtr(),"[predicateInList] ENDED - NOT in list\n");
 		#endif
 		return 0;
 	}
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[predicateInList] ENDED\n");
+	fprintf(getLogFilePtr(),"[predicateInList] ENDED\n");
 	#endif
 	return 0;
 }
@@ -1000,7 +1003,7 @@ void printTruthListToFile(struct truthAssignmentListStruct* root){
 
 void printTruthListToFilePtr(struct truthAssignmentListStruct* root, FILE* fp){
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[printTruthListToFilePtr] STARTED\n");
+	fprintf(getLogFilePtr(),"[printTruthListToFilePtr] STARTED\n");
 	#endif
 	if(fp){
 		if(root){
@@ -1036,10 +1039,10 @@ void printTruthListToFilePtr(struct truthAssignmentListStruct* root, FILE* fp){
 			//fprintf(fp,"\n------------------------------------------\n");
 			return;
 		}
-		fprintf(fp,"Truth List Is Empty\n");fflush(logFile);
+		fprintf(fp,"Truth List Is Empty\n");fflush(getLogFilePtr());
 	}
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[printTruthListToFilePtr] ENDED\n");
+	fprintf(getLogFilePtr(),"[printTruthListToFilePtr] ENDED\n");
 	#endif
 	
 }
@@ -1220,7 +1223,7 @@ void printSequencePositionsToFile(struct treeNode* root, FILE *fp){
  */
 void sortTruthAssignmentList(struct truthAssignmentListStruct** root){
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[SORT] START\n");fflush(logFile);
+	fprintf(getLogFilePtr(),"[SORT] START\n");fflush(getLogFilePtr());
 	#endif
 	if(*root){
 		struct truthAssignmentListStruct *a, *b;
@@ -1229,13 +1232,13 @@ void sortTruthAssignmentList(struct truthAssignmentListStruct** root){
                 //Size of list is 0 or 1
 		if(head == NULL || head->next == NULL){
 			#ifdef VERBOSE_LOW
-			fprintf(logFile,"[SORT] 1-4 END\n");fflush(logFile);
+			fprintf(getLogFilePtr(),"[SORT] 1-4 END\n");fflush(getLogFilePtr());
 			#endif
 			return;
 		}
 		
 		#ifdef VERBOSE_LOW
-		fprintf(logFile,"[SORT] HERE 1\n");fflush(logFile);	
+		fprintf(getLogFilePtr(),"[SORT] HERE 1\n");fflush(getLogFilePtr());	
 		#endif
 		
 		
@@ -1244,7 +1247,7 @@ void sortTruthAssignmentList(struct truthAssignmentListStruct** root){
 		listSplit(head,&b);
 		
 		#ifdef VERBOSE_LOW
-		fprintf(logFile,"[SORT] HERE 2\n");fflush(logFile);
+		fprintf(getLogFilePtr(),"[SORT] HERE 2\n");fflush(getLogFilePtr());
 		#endif
 		
 		//Sort each list recursively
@@ -1252,17 +1255,17 @@ void sortTruthAssignmentList(struct truthAssignmentListStruct** root){
 		sortTruthAssignmentList(&b);
 		
 		#ifdef VERBOSE_LOW
-		fprintf(logFile,"[SORT] HERE 3\n");fflush(logFile);
+		fprintf(getLogFilePtr(),"[SORT] HERE 3\n");fflush(getLogFilePtr());
 		#endif
 		
 		//Merge a and b
                 *root = auxMergeTruthAssignmentList(a,b);
 		#ifdef VERBOSE_LOW
-		fprintf(logFile,"[SORT] HERE 4\n");fflush(logFile);
+		fprintf(getLogFilePtr(),"[SORT] HERE 4\n");fflush(getLogFilePtr());
 		#endif
 	}
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[SORT] END\n");fflush(logFile);
+	fprintf(getLogFilePtr(),"[SORT] END\n");fflush(getLogFilePtr());
 	#endif
 }
 
@@ -1272,19 +1275,19 @@ void sortTruthAssignmentList(struct truthAssignmentListStruct** root){
 struct truthAssignmentListStruct* auxMergeTruthAssignmentList(struct truthAssignmentListStruct* a, struct truthAssignmentListStruct* b){
 	
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[AUX] START\n");
+	fprintf(getLogFilePtr(),"[AUX] START\n");
 	#endif
         struct truthAssignmentListStruct *result = NULL;
 	
 	if(a==NULL){
 		#ifdef VERBOSE_LOW 
-		fprintf(logFile,"[AUX] END\n"); 
+		fprintf(getLogFilePtr(),"[AUX] END\n"); 
 		#endif 
 		return(b);
 	}
 	if(b==NULL){
 		#ifdef VERBOSE_LOW
-		fprintf(logFile,"[AUX] END\n"); 
+		fprintf(getLogFilePtr(),"[AUX] END\n"); 
 		#endif
 		return(a);
 	}
@@ -1299,7 +1302,7 @@ struct truthAssignmentListStruct* auxMergeTruthAssignmentList(struct truthAssign
 		result->next = auxMergeTruthAssignmentList(a,b->next);
 	}
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[AUX] END\n");
+	fprintf(getLogFilePtr(),"[AUX] END\n");
 	#endif
 	return(result);
 }
@@ -1310,10 +1313,10 @@ struct truthAssignmentListStruct* auxMergeTruthAssignmentList(struct truthAssign
  */
 void listSplit(struct truthAssignmentListStruct* root, struct truthAssignmentListStruct** mid){
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[LIST SPLIT] START\n"); fflush(logFile);
-        fprintf(logFile,"**************************** LIST ***************************\n"); 
-        printTruthListToFilePtr(root,logFile);
-        fprintf(logFile,"**************************************************************\n");
+	fprintf(getLogFilePtr(),"[LIST SPLIT] START\n"); fflush(getLogFilePtr());
+        fprintf(getLogFilePtr(),"**************************** LIST ***************************\n"); 
+        printTruthListToFilePtr(root,getLogFilePtr());
+        fprintf(getLogFilePtr(),"**************************************************************\n");
 	#endif
         
 	struct truthAssignmentListStruct *slow, *fast;
@@ -1336,41 +1339,41 @@ void listSplit(struct truthAssignmentListStruct* root, struct truthAssignmentLis
 		slow->next = NULL; //This puts an end to the first half of the list.
 	}
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[LIST SPLIT] END\n");
-        fflush(logFile);
+	fprintf(getLogFilePtr(),"[LIST SPLIT] END\n");
+        fflush(getLogFilePtr());
 	#endif
 }
 
 void purgeTruthList(struct truthAssignmentListStruct* truthList){
 	if(truthList){
-		fprintf(logFile,"ASSIGNMENT TO BE FREE\n");fflush(logFile);
+		fprintf(getLogFilePtr(),"ASSIGNMENT TO BE FREE\n");fflush(getLogFilePtr());
 		free(truthList->asgmt);
 		truthList->asgmt=NULL;
 		
-		fprintf(logFile,"NEXT OF TRUTH LIST TO BE PURGED\n");fflush(logFile);
+		fprintf(getLogFilePtr(),"NEXT OF TRUTH LIST TO BE PURGED\n");fflush(getLogFilePtr());
 		purgeTruthList(truthList->next);
 		
-		fprintf(logFile,"NEXT OF TRUTH LIST TO BE FREE\n");fflush(logFile);
+		fprintf(getLogFilePtr(),"NEXT OF TRUTH LIST TO BE FREE\n");fflush(getLogFilePtr());
 		free(truthList->next);
 		truthList->next=NULL;
 		
-		fprintf(logFile,"DONE WITH NODE [%p]\n",truthList);fflush(logFile);
+		fprintf(getLogFilePtr(),"DONE WITH NODE [%p]\n",truthList);fflush(getLogFilePtr());
 	}
 }
 
 void purgeTruthListForTreeNode(struct treeNode* root){
 	if(root){
-		fprintf(logFile,"LEFT TO BE FREE\n");fflush(logFile);
+		fprintf(getLogFilePtr(),"LEFT TO BE FREE\n");fflush(getLogFilePtr());
 		purgeTruthListForTreeNode(root->left);
 		
-		fprintf(logFile,"RIGHT TO BE FREE\n");fflush(logFile);
+		fprintf(getLogFilePtr(),"RIGHT TO BE FREE\n");fflush(getLogFilePtr());
 		purgeTruthListForTreeNode(root->right);
 		
-		fprintf(logFile,"TRUTH LIST TO BE FREE\n");fflush(logFile);
+		fprintf(getLogFilePtr(),"TRUTH LIST TO BE FREE\n");fflush(getLogFilePtr());
 		purgeTruthList(root->truthList);
 		root->truthList = NULL;
 		
-		fprintf(logFile,"DONE WITH NODE [%p]\n",root);fflush(logFile);
+		fprintf(getLogFilePtr(),"DONE WITH NODE [%p]\n",root);fflush(getLogFilePtr());
 	}
 }
 
@@ -1387,17 +1390,17 @@ struct indexCouple* createIndexCouple(int target, int predicate){
 
 void addToIndexCoupleList(struct indexCouple** root, struct indexCouple* listItem){
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[addToIndexCoupleList] STARTED\n");
+	fprintf(getLogFilePtr(),"[addToIndexCoupleList] STARTED\n");
 	#endif
 	if(*root){
 		struct indexCouple* iterator = getLastOfIndexCoupleList(*root);
 		iterator->next = listItem;
 		#ifdef VERBOSE_LOW
-		fprintf(logFile,"[addToIndexCoupleList] ENDED - added listItem to the root list\n");fflush(logFile);
+		fprintf(getLogFilePtr(),"[addToIndexCoupleList] ENDED - added listItem to the root list\n");fflush(getLogFilePtr());
 		#endif
 	} else {
 		#ifdef VERBOSE_LOW
-		fprintf(logFile,"[addToIndexCoupleList] ENDED - root was NULL\n");fflush(logFile);
+		fprintf(getLogFilePtr(),"[addToIndexCoupleList] ENDED - root was NULL\n");fflush(getLogFilePtr());
 		#endif
 		*root = listItem;
 	}	
@@ -1547,8 +1550,8 @@ double minFloat(double val1, double val2){
 
 double lengthOfIntervalList(struct intervalListStruct* list){
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"\n[lengthOfIntervalList] STARTED\n");
-	fflush(logFile);
+	fprintf(getLogFilePtr(),"\n[lengthOfIntervalList] STARTED\n");
+	fflush(getLogFilePtr());
 	#endif
 	if(list){
 		double length = 0.0;
@@ -1557,14 +1560,14 @@ double lengthOfIntervalList(struct intervalListStruct* list){
 			list = list->next;
 		}
 		#ifdef VERBOSE_LOW
-		fprintf(logFile,"\n[lengthOfIntervalList] ENDED\n");
-		fflush(logFile);
+		fprintf(getLogFilePtr(),"\n[lengthOfIntervalList] ENDED\n");
+		fflush(getLogFilePtr());
 		#endif
 		return length;
 	}
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"\n[lengthOfIntervalList] ENDED with NULL LIST returning ZERO\n");
-	fflush(logFile);
+	fprintf(getLogFilePtr(),"\n[lengthOfIntervalList] ENDED with NULL LIST returning ZERO\n");
+	fflush(getLogFilePtr());
 	#endif
 	return 0.0;
 }
@@ -1592,7 +1595,7 @@ int countLists(struct listOfIntervalListsStruct* list){
 
 double computeMean(struct listOfIntervalListsStruct** localIntervalSets, int target, double traceLength, struct intervalListStruct** influenceList){
 	#ifdef SUP_DEBUG
-	fprintf(logFile,"[computeMean] STARTED target = %d\n",target);
+	fprintf(getLogFilePtr(),"[computeMean] STARTED target = %d\n",target);
 	#endif
 	
 	if(localIntervalSets){
@@ -1606,20 +1609,20 @@ double computeMean(struct listOfIntervalListsStruct** localIntervalSets, int tar
 		for(i=0;i<traceCount;i++){
 			traceLength += lengthOfIntervalList(influenceList[i]);
 			
-			fprintf(logFile,"INFLUENCE LIST:");
-			printIntervalListToFilePtr(influenceList[i],logFile);fprintf(logFile,"\n");
+			fprintf(getLogFilePtr(),"INFLUENCE LIST:");
+			printIntervalListToFilePtr(influenceList[i],getLogFilePtr());fprintf(getLogFilePtr(),"\n");
 			
-			fprintf(logFile,"PREDICATE TRUTH INTERVAL LIST:");
-			printListOfIntervalListsToFilePtr(listOfIntervalSets[i],logFile);fprintf(logFile,"\n");
+			fprintf(getLogFilePtr(),"PREDICATE TRUTH INTERVAL LIST:");
+			printListOfIntervalListsToFilePtr(listOfIntervalSets[i],getLogFilePtr());fprintf(getLogFilePtr(),"\n");
 			
 			//printIntervalListToFilePtr(influenceList[i],stdout);
 			targetList = getListAtPosition(listOfIntervalSets[i],target);
 			
-			fprintf(logFile,"TARGET INTERVAL LIST:");
-			printIntervalListToFilePtr(targetList->trueList,logFile);fprintf(logFile,"\n");
-			printIntervalListToFilePtr(targetList->falseList,logFile);fprintf(logFile,"\n");
+			fprintf(getLogFilePtr(),"TARGET INTERVAL LIST:");
+			printIntervalListToFilePtr(targetList->trueList,getLogFilePtr());fprintf(getLogFilePtr(),"\n");
+			printIntervalListToFilePtr(targetList->falseList,getLogFilePtr());fprintf(getLogFilePtr(),"\n");
 			
-			fprintf(logFile,"TARGET TRUE LIST:");
+			fprintf(getLogFilePtr(),"TARGET TRUE LIST:");
 			trueList = targetList->trueList;
 			
 			//if(traceLength>0 && influenceList[i]==NULL){
@@ -1636,11 +1639,11 @@ double computeMean(struct listOfIntervalListsStruct** localIntervalSets, int tar
 			targetLength += lengthOfIntervalList(trueList);
 			
 			#ifdef SUP_DEBUG
-			fprintf(logFile,"[computeMean] Target-%d's Truth Lists for Trace [%d]\n",target,i);
-			fprintf(logFile,"Target List [%p]\n",targetList);
-			printIntervalListToFilePtr(targetList->trueList,logFile);fprintf(logFile,"\n");
-			fprintf(logFile,"[computeMean] Length of End Match for Trace[%d] = [%f]\n",i,lengthOfIntervalList(influenceList[i]));
-			fprintf(logFile,"[computeMean] Length of Target[True] Under Constraints = %lf\n",targetLength);
+			fprintf(getLogFilePtr(),"[computeMean] Target-%d's Truth Lists for Trace [%d]\n",target,i);
+			fprintf(getLogFilePtr(),"Target List [%p]\n",targetList);
+			printIntervalListToFilePtr(targetList->trueList,getLogFilePtr());fprintf(getLogFilePtr(),"\n");
+			fprintf(getLogFilePtr(),"[computeMean] Length of End Match for Trace[%d] = [%f]\n",i,lengthOfIntervalList(influenceList[i]));
+			fprintf(getLogFilePtr(),"[computeMean] Length of Target[True] Under Constraints = %lf\n",targetLength);
 			#endif
 			
 			if(trueList!=NULL){
@@ -1652,22 +1655,22 @@ double computeMean(struct listOfIntervalListsStruct** localIntervalSets, int tar
 			
 			meanVal = mean(targetLength,traceLength);
 			#ifdef SUP_DEBUG
-			fprintf(logFile,"[computeMean] Returning Mean [%lf] for Target [%d]\n",meanVal,target);
+			fprintf(getLogFilePtr(),"[computeMean] Returning Mean [%lf] for Target [%d]\n",meanVal,target);
 			#endif
 			if(meanVal>1.0 || meanVal<0.0){
-				fprintf(logFile,"[computeMean] [ERROR] Mean = [%lf], targetLength = [%lf], traceLength = [%lf]\n",meanVal,targetLength,traceLength);
+				fprintf(getLogFilePtr(),"[computeMean] [ERROR] Mean = [%lf], targetLength = [%lf], traceLength = [%lf]\n",meanVal,targetLength,traceLength);
 			}
 			return meanVal;
 		}
 		#ifdef SUP_DEBUG
-		fprintf(logFile,"[computeMean] Error\n");
-		fprintf(logFile,"[computeMean] ENDED\n");
+		fprintf(getLogFilePtr(),"[computeMean] Error\n");
+		fprintf(getLogFilePtr(),"[computeMean] ENDED\n");
 		#endif
 		
 		return 0.0;
 	}
 	#ifdef SUP_DEBUG
-	fprintf(logFile,"[computeMean] ENDED with NULL\n");
+	fprintf(getLogFilePtr(),"[computeMean] ENDED with NULL\n");
 	#endif
 	
 	return 0.0;
@@ -1680,7 +1683,7 @@ double computeMean(struct listOfIntervalListsStruct** localIntervalSets, int tar
  */
 double computeFalseMean(struct listOfIntervalListsStruct** localIntervalSet, int target, double traceLength, struct intervalListStruct** influenceList){
         #ifdef SUP_DEBUG
-	fprintf(logFile,"[computeFalseMean] STARTED target = %d\n",target);
+	fprintf(getLogFilePtr(),"[computeFalseMean] STARTED target = %d\n",target);
 	#endif
         
 	if(localIntervalSet){
@@ -1704,33 +1707,33 @@ double computeFalseMean(struct listOfIntervalListsStruct** localIntervalSet, int
 			}
 			
 			#ifdef SUP_DEBUG
-			fprintf(logFile,"[computeFalseMean] Influence List = ");
-			printIntervalListToFilePtr(influenceList[i],logFile);fprintf(logFile,"\n");
-			fprintf(logFile,"[computeFalseMean] Trace Length = %lf [%lf]\n",traceLength,lengthOfIntervalList(influenceList[i]));
-			fprintf(logFile,"[computeFalseMean] Target    List = ");
-			printIntervalListToFilePtr(falseList,logFile);fprintf(logFile,"\n");
-			fprintf(logFile,"[computeFalseMean] Length of Target[False] Under Constraints = %lf\n",targetLength);
+			fprintf(getLogFilePtr(),"[computeFalseMean] Influence List = ");
+			printIntervalListToFilePtr(influenceList[i],getLogFilePtr());fprintf(getLogFilePtr(),"\n");
+			fprintf(getLogFilePtr(),"[computeFalseMean] Trace Length = %lf [%lf]\n",traceLength,lengthOfIntervalList(influenceList[i]));
+			fprintf(getLogFilePtr(),"[computeFalseMean] Target    List = ");
+			printIntervalListToFilePtr(falseList,getLogFilePtr());fprintf(getLogFilePtr(),"\n");
+			fprintf(getLogFilePtr(),"[computeFalseMean] Length of Target[False] Under Constraints = %lf\n",targetLength);
 			#endif
 		}
                 if(!emptyInfluenceFlag){
 			meanVal = mean(targetLength,traceLength);
 			#ifdef SUP_DEBUG
-			fprintf(logFile,"[computeFalseMean] Returning Mean [%lf] for Target [%d]\n",meanVal,target);
+			fprintf(getLogFilePtr(),"[computeFalseMean] Returning Mean [%lf] for Target [%d]\n",meanVal,target);
 			#endif
                         if(meanVal>1.0 || meanVal<0.0){
-				fprintf(logFile,"[computeFalseMean] [ERROR] Mean = [%lf], targetLength = [%lf], traceLength = [%lf]\n",meanVal,targetLength,traceLength);
+				fprintf(getLogFilePtr(),"[computeFalseMean] [ERROR] Mean = [%lf], targetLength = [%lf], traceLength = [%lf]\n",meanVal,targetLength,traceLength);
 			}
                         return meanVal;
                 }
                 #ifdef SUP_DEBUG
-                fprintf(logFile,"[computeFalseMean] Error\n");
-		fprintf(logFile,"[computeFalseMean] ENDED\n");
+                fprintf(getLogFilePtr(),"[computeFalseMean] Error\n");
+		fprintf(getLogFilePtr(),"[computeFalseMean] ENDED\n");
                 #endif
                 
                 return 0.0;
         }
         #ifdef SUP_DEBUG
-        fprintf(logFile,"[computeFalseMean] ENDED with NULL\n");
+        fprintf(getLogFilePtr(),"[computeFalseMean] ENDED with NULL\n");
         #endif
         
         return 0.0;
@@ -1739,7 +1742,7 @@ double computeFalseMean(struct listOfIntervalListsStruct** localIntervalSet, int
 struct intervalListStruct* computeComplimentList(struct intervalListStruct* list, struct intervalListStruct* universe, double traceLength){
 	if(universe){
 		#ifdef VERBOSE_LOW
-		fprintf(logFile,"[computeComplimentList] STARTED\n");
+		fprintf(getLogFilePtr(),"[computeComplimentList] STARTED\n");
 		#endif
 		struct intervalListStruct* trueList = list;
 		struct intervalListStruct* falseList = NULL;
@@ -1762,7 +1765,7 @@ struct intervalListStruct* computeComplimentList(struct intervalListStruct* list
 		}
 		falseList = intersectIntervalList(falseList,universe);
 		#ifdef VERBOSE_LOW
-		fprintf(logFile,"[computeComplimentList] Done\n");
+		fprintf(getLogFilePtr(),"[computeComplimentList] Done\n");
 		#endif
 		return falseList;
 	}
@@ -1770,12 +1773,12 @@ struct intervalListStruct* computeComplimentList(struct intervalListStruct* list
 
 void computeFalseLists(struct listOfIntervalListsStruct* intervalLists, double traceLength){
 	#ifdef VERBOSE_LOW
-        fprintf(logFile,"[computeFalseLists] STARTED\n");
+        fprintf(getLogFilePtr(),"[computeFalseLists] STARTED\n");
         #endif
         if(intervalLists){
 		while(intervalLists){
 			#ifdef VERBOSE_LOW
-                        fprintf(logFile,"[computeFalseLists] T [%p]\n",intervalLists->trueList);
+                        fprintf(getLogFilePtr(),"[computeFalseLists] T [%p]\n",intervalLists->trueList);
                         #endif
 			struct intervalListStruct* trueList = intervalLists->trueList;
 			
@@ -1798,13 +1801,13 @@ void computeFalseLists(struct listOfIntervalListsStruct* intervalLists, double t
                         }
 			
 			#ifdef VERBOSE_LOW
-                        fprintf(logFile,"[computeFalseLists] Moving on\n");
+                        fprintf(getLogFilePtr(),"[computeFalseLists] Moving on\n");
                         #endif
 			intervalLists = intervalLists->nextList;
 		}
 	}
 	#ifdef VERBOSE_LOW
-        fprintf(logFile,"[computeFalseLists] ENDED\n");
+        fprintf(getLogFilePtr(),"[computeFalseLists] ENDED\n");
         #endif
 }
 
@@ -1813,19 +1816,19 @@ struct listOfIntervalListsStruct* getListAtPosition(struct listOfIntervalListsSt
 		struct listOfIntervalListsStruct* iterator =  intervalLists;
 		int i = 1;
 		while(i < target){
-			fprintf(logFile,"\n[%d]\nFALSE: ",i);
-			printIntervalListToFilePtr(iterator->falseList,logFile);fprintf(logFile,"\nTRUE: ");
-			printIntervalListToFilePtr(iterator->trueList,logFile);
+			fprintf(getLogFilePtr(),"\n[%d]\nFALSE: ",i);
+			printIntervalListToFilePtr(iterator->falseList,getLogFilePtr());fprintf(getLogFilePtr(),"\nTRUE: ");
+			printIntervalListToFilePtr(iterator->trueList,getLogFilePtr());
 			
 			iterator = iterator->nextList;
 			i++;
 		}
 		if(superFlag){
-			fprintf(logFile,"\nIn GetList\n");
-			fprintf(logFile,"\n[%d]\nFALSE: ",i);
-			printIntervalListToFilePtr(iterator->falseList,logFile);
-			fprintf(logFile,"\nTRUE: ");
-			printIntervalListToFilePtr(iterator->trueList,logFile);
+			fprintf(getLogFilePtr(),"\nIn GetList\n");
+			fprintf(getLogFilePtr(),"\n[%d]\nFALSE: ",i);
+			printIntervalListToFilePtr(iterator->falseList,getLogFilePtr());
+			fprintf(getLogFilePtr(),"\nTRUE: ");
+			printIntervalListToFilePtr(iterator->trueList,getLogFilePtr());
 			
 		}
 		return iterator;
@@ -1859,7 +1862,7 @@ struct listOfIntervalListsStruct** getListsAtPosition(struct listOfIntervalLists
 
 double computeTrueEntropy(struct listOfIntervalListsStruct** target, struct intervalListStruct** endMatchList){
 	#ifdef SUP_DEBUG
-	fprintf(logFile,"[computeTrueEntropy] STARTED\n");
+	fprintf(getLogFilePtr(),"[computeTrueEntropy] STARTED\n");
 	#endif
 	
 	if(endMatchList){
@@ -1874,28 +1877,28 @@ double computeTrueEntropy(struct listOfIntervalListsStruct** target, struct inte
 		}
 		
 		#ifdef SUP_DEBUG
-		fprintf(logFile,"[computeTrueEntropy] Length of Antecedent End Match = %lf\n",lengthEM);
-		fprintf(logFile,"[computeTrueEntropy] Length of EM Intersection with Target(True) = %lf\n",lengthTargetTrueEM);		
+		fprintf(getLogFilePtr(),"[computeTrueEntropy] Length of Antecedent End Match = %lf\n",lengthEM);
+		fprintf(getLogFilePtr(),"[computeTrueEntropy] Length of EM Intersection with Target(True) = %lf\n",lengthTargetTrueEM);		
 		#endif
 		
 		double pTrue = lengthEM==0?0.0:lengthTargetTrueEM/lengthEM;
 		
 		#ifdef SUP_DEBUG
-		fprintf(logFile,"[computeTrueEntropy] pTrue = %lf\n",pTrue);
+		fprintf(getLogFilePtr(),"[computeTrueEntropy] pTrue = %lf\n",pTrue);
 		#endif
 		
 		double H = pTrue*(pTrue==0.0?0.0:log2(pTrue));
 		
 		#ifdef SUP_DEBUG
-		fprintf(logFile,"[computeTrueEntropy] H = %lf\n\n",(-1.0)*H);
-		fprintf(logFile,"[computeTrueEntropy] ENDED normally\n");
+		fprintf(getLogFilePtr(),"[computeTrueEntropy] H = %lf\n\n",(-1.0)*H);
+		fprintf(getLogFilePtr(),"[computeTrueEntropy] ENDED normally\n");
 		#endif
 		
 		return (-1.0)*H;
 		
 	} else {
 		#ifdef SUP_DEBUG
-		fprintf(logFile,"[computeTrueEntropy] ENDED with NULL\n");
+		fprintf(getLogFilePtr(),"[computeTrueEntropy] ENDED with NULL\n");
 		#endif
 		return 0.0;
 	}
@@ -1903,7 +1906,7 @@ double computeTrueEntropy(struct listOfIntervalListsStruct** target, struct inte
 
 double computeFalseEntropy(struct listOfIntervalListsStruct** target, struct intervalListStruct** endMatchList){
 	#ifdef SUP_DEBUG
-	fprintf(logFile,"[computeFalseEntropy] STARTED\n");
+	fprintf(getLogFilePtr(),"[computeFalseEntropy] STARTED\n");
 	#endif
 	if(endMatchList){
 		int i;
@@ -1917,29 +1920,29 @@ double computeFalseEntropy(struct listOfIntervalListsStruct** target, struct int
 		}
 		
 		#ifdef SUP_DEBUG
-		fprintf(logFile,"[computeFalseEntropy] Length of Antecedent End Match = %lf\n",lengthEM);
-		fprintf(logFile,"[computeFalseEntropy] Length of EM Intersection with Target(False) = %lf\n",lengthTargetFalseEM);		
+		fprintf(getLogFilePtr(),"[computeFalseEntropy] Length of Antecedent End Match = %lf\n",lengthEM);
+		fprintf(getLogFilePtr(),"[computeFalseEntropy] Length of EM Intersection with Target(False) = %lf\n",lengthTargetFalseEM);		
 		#endif
 		
 		double pFalse = lengthEM==0?0.0:lengthTargetFalseEM/lengthEM;
 		
 		#ifdef SUP_DEBUG
-		fprintf(logFile,"[computeFalseEntropy] pFalse = %lf\n",pFalse);
+		fprintf(getLogFilePtr(),"[computeFalseEntropy] pFalse = %lf\n",pFalse);
 		#endif
 		
 		
 		double H = pFalse*(pFalse==0.0?0.0:log2(pFalse));
 		
 		#ifdef SUP_DEBUG
-		fprintf(logFile,"[computeFalseEntropy] H = %lf\n\n",(-1.0)*H);
-		fprintf(logFile,"[computeFalseEntropy] ENDED normally\n");
+		fprintf(getLogFilePtr(),"[computeFalseEntropy] H = %lf\n\n",(-1.0)*H);
+		fprintf(getLogFilePtr(),"[computeFalseEntropy] ENDED normally\n");
 		#endif
 		
 		return (-1.0)*H;
 		
 	} else {
 		#ifdef SUP_DEBUG
-		fprintf(logFile,"[computeFalseEntropy] ENDED with NULL\n");
+		fprintf(getLogFilePtr(),"[computeFalseEntropy] ENDED with NULL\n");
 		#endif
 		return 0.0;
 	}
@@ -1960,21 +1963,21 @@ double computeOverlapEntropy(struct listOfIntervalListsStruct** target, struct i
 		}
 		
 		#ifdef SUP_DEBUG
-		fprintf(logFile,"[computeOverlapEntropy] Length of Antecedent End Match = %lf\n",lengthEM);
-		fprintf(logFile,"[computeOverlapEntropy] Length of EM Intersection with Target(True & False) = %lf\n",lengthOverlapTargetEM);		
+		fprintf(getLogFilePtr(),"[computeOverlapEntropy] Length of Antecedent End Match = %lf\n",lengthEM);
+		fprintf(getLogFilePtr(),"[computeOverlapEntropy] Length of EM Intersection with Target(True & False) = %lf\n",lengthOverlapTargetEM);		
 		#endif
 		
 		double pOverlap = lengthEM==0?0.0:lengthOverlapTargetEM/lengthEM;
 		
 		#ifdef SUP_DEBUG
-		fprintf(logFile,"[computeOverlapEntropy] pOverlap = %lf\n",pOverlap);
+		fprintf(getLogFilePtr(),"[computeOverlapEntropy] pOverlap = %lf\n",pOverlap);
 		#endif
 		
 		
 		double H = (pOverlap==0.0?0.0:pOverlap*log2(pOverlap));
 		
 		#ifdef SUP_DEBUG
-		fprintf(logFile,"[computeOverlapEntropy] H = %lf\n\n",(-1.0)*H);
+		fprintf(getLogFilePtr(),"[computeOverlapEntropy] H = %lf\n\n",(-1.0)*H);
 		#endif
 		
 		return (-1.0)*H;
@@ -2011,7 +2014,7 @@ double computeEntropy(struct listOfIntervalListsStruct** target, struct interval
 		}
 		
 		#ifdef SUP_DEBUG
-		fprintf(logFile,"[computeEntropy] H = %lf\n\n",H);
+		fprintf(getLogFilePtr(),"[computeEntropy] H = %lf\n\n",H);
 		#endif
 		
 		return H;
@@ -2026,7 +2029,7 @@ double computeEntropy(struct listOfIntervalListsStruct** target, struct interval
 
 double computeBinaryEntropy(struct listOfIntervalListsStruct** localIntervalSet, struct truthAssignmentListStruct* constraintList, int predicate_id, int pos, int targetPORV_id){
 	#ifdef SUP_DEBUG
-	fprintf(logFile,"[computeBinaryEntropy] STARTED\n");fflush(logFile);
+	fprintf(getLogFilePtr(),"[computeBinaryEntropy] STARTED\n");fflush(getLogFilePtr());
 	#endif
 	if(localIntervalSet){
 		//Get influence list for constraints when predicate is true
@@ -2065,22 +2068,22 @@ double computeBinaryEntropy(struct listOfIntervalListsStruct** localIntervalSet,
 		double totalLength = (posLength+negLength);
 		
 		#ifdef SUP_DEBUG
-		fprintf(logFile,"[computeBinaryEntropy] Length of Neg Influence = %lf\n",negLength);
-		fprintf(logFile,"[computeBinaryEntropy] Length of Pos Influence = %lf\n",posLength);
-		fprintf(logFile,"[computeBinaryEntropy] Length of Sum Influence = %lf\n",totalLength);
-		fflush(logFile);
+		fprintf(getLogFilePtr(),"[computeBinaryEntropy] Length of Neg Influence = %lf\n",negLength);
+		fprintf(getLogFilePtr(),"[computeBinaryEntropy] Length of Pos Influence = %lf\n",posLength);
+		fprintf(getLogFilePtr(),"[computeBinaryEntropy] Length of Sum Influence = %lf\n",totalLength);
+		fflush(getLogFilePtr());
 		#endif
 		
 		
 		#ifdef SUP_DEBUG
-		fprintf(logFile,"[computeBinaryEntropy] Computing Hpos - predidate is true\n");
-		fflush(logFile);
+		fprintf(getLogFilePtr(),"[computeBinaryEntropy] Computing Hpos - predidate is true\n");
+		fflush(getLogFilePtr());
 		#endif
 		double Hpos = computeEntropy(targetList,posContraintIntervalList);
 		
 		#ifdef SUP_DEBUG
-		fprintf(logFile,"[computeBinaryEntropy] Computing Hneg - predicate is false\n");
-		fflush(logFile);
+		fprintf(getLogFilePtr(),"[computeBinaryEntropy] Computing Hneg - predicate is false\n");
+		fflush(getLogFilePtr());
 		#endif
 		
 		double Hneg = computeEntropy(targetList,negContraintIntervalList);
@@ -2089,16 +2092,16 @@ double computeBinaryEntropy(struct listOfIntervalListsStruct** localIntervalSet,
 		double pNeg = totalLength==0?0:negLength/totalLength;
 		
 		#ifdef SUP_DEBUG
-		fprintf(logFile,"[computeBinaryEntropy] Hpos = %lf \n",Hpos);
-		fprintf(logFile,"[computeBinaryEntropy] Hneg = %lf \n",Hneg);
+		fprintf(getLogFilePtr(),"[computeBinaryEntropy] Hpos = %lf \n",Hpos);
+		fprintf(getLogFilePtr(),"[computeBinaryEntropy] Hneg = %lf \n",Hneg);
 		
-		fprintf(stdout,"[computeBinaryEntropy] Hpos = %lf \n",Hpos);
-		fprintf(stdout,"[computeBinaryEntropy] Hneg = %lf \n",Hneg);
+		//fprintf(stdout,"[computeBinaryEntropy] Hpos = %lf \n",Hpos);
+		//fprintf(stdout,"[computeBinaryEntropy] Hneg = %lf \n",Hneg);
 		
-		fprintf(logFile,"[computeBinaryEntropy] pPos = %lf \n",pPos);
-		fprintf(logFile,"[computeBinaryEntropy] pNeg = %lf \n",pNeg);
-		fprintf(logFile,"[computeBinaryEntropy] ENDED\n");
-		fflush(logFile);
+		fprintf(getLogFilePtr(),"[computeBinaryEntropy] pPos = %lf \n",pPos);
+		fprintf(getLogFilePtr(),"[computeBinaryEntropy] pNeg = %lf \n",pNeg);
+		fprintf(getLogFilePtr(),"[computeBinaryEntropy] ENDED\n");
+		fflush(getLogFilePtr());
 		#endif
 		
 		/*
@@ -2123,8 +2126,8 @@ double computeBinaryEntropy(struct listOfIntervalListsStruct** localIntervalSet,
 		}
 	}
 	#ifdef SUP_DEBUG
-	fprintf(logFile,"[computeBinaryEntropy] ENDED\n");
-	fflush(logFile);
+	fprintf(getLogFilePtr(),"[computeBinaryEntropy] ENDED\n");
+	fflush(getLogFilePtr());
 	#endif
 	return (-1.0)*FLT_MAX;
 }
@@ -2136,30 +2139,30 @@ double computeBinaryEntropy(struct listOfIntervalListsStruct** localIntervalSet,
  */
 double computeGain(struct listOfIntervalListsStruct** localIntervalSet, int predicate_id, int target, double e, int pos, int *trueFalseFlag, struct truthAssignmentListStruct* constraintList,int targetPORV_id){
 	#ifdef SUP_DEBUG
-	fprintf(logFile,"[computeGain] STARTED: Predicate [%d], Target [%d], Position [%d]\n",predicate_id,target,pos);fflush(logFile);
-	fprintf(stdout,"[computeGain] STARTED: Predicate [%d], Target [%d], Position [%d]\n",predicate_id,target,pos);fflush(stdout);
+	fprintf(getLogFilePtr(),"[computeGain] STARTED: Predicate [%d], Target [%d], Position [%d]\n",predicate_id,target,pos);fflush(getLogFilePtr());
+	//fprintf(stdout,"[computeGain] STARTED: Predicate [%d], Target [%d], Position [%d]\n",predicate_id,target,pos);fflush(stdout);
 	#endif
 	if(localIntervalSet){
 		#ifdef SUP_DEBUG
-		fprintf(logFile,"[computeGain] Constraint List:");printTruthListToFilePtr(constraintList,logFile);fprintf(logFile,"\n");fflush(logFile);
+		fprintf(getLogFilePtr(),"[computeGain] Constraint List:");printTruthListToFilePtr(constraintList,getLogFilePtr());fprintf(getLogFilePtr(),"\n");fflush(getLogFilePtr());
 		#endif
 		
 		double gain = e; 
 		double entropy = computeBinaryEntropy(localIntervalSet,constraintList,predicate_id,pos,targetPORV_id);
 		gain -= entropy;
 		#ifdef SUP_DEBUG
-			fprintf(stdout,"[computeGain] Current Error = %lf\n",e);
-			fprintf(stdout,"[computeGain] Entropy of Split [Pred %d Pos %d] = %lf\n",predicate_id,pos,entropy);
-			fprintf(stdout,"[computeGain] Gain for Predicate [%d], Target [%d], Position [%d] = %lf\n",predicate_id,target,pos,gain); fprintf(stdout,"\n\n");
-			fprintf(logFile,"[computeGain] ENDED\n");fflush(logFile);
-			fprintf(stdout,"[computeGain] ENDED\n");fflush(stdout);
+			//fprintf(stdout,"[computeGain] Current Error = %lf\n",e);
+			//fprintf(stdout,"[computeGain] Entropy of Split [Pred %d Pos %d] = %lf\n",predicate_id,pos,entropy);
+			//fprintf(stdout,"[computeGain] Gain for Predicate [%d], Target [%d], Position [%d] = %lf\n",predicate_id,target,pos,gain); fprintf(stdout,"\n\n");
+			fprintf(getLogFilePtr(),"[computeGain] ENDED\n");fflush(getLogFilePtr());
+			//fprintf(stdout,"[computeGain] ENDED\n");fflush(stdout);
 		#endif
 		
 		return gain;
 	}
 	#ifdef SUP_DEBUG
-	fprintf(logFile,"[computeGain] ENDED with NULL\n");fflush(logFile);
-	fprintf(stdout,"[computeGain] ENDED with NULL\n");fflush(stdout);
+	fprintf(getLogFilePtr(),"[computeGain] ENDED with NULL\n");fflush(getLogFilePtr());
+	//fprintf(stdout,"[computeGain] ENDED with NULL\n");fflush(stdout);
 	#endif
 	return 0.0;
 }
@@ -2169,7 +2172,7 @@ double computeGain(struct listOfIntervalListsStruct** localIntervalSet, int pred
 
 double computeCumulativeTrueEntropy(struct listOfIntervalListsStruct* localIntervalSet, struct intervalListStruct* endMatchList, int smallestBucketID, int targetPORV_id){
 	#ifdef SUP_DEBUG
-	fprintf(logFile,"[computeTrueEntropy] STARTED\n");
+	fprintf(getLogFilePtr(),"[computeTrueEntropy] STARTED\n");
 	#endif
 	
 	if(endMatchList){
@@ -2200,31 +2203,31 @@ double computeCumulativeTrueEntropy(struct listOfIntervalListsStruct* localInter
 		double lengthEM = lengthOfIntervalList(endMatchList);
 		
 			#ifdef SUP_DEBUG
-			fprintf(logFile,"[computeCumulativeTrueEntropy] Length True EM = %lf\n",lengthTrueEM);
-			fprintf(logFile,"[computeCumulativeTrueEntropy] Length EM = %lf\n",lengthEM);
+			fprintf(getLogFilePtr(),"[computeCumulativeTrueEntropy] Length True EM = %lf\n",lengthTrueEM);
+			fprintf(getLogFilePtr(),"[computeCumulativeTrueEntropy] Length EM = %lf\n",lengthEM);
 			#endif
 		
 		//smallestBucketID++;
 		//double pTrue = lengthTrueEM/(smallestBucketID * lengthEM);
 		double pTrue = lengthTrueEM/(lengthEM);
 			#ifdef SUP_DEBUG
-			fprintf(logFile,"[computeCumulativeTrueEntropy] pTrue = %lf\n",pTrue);
-			fprintf(stdout,"[computeCumulativeTrueEntropy] pTrue = %lf\n",pTrue);
+			fprintf(getLogFilePtr(),"[computeCumulativeTrueEntropy] pTrue = %lf\n",pTrue);
+			//fprintf(stdout,"[computeCumulativeTrueEntropy] pTrue = %lf\n",pTrue);
 			#endif
 		
 		
 		double H = pTrue*(pTrue==0.0?0.0:log2(pTrue));
 		
 			#ifdef SUP_DEBUG
-			fprintf(logFile,"[computeCumulativeTrueEntropy] H = %lf\n\n",(-1.0)*H);
-			fprintf(logFile,"[computeCumulativeTrueEntropy] ENDED normally\n");
+			fprintf(getLogFilePtr(),"[computeCumulativeTrueEntropy] H = %lf\n\n",(-1.0)*H);
+			fprintf(getLogFilePtr(),"[computeCumulativeTrueEntropy] ENDED normally\n");
 			#endif
 		
 		return (-1.0)*H;
 		
 	} else {
 			#ifdef SUP_DEBUG
-			fprintf(logFile,"[computeCumulativeTrueEntropy] ENDED with NULL\n");
+			fprintf(getLogFilePtr(),"[computeCumulativeTrueEntropy] ENDED with NULL\n");
 			#endif
 		return 0.0;
 	}
@@ -2232,7 +2235,7 @@ double computeCumulativeTrueEntropy(struct listOfIntervalListsStruct* localInter
 
 double computeCumulativeFalseEntropy(struct listOfIntervalListsStruct* localIntervalSet, struct intervalListStruct* endMatchList, int smallestBucketID, int targetPORV_id){
 	#ifdef SUP_DEBUG
-	fprintf(logFile,"[computeFalseEntropy] STARTED\n");
+	fprintf(getLogFilePtr(),"[computeFalseEntropy] STARTED\n");
 	#endif
 	if(endMatchList){
 		struct listOfIntervalListsStruct* targetList =  getListAtPosition(localIntervalSet,targetPORV_id);
@@ -2261,31 +2264,31 @@ double computeCumulativeFalseEntropy(struct listOfIntervalListsStruct* localInte
 		double lengthEM = lengthOfIntervalList(endMatchList);
 		
 			#ifdef SUP_DEBUG
-			fprintf(logFile,"[computeCumulativeFalseEntropy] Length False EM = %lf\n",lengthFalseEM);
-			fprintf(logFile,"[computeCumulativeFalseEntropy] Length EM = %lf\n",lengthEM);
+			fprintf(getLogFilePtr(),"[computeCumulativeFalseEntropy] Length False EM = %lf\n",lengthFalseEM);
+			fprintf(getLogFilePtr(),"[computeCumulativeFalseEntropy] Length EM = %lf\n",lengthEM);
 			#endif
 		
 		//smallestBucketID++;
 		//double pFalse = lengthFalseEM/(smallestBucketID * lengthEM);
 		double pFalse = lengthFalseEM/(lengthEM);
 			#ifdef SUP_DEBUG
-			fprintf(logFile,"[computeCumulativeFalseEntropy] pFalse = %lf\n",pFalse);
-			fprintf(stdout,"[computeCumulativeFalseEntropy] pFalse = %lf\n",pFalse);
+			fprintf(getLogFilePtr(),"[computeCumulativeFalseEntropy] pFalse = %lf\n",pFalse);
+			//fprintf(stdout,"[computeCumulativeFalseEntropy] pFalse = %lf\n",pFalse);
 			#endif
 		
 		
 		double H = pFalse*(pFalse==0.0?0.0:log2(pFalse));
 		
 			#ifdef SUP_DEBUG
-			fprintf(logFile,"[computeCumulativeFalseEntropy] H = %lf\n\n",(-1.0)*H);
-			fprintf(logFile,"[computeCumulativeFalseEntropy] ENDED normally\n");
+			fprintf(getLogFilePtr(),"[computeCumulativeFalseEntropy] H = %lf\n\n",(-1.0)*H);
+			fprintf(getLogFilePtr(),"[computeCumulativeFalseEntropy] ENDED normally\n");
 			#endif
 		
 		return (-1.0)*H;
 		
 	} else {
 			#ifdef SUP_DEBUG
-			fprintf(logFile,"[computeCumulativeFalseEntropy] ENDED with NULL\n");
+			fprintf(getLogFilePtr(),"[computeCumulativeFalseEntropy] ENDED with NULL\n");
 			#endif
 		return 0.0;
 	}
@@ -2324,8 +2327,8 @@ double computeCumulativeOverlapEntropy(struct listOfIntervalListsStruct* localIn
 		double lengthEM = lengthOfIntervalList(endMatchList);
 		
 			#ifdef SUP_DEBUG
-			fprintf(logFile,"[computeCumulativeOverlapEntropy] Length Overlap EM = %lf\n",lengthOverlapTargetEM);
-			fprintf(logFile,"[computeCumulativeOverlapEntropy] Length EM = %lf\n",lengthEM);
+			fprintf(getLogFilePtr(),"[computeCumulativeOverlapEntropy] Length Overlap EM = %lf\n",lengthOverlapTargetEM);
+			fprintf(getLogFilePtr(),"[computeCumulativeOverlapEntropy] Length EM = %lf\n",lengthEM);
 			#endif
 		
 		//smallestBucketID++;
@@ -2333,15 +2336,15 @@ double computeCumulativeOverlapEntropy(struct listOfIntervalListsStruct* localIn
 		double pOverlap = lengthOverlapTargetEM/(lengthEM);
 		
 			#ifdef SUP_DEBUG
-			fprintf(logFile,"[computeCumulativeOverlapEntropy] pOverlap = %lf\n",pOverlap);
-			fprintf(stdout,"[computeCumulativeOverlapEntropy] pOverlap = %lf\n",pOverlap);
+			fprintf(getLogFilePtr(),"[computeCumulativeOverlapEntropy] pOverlap = %lf\n",pOverlap);
+			//fprintf(stdout,"[computeCumulativeOverlapEntropy] pOverlap = %lf\n",pOverlap);
 			#endif
 		
 		
 		double H = (pOverlap==0.0?0.0:pOverlap*log2(pOverlap));
 		
 			#ifdef SUP_DEBUG
-			fprintf(logFile,"[computeCumulativeOverlapEntropy] H = %lf\n\n",(-1.0)*H);
+			fprintf(getLogFilePtr(),"[computeCumulativeOverlapEntropy] H = %lf\n\n",(-1.0)*H);
 			#endif
 		
 		return (-1.0)*H;
@@ -2372,7 +2375,7 @@ double computeCumulativeEntropy(struct listOfIntervalListsStruct* localIntervalS
 		// pTrue*(pTrue==0.0?0.0:log2(pTrue)) + pFalse*(pFalse==0.0?0.0:log2(pFalse)) - (pOverlap==0.0?0.0:pOverlap*log2(pOverlap));
 		
 		#ifdef SUP_DEBUG
-		fprintf(logFile,"[computeEntropy] H = %lf\n\n",H);
+		fprintf(getLogFilePtr(),"[computeEntropy] H = %lf\n\n",H);
 		#endif
 		
 		return H;//(-1.0)*H;
@@ -2384,26 +2387,26 @@ double computeCumulativeEntropy(struct listOfIntervalListsStruct* localIntervalS
 
 double computeCumulativeBinaryEntropy(struct listOfIntervalListsStruct* localIntervalSet, struct truthAssignmentListStruct* constraintList, int predicate_id, int pos, double* falseEntropy, double* trueEntropy,int targetPORV_id){
 	#ifdef SUP_DEBUG
-	fprintf(logFile,"[computeCumulativeBinaryEntropy] STARTED\n");fflush(logFile);
+	fprintf(getLogFilePtr(),"[computeCumulativeBinaryEntropy] STARTED\n");fflush(getLogFilePtr());
 	#endif
 	if(localIntervalSet){
-			fprintf(logFile,"numberOfPORVs = %d\n",numberOfPORVs);fflush(logFile);
+			fprintf(getLogFilePtr(),"numberOfPORVs = %d\n",numberOfPORVs);fflush(getLogFilePtr());
 		//Get influence list for constraints when predicate is true
 		struct truthAssignmentListStruct* posConstraintList = duplicateTruthAssignmentList(constraintList);
 			
-			fprintf(logFile,"[computeCumulativeBinaryEntropy] ENTROPY 1\n");fflush(logFile);
+			fprintf(getLogFilePtr(),"[computeCumulativeBinaryEntropy] ENTROPY 1\n");fflush(getLogFilePtr());
 		
 		addToTruthAssignmentList(&posConstraintList,createTruthListStruct(createTruthAssignment(predicate_id,1,pos)));
 			
-			fprintf(logFile,"[computeCumulativeBinaryEntropy] ENTROPY 2\n");fflush(logFile);
+			fprintf(getLogFilePtr(),"[computeCumulativeBinaryEntropy] ENTROPY 2\n");fflush(getLogFilePtr());
 		
 		struct intervalListStruct* posContraintIntervalList = endMatchForPrefix(posConstraintList);
 			
-			fprintf(logFile,"[computeCumulativeBinaryEntropy] ENTROPY 3\n");fflush(logFile);
+			fprintf(getLogFilePtr(),"[computeCumulativeBinaryEntropy] ENTROPY 3\n");fflush(getLogFilePtr());
 		
 			#ifdef SUP_DEBUG
-			fprintf(logFile,"[computeCumulativeBinaryEntropy] Positive Influence: ");
-			printIntervalListToFilePtr(posContraintIntervalList,logFile); fprintf(logFile,"\n");fflush(logFile);
+			fprintf(getLogFilePtr(),"[computeCumulativeBinaryEntropy] Positive Influence: ");
+			printIntervalListToFilePtr(posContraintIntervalList,getLogFilePtr()); fprintf(getLogFilePtr(),"\n");fflush(getLogFilePtr());
 			#endif		
 		
 		//Get influence list for constraints when predicate is false
@@ -2412,8 +2415,8 @@ double computeCumulativeBinaryEntropy(struct listOfIntervalListsStruct* localInt
 		struct intervalListStruct* negContraintIntervalList = endMatchForPrefix(negConstraintList);
 		
 			#ifdef SUP_DEBUG
-			fprintf(logFile,"[computeCumulativeBinaryEntropy] NegativeInfluence: ");
-			printIntervalListToFilePtr(negContraintIntervalList,logFile); fprintf(logFile,"\n");fflush(logFile);
+			fprintf(getLogFilePtr(),"[computeCumulativeBinaryEntropy] NegativeInfluence: ");
+			printIntervalListToFilePtr(negContraintIntervalList,getLogFilePtr()); fprintf(getLogFilePtr(),"\n");fflush(getLogFilePtr());
 			#endif
 			
 		int smallestBucketID = getSmallestBucketID(posConstraintList);
@@ -2424,19 +2427,19 @@ double computeCumulativeBinaryEntropy(struct listOfIntervalListsStruct* localInt
 		double totalLength = (posLength+negLength);
 		
 			#ifdef SUP_DEBUG
-			fprintf(logFile,"[computeCumulativeBinaryEntropy] Length of Neg Influence = %lf\n",negLength);
-			fprintf(logFile,"[computeCumulativeBinaryEntropy] Length of Pos Influence = %lf\n",posLength);
-			fprintf(logFile,"[computeCumulativeBinaryEntropy] Length of Sum Influence = %lf\n",totalLength);
-			fprintf(logFile,"[computeCumulativeBinaryEntropy] Computing Hpos - predidate is true\n");
-			fflush(logFile);
+			fprintf(getLogFilePtr(),"[computeCumulativeBinaryEntropy] Length of Neg Influence = %lf\n",negLength);
+			fprintf(getLogFilePtr(),"[computeCumulativeBinaryEntropy] Length of Pos Influence = %lf\n",posLength);
+			fprintf(getLogFilePtr(),"[computeCumulativeBinaryEntropy] Length of Sum Influence = %lf\n",totalLength);
+			fprintf(getLogFilePtr(),"[computeCumulativeBinaryEntropy] Computing Hpos - predidate is true\n");
+			fflush(getLogFilePtr());
 			#endif
 		
 		double Hpos = computeCumulativeEntropy(localIntervalSet,posContraintIntervalList,smallestBucketID,targetPORV_id);
 		*trueEntropy = Hpos;
 		
 			#ifdef SUP_DEBUG
-			fprintf(logFile,"[computeCumulativeBinaryEntropy] Computing Hneg - predicate is false\n");
-			fflush(logFile);
+			fprintf(getLogFilePtr(),"[computeCumulativeBinaryEntropy] Computing Hneg - predicate is false\n");
+			fflush(getLogFilePtr());
 			#endif
 		
 		double Hneg = computeCumulativeEntropy(localIntervalSet,negContraintIntervalList,smallestBucketID,targetPORV_id);
@@ -2446,12 +2449,12 @@ double computeCumulativeBinaryEntropy(struct listOfIntervalListsStruct* localInt
 		double pNeg = negLength/totalLength;
 		
 			#ifdef SUP_DEBUG
-			fprintf(logFile,"[computeCumulativeBinaryEntropy] Hpos = %lf \n",Hpos);
-			fprintf(logFile,"[computeCumulativeBinaryEntropy] Hneg = %lf \n",Hneg);
-			fprintf(logFile,"[computeCumulativeBinaryEntropy] pPos = %lf \n",pPos);
-			fprintf(logFile,"[computeCumulativeBinaryEntropy] pNeg = %lf \n",pNeg);
-			fprintf(logFile,"[computeCumulativeBinaryEntropy] ENDED\n");
-			fflush(logFile);
+			fprintf(getLogFilePtr(),"[computeCumulativeBinaryEntropy] Hpos = %lf \n",Hpos);
+			fprintf(getLogFilePtr(),"[computeCumulativeBinaryEntropy] Hneg = %lf \n",Hneg);
+			fprintf(getLogFilePtr(),"[computeCumulativeBinaryEntropy] pPos = %lf \n",pPos);
+			fprintf(getLogFilePtr(),"[computeCumulativeBinaryEntropy] pNeg = %lf \n",pNeg);
+			fprintf(getLogFilePtr(),"[computeCumulativeBinaryEntropy] ENDED\n");
+			fflush(getLogFilePtr());
 			#endif
 			
 		return pPos*Hpos + pNeg*Hneg;
@@ -2459,8 +2462,8 @@ double computeCumulativeBinaryEntropy(struct listOfIntervalListsStruct* localInt
 	}
 	
 		#ifdef SUP_DEBUG
-		fprintf(logFile,"[computeCumulativeBinaryEntropy] ENDED\n");
-		fflush(logFile);
+		fprintf(getLogFilePtr(),"[computeCumulativeBinaryEntropy] ENDED\n");
+		fflush(getLogFilePtr());
 		#endif
 		
 	return (-1.0)*FLT_MAX;
@@ -2473,30 +2476,30 @@ double computeCumulativeBinaryEntropy(struct listOfIntervalListsStruct* localInt
  */
 double computeCumulativeGain(struct listOfIntervalListsStruct* localIntervalSet, int predicate_id, int target, double e, int pos, int *trueFalseFlag, struct truthAssignmentListStruct* constraintList, double* falseEntropy, double* trueEntropy,int targetPORV_id){
 	#ifdef SUP_DEBUG
-	fprintf(logFile,"[computeCumulativeGain] STARTED: Predicate [%d], Target [%d], Position [%d]\n",predicate_id,target,pos);fflush(logFile);
-	fprintf(stdout,"[computeCumulativeGain] STARTED: Predicate [%d], Target [%d], Position [%d]\n",predicate_id,target,pos);fflush(stdout);
+	fprintf(getLogFilePtr(),"[computeCumulativeGain] STARTED: Predicate [%d], Target [%d], Position [%d]\n",predicate_id,target,pos);fflush(getLogFilePtr());
+	//fprintf(stdout,"[computeCumulativeGain] STARTED: Predicate [%d], Target [%d], Position [%d]\n",predicate_id,target,pos);fflush(stdout);
 	#endif
 	if(localIntervalSet){
 		#ifdef SUP_DEBUG
-		fprintf(logFile,"[computeCumulativeGain] Constraint List:");printTruthListToFilePtr(constraintList,logFile);fprintf(logFile,"\n");fflush(logFile);
+		fprintf(getLogFilePtr(),"[computeCumulativeGain] Constraint List:");printTruthListToFilePtr(constraintList,getLogFilePtr());fprintf(getLogFilePtr(),"\n");fflush(getLogFilePtr());
 		#endif
 		
 		double gain = e; 
 		double entropy = computeCumulativeBinaryEntropy(localIntervalSet,constraintList,predicate_id,pos,falseEntropy,trueEntropy,targetPORV_id);
 		gain -= entropy;
 		#ifdef SUP_DEBUG
-		fprintf(stdout,"[computeCumulativeGain] Current Error = %lf\n",e);
-		fprintf(stdout,"[computeCumulativeGain] Entropy of Split [Pred %d Pos %d] = %lf\n",predicate_id,pos,e);
-		fprintf(stdout,"[computeCumulativeGain] Gain for Predicate [%d], Target [%d], Position [%d] = %lf\n",predicate_id,target,pos,gain); fprintf(stdout,"\n\n");
-		fprintf(logFile,"[computeCumulativeGain] ENDED\n");fflush(logFile);
-		fprintf(stdout,"[computeCumulativeGain] ENDED\n");fflush(stdout);
+		//fprintf(stdout,"[computeCumulativeGain] Current Error = %lf\n",e);
+		//fprintf(stdout,"[computeCumulativeGain] Entropy of Split [Pred %d Pos %d] = %lf\n",predicate_id,pos,e);
+		//fprintf(stdout,"[computeCumulativeGain] Gain for Predicate [%d], Target [%d], Position [%d] = %lf\n",predicate_id,target,pos,gain); //fprintf(stdout,"\n\n");
+		fprintf(getLogFilePtr(),"[computeCumulativeGain] ENDED\n");fflush(getLogFilePtr());
+		//fprintf(stdout,"[computeCumulativeGain] ENDED\n");fflush(stdout);
 		#endif
 		
 		return gain;
 	}
 	#ifdef SUP_DEBUG
-	fprintf(logFile,"[computeCumulativeGain] ENDED with NULL\n");fflush(logFile);
-	fprintf(stdout,"[computeCumulativeGain] ENDED with NULL\n");fflush(stdout);
+	fprintf(getLogFilePtr(),"[computeCumulativeGain] ENDED with NULL\n");fflush(getLogFilePtr());
+	//fprintf(stdout,"[computeCumulativeGain] ENDED with NULL\n");fflush(stdout);
 	#endif
 	return 0.0;
 }
@@ -2506,7 +2509,7 @@ double computeCumulativeGain(struct listOfIntervalListsStruct* localIntervalSet,
 
 void computeAllGains(struct listOfIntervalListsStruct** localIntervalSet, int target, int *trueFalseFlag, double* bestGain, int i, int j, int PORVCount, struct treeNode* currentNode, double* falseEntropy, double* trueEntropy, int targetPORV_id){
 	#ifdef SUP_DEBUG
-	fprintf(logFile,"[computeAllGains] STARTED: Predicate [%d]\n",j+1);fflush(logFile);
+	fprintf(getLogFilePtr(),"[computeAllGains] STARTED: Predicate [%d]\n",j+1);fflush(getLogFilePtr());
 	#endif
 	
 	if(localIntervalSet){
@@ -2518,7 +2521,7 @@ void computeAllGains(struct listOfIntervalListsStruct** localIntervalSet, int ta
 	}
 	
 	#ifdef SUP_DEBUG
-	fprintf(logFile,"[computeAllGains] ENDED Gain = %lf\n",*bestGain);fflush(logFile);
+	fprintf(getLogFilePtr(),"[computeAllGains] ENDED Gain = %lf\n",*bestGain);fflush(getLogFilePtr());
 	#endif	
 }
 
@@ -2536,8 +2539,8 @@ struct treeNode* findBestGain(struct listOfIntervalListsStruct** localIntervalSe
 	//N is the number of delays to be considered (0 included , it would be 0 to N-1)
 	//PORVCount is the number of PORVs in the system.
 	#ifdef SUP_DEBUG
-		fprintf(logFile,"[findBestGain] STARTED\n");
-		printTruthListToFilePtr(currentNode->truthList,logFile);
+		fprintf(getLogFilePtr(),"[findBestGain] STARTED\n");
+		printTruthListToFilePtr(currentNode->truthList,getLogFilePtr());
 	#endif
 		
 	if(localIntervalSets && currentNode){
@@ -2571,9 +2574,9 @@ struct treeNode* findBestGain(struct listOfIntervalListsStruct** localIntervalSe
 			//fprintf(stdout,"HERE FG 3\n");fflush(stdout);
 					
 			#ifdef SUP_DEBUG
-			fprintf(logFile,"[findBestGain] CONSTRAINT LIST = ");printTruthListToFilePtr(currentNode->truthList,logFile);fprintf(logFile,"\n");		
-			fprintf(logFile,"[findBestGain] INFLUENCE  LIST TARGET TRUE = ");printIntervalListToFilePtr(influenceListTargetTrue,logFile);fprintf(logFile,"\n");
-			fprintf(logFile,"[findBestGain] INFLUENCE  LIST TARGET FALSE= ");printIntervalListToFilePtr(influenceListTargetFalse,logFile);fprintf(logFile,"\n");
+			fprintf(getLogFilePtr(),"[findBestGain] CONSTRAINT LIST = ");printTruthListToFilePtr(currentNode->truthList,getLogFilePtr());fprintf(getLogFilePtr(),"\n");		
+			fprintf(getLogFilePtr(),"[findBestGain] INFLUENCE  LIST TARGET TRUE = ");printIntervalListToFilePtr(influenceListTargetTrue,getLogFilePtr());fprintf(getLogFilePtr(),"\n");
+			fprintf(getLogFilePtr(),"[findBestGain] INFLUENCE  LIST TARGET FALSE= ");printIntervalListToFilePtr(influenceListTargetFalse,getLogFilePtr());fprintf(getLogFilePtr(),"\n");
 			#endif
 			
 			//Trace length applicable for the present interval set
@@ -2606,7 +2609,7 @@ struct treeNode* findBestGain(struct listOfIntervalListsStruct** localIntervalSe
 								 computeBucketSeparation							 *target have a zero error.
 								 */
 		#ifdef SUP_DEBUG
-			fprintf(logFile,"[findBestGain] PORVCount = %d, N = %d\n",PORVCount,N);
+			fprintf(getLogFilePtr(),"[findBestGain] PORVCount = %d, N = %d\n",PORVCount,N);
 		#endif
 		//For each predicate, target position, place it in the constraint set 
 		//and compute a tentative endmatch. Use this for mean and error
@@ -2661,7 +2664,7 @@ struct treeNode* findBestGain(struct listOfIntervalListsStruct** localIntervalSe
 					if(indexInList(currentNode->explored,j+1,i)==1) continue;
 					
 					#ifdef SUP_DEBUG
-					fprintf(logFile,"[findBestGain] Computing Gain For PORV P[%d] with Target at position [%d] \n",j+1,i);fflush(logFile);
+					fprintf(getLogFilePtr(),"[findBestGain] Computing Gain For PORV P[%d] with Target at position [%d] \n",j+1,i);fflush(getLogFilePtr());
 					#endif
 						
 					int trueFalseFlag = 0;
@@ -2670,7 +2673,7 @@ struct treeNode* findBestGain(struct listOfIntervalListsStruct** localIntervalSe
 					computeAllGains(localIntervalSets, target, &trueFalseFlag, &modGains[i][j], i, j, PORVCount, currentNode,&entropy[j][2*i],&entropy[j][2*i+1],targetPORV_id);
 					
 					#ifdef SUP_DEBUG
-					fprintf(logFile,"[findBestGain] Computed Gain: P-%d , Target Position: %d =  %lf\n",j+1,i,modGains[i][j]);fflush(logFile);
+					fprintf(getLogFilePtr(),"[findBestGain] Computed Gain: P-%d , Target Position: %d =  %lf\n",j+1,i,modGains[i][j]);fflush(getLogFilePtr());
 					#endif
 					
 					if(modGains[i][j]>bg){
@@ -2680,7 +2683,7 @@ struct treeNode* findBestGain(struct listOfIntervalListsStruct** localIntervalSe
 					}
 					#ifdef SUP_DEBUG
 					//#ifdef VERBOSE_LOW
-					fprintf(logFile,"[findBestGain] : PORV %d TARGET POSITION %d : Gain %lf, (Best Gain [%lf])\n",j+1,i,modGains[i][j],bg);fflush(logFile);
+					fprintf(getLogFilePtr(),"[findBestGain] : PORV %d TARGET POSITION %d : Gain %lf, (Best Gain [%lf])\n",j+1,i,modGains[i][j],bg);fflush(getLogFilePtr());
 					#endif
 					
 				}	
@@ -2691,13 +2694,13 @@ struct treeNode* findBestGain(struct listOfIntervalListsStruct** localIntervalSe
 			}*/
 			//copyMatrix(currentNode->gains,N*2,PORVCount,gainVal);
 			
-			printFloat2DArraryToFile(N,PORVCount,modGains,logFile);fflush(logFile);
+			printFloat2DArraryToFile(N,PORVCount,modGains,getLogFilePtr());fflush(getLogFilePtr());
 			//choicePause();
-			fprintf(logFile,"[findBestGain] Outside: i=%d,j=%d and bi=%d\n",i,j,bi);
-			fprintf(logFile,"[findBestGain] Under the Constraint List:");printTruthListToFilePtr(currentNode->truthList,logFile);//fprintf(logFile,"\n");
-			fprintf(logFile,"[findBestGain] Best Gain[%lf]: Position[%d] PORV [%d].\n",bg,bi,bj+1);
-			fprintf(logFile,"[findBestGain] GAINS computed:\n");
-			fflush(logFile);
+			fprintf(getLogFilePtr(),"[findBestGain] Outside: i=%d,j=%d and bi=%d\n",i,j,bi);
+			fprintf(getLogFilePtr(),"[findBestGain] Under the Constraint List:");printTruthListToFilePtr(currentNode->truthList,getLogFilePtr());//fprintf(getLogFilePtr(),"\n");
+			fprintf(getLogFilePtr(),"[findBestGain] Best Gain[%lf]: Position[%d] PORV [%d].\n",bg,bi,bj+1);
+			fprintf(getLogFilePtr(),"[findBestGain] GAINS computed:\n");
+			fflush(getLogFilePtr());
 			
 		}
 		
@@ -2710,9 +2713,9 @@ struct treeNode* findBestGain(struct listOfIntervalListsStruct** localIntervalSe
 			bucketCount = currentNode->truthList->asgmt->position;
 		
 		struct intervalListStruct* trueList = getListAtPosition(localIntervalSets[0],target)->trueList;
-		//fprintf(logFile,"YO-4-HERE-1-1-1\n");fflush(logFile);
+		//fprintf(getLogFilePtr(),"YO-4-HERE-1-1-1\n");fflush(getLogFilePtr());
 		if(predicateMap){
-			//fprintf(logFile,"YO-HERE-1-1-1\n");fflush(logFile);
+			//fprintf(getLogFilePtr(),"YO-HERE-1-1-1\n");fflush(getLogFilePtr());
 			printRequestForNewPredicate(inputConfig,predicateMap->varList,buckets,bucketCount,trueList);
 		}
 		static int testDepth=5;
@@ -2734,33 +2737,33 @@ struct treeNode* findBestGain(struct listOfIntervalListsStruct** localIntervalSe
 			details = NULL;
 			
 			struct intervalListStruct** buckets = computeBuckets(currentNode);
-			//fprintf(logFile,"YO-1-HERE-1-1-1\n");fflush(logFile);
+			//fprintf(getLogFilePtr(),"YO-1-HERE-1-1-1\n");fflush(getLogFilePtr());
 			//File from which to read predicates
 			if(learnedOPin){
-				fprintf(logFile,"INSIDE\n");fflush(logFile);
+				fprintf(getLogFilePtr(),"INSIDE\n");fflush(getLogFilePtr());
 				fclose(learnedOPin);
 				
 			}
-			//fprintf(logFile,"YO-2-HERE-1-1-1\n");fflush(logFile);
+			//fprintf(getLogFilePtr(),"YO-2-HERE-1-1-1\n");fflush(getLogFilePtr());
 			
 			int bucketCount = -1;
 			if(currentNode->truthList)
 				bucketCount = currentNode->truthList->asgmt->position;
 			
-			//fprintf(logFile,"YO-3-HERE-1-1-1\n");fflush(logFile);
+			//fprintf(getLogFilePtr(),"YO-3-HERE-1-1-1\n");fflush(getLogFilePtr());
 			/*
 			struct intervalListStruct* trueList = getListAtPosition(localIntervalSet,target)->trueList;
-			//fprintf(logFile,"YO-4-HERE-1-1-1\n");fflush(logFile);
+			//fprintf(getLogFilePtr(),"YO-4-HERE-1-1-1\n");fflush(getLogFilePtr());
 			if(predicateMap){
-				//fprintf(logFile,"YO-HERE-1-1-1\n");fflush(logFile);
+				//fprintf(getLogFilePtr(),"YO-HERE-1-1-1\n");fflush(getLogFilePtr());
 				printRequestForNewPredicate(inputConfig,predicateMap->varList,buckets,bucketCount,trueList);
 			}
-			//fprintf(logFile,"YO-5-HERE-1-1-1\n");fflush(logFile);
+			//fprintf(getLogFilePtr(),"YO-5-HERE-1-1-1\n");fflush(getLogFilePtr());
 			
 			learnNewPredicates();
 			
 			#ifdef SUP_DEBUG
-			printPredicateDetailListToFilePtr(details,logFile);
+			printPredicateDetailListToFilePtr(details,getLogFilePtr());
 			#endif
 			*/
 			details = NULL;
@@ -2809,13 +2812,13 @@ struct treeNode* findBestGain(struct listOfIntervalListsStruct** localIntervalSe
 				return currentNode;
 			}
 		} else {//No need for learning.
-			fprintf(logFile,"No learning\n");fflush(logFile);
+			fprintf(getLogFilePtr(),"No learning\n");fflush(getLogFilePtr());
 			if(bg==-1){//We should never enter here anymore. May consider removing this code eventually.
 				currentNode->targetInfluence = 0;
 				currentNode->splittingPredicate_id = -1;
 				currentNode->predType = 0;
 				
-				fprintf(logFile,"No further gain improvement is possible at this node [ID = %d].\n",currentNode->id);
+				fprintf(getLogFilePtr(),"No further gain improvement is possible at this node [ID = %d].\n",currentNode->id);
 				
 			} else {
 				currentNode->targetInfluence = bi;
@@ -2827,20 +2830,20 @@ struct treeNode* findBestGain(struct listOfIntervalListsStruct** localIntervalSe
 				addToIndexCoupleList(&(currentNode->explored),createIndexCouple(currentNode->targetInfluence,currentNode->splittingPredicate_id));
 			}
 		}
-		fprintf(logFile,"HERE FG 9\n");fflush(logFile);
-		//printFloat2DArraryToFile(N*2,PORVCount,gainVal,logFile);
+		fprintf(getLogFilePtr(),"HERE FG 9\n");fflush(getLogFilePtr());
+		//printFloat2DArraryToFile(N*2,PORVCount,gainVal,getLogFilePtr());
 		
 		#ifdef SUP_DEBUG
-		fprintf(logFile,"[findBestGain] NODE STATS: \n\t[Mean = %lf]\n\t[Error = %lf]\n\tTarget = %d\n\tSplitting On Predicate = %d\n",currentNode->mean,currentNode->error,currentNode->targetInfluence,currentNode->splittingPredicate_id);fflush(logFile);
-		printTruthListToFilePtr(currentNode->truthList,logFile);
-		fprintf(logFile,"[findBestGain] ENDED\n");fflush(logFile);
+		fprintf(getLogFilePtr(),"[findBestGain] NODE STATS: \n\t[Mean = %lf]\n\t[Error = %lf]\n\tTarget = %d\n\tSplitting On Predicate = %d\n",currentNode->mean,currentNode->error,currentNode->targetInfluence,currentNode->splittingPredicate_id);fflush(getLogFilePtr());
+		printTruthListToFilePtr(currentNode->truthList,getLogFilePtr());
+		fprintf(getLogFilePtr(),"[findBestGain] ENDED\n");fflush(getLogFilePtr());
 		#endif
                 
 		return currentNode;
 	}
 	#ifdef SUP_DEBUG
-	printTruthListToFilePtr(currentNode->truthList,logFile);
-	fprintf(logFile,"[findBestGain] ENDED\n");fflush(logFile);
+	printTruthListToFilePtr(currentNode->truthList,getLogFilePtr());
+	fprintf(getLogFilePtr(),"[findBestGain] ENDED\n");fflush(getLogFilePtr());
 	#endif
 	return currentNode;
 	
@@ -2858,9 +2861,9 @@ struct intervalStruct* minkowskiDiff(struct intervalStruct* interval, double l, 
 	if(interval){
                 
                 #ifdef VERBOSE_LOW
-		fprintf(logFile,"interval->l = [%lf] \t interval->r = [%lf]\n",interval->l, interval->r);
-		fprintf(logFile,"l = [%lf] \t r = [%lf] \n",l,r);
-		fprintf(logFile,"Left = [%lf] \t Right = [%lf]\n",((interval)->l)-r,((interval)->r)-l);
+		fprintf(getLogFilePtr(),"interval->l = [%lf] \t interval->r = [%lf]\n",interval->l, interval->r);
+		fprintf(getLogFilePtr(),"l = [%lf] \t r = [%lf] \n",l,r);
+		fprintf(getLogFilePtr(),"Left = [%lf] \t Right = [%lf]\n",((interval)->l)-r,((interval)->r)-l);
                 #endif
 		
                 return createIntervalStruct(
@@ -2875,9 +2878,9 @@ struct intervalStruct* minmaxDiff(struct intervalStruct* interval, double l, dou
         if(interval){
                 
 		#ifdef VERBOSE_LOW
-		fprintf(logFile,"interval->l = [%lf] \t interval->r = [%lf]\n",interval->l, interval->r);
-		fprintf(logFile,"l = [%lf] \t r = [%lf] \n",l,r);
-		fprintf(logFile,"Left = [%lf] \t Right = [%lf]\n",((interval)->l)-l,((interval)->r)-r);
+		fprintf(getLogFilePtr(),"interval->l = [%lf] \t interval->r = [%lf]\n",interval->l, interval->r);
+		fprintf(getLogFilePtr(),"l = [%lf] \t r = [%lf] \n",l,r);
+		fprintf(getLogFilePtr(),"Left = [%lf] \t Right = [%lf]\n",((interval)->l)-l,((interval)->r)-r);
                 #endif
                 
                 return createIntervalStruct(
@@ -2927,7 +2930,7 @@ struct intervalListStruct* minkowskiDiffList(struct intervalListStruct* list, do
 		}
 		
 		#ifdef VERBOSE_LOW
-		fprintf(logFile,"\n");printIntervalListToFilePtr(diff,logFile);fprintf(logFile,"\n");
+		fprintf(getLogFilePtr(),"\n");printIntervalListToFilePtr(diff,getLogFilePtr());fprintf(getLogFilePtr(),"\n");
 		#endif
 		
 		return flattenIntervalList(diff);
@@ -2936,34 +2939,34 @@ struct intervalListStruct* minkowskiDiffList(struct intervalListStruct* list, do
 }
 
 int amsMine(struct treeNode* root, int target, int numberOfPORVs, int N, int depth,int targetPORV_id){
- 	fflush(logFile);
+ 	fflush(getLogFilePtr());
 	#ifdef MINER_DEBUG
-	fprintf(logFile,"\n[amsMine] STARTED - Depth %d\n",depth);
+	fprintf(getLogFilePtr(),"\n[amsMine] STARTED - Depth %d\n",depth);
 	//fprintf(stdout,"\n[amsMine] STARTED - Depth %d\n",depth);
-	fflush(logFile);
+	fflush(getLogFilePtr());
 	#endif
 	/*if(root->id==4){
-		fprintf(logFile,"\nCHECK WHATS HAPPENING HERE --- ABC ---\n");
+		fprintf(getLogFilePtr(),"\nCHECK WHATS HAPPENING HERE --- ABC ---\n");
 	}*/
 	//TODO: Cleanup all the dumps of interval sets to the assertion file. Its pointless.
 	if(root && depth>0){
 		
                 #ifdef VERBOSE_LOW
 		if(root->parent == NULL)
-			fprintf(logFile,"[amsMine] Current Node is ROOT [ID=%d]: Target %d (Now Splitting On P-%d)\n",root->id,target,root->splittingPredicate_id);
+			fprintf(getLogFilePtr(),"[amsMine] Current Node is ROOT [ID=%d]: Target %d (Now Splitting On P-%d)\n",root->id,target,root->splittingPredicate_id);
 		else
-			fprintf(logFile,"[amsMine] Current Node is INTERNAL [ID=%d]: Target %d (Context On P-%d)\n",root->id,target,root->parent->splittingPredicate_id);
+			fprintf(getLogFilePtr(),"[amsMine] Current Node is INTERNAL [ID=%d]: Target %d (Context On P-%d)\n",root->id,target,root->parent->splittingPredicate_id);
 
-		printTreeNodeToFilePtr(root,logFile,targetPORV_id);
-		fprintf(logFile,"[amsMine] >>> Checking for Termination\n");
-		fflush(logFile);
+		printTreeNodeToFilePtr(root,getLogFilePtr(),targetPORV_id);
+		fprintf(getLogFilePtr(),"[amsMine] >>> Checking for Termination\n");
+		fflush(getLogFilePtr());
 		#endif
 		
 		//Get list of zero error positions
 		
                 if(root->traceLength>0.0 && (root->mean == 0.0 || root->mean == 1.0) && fabs(root->error) == 0.0){
 			#ifdef VERBOSE_LOW
-			fprintf(logFile,"\n-----------------------------------------------------------------\nAssertion Found @1: Consequent - %s\n",root->truthValue==0?(root->mean==0.0?"true":"false"):(root->mean==1.0?"true":"false"));
+			fprintf(getLogFilePtr(),"\n-----------------------------------------------------------------\nAssertion Found @1: Consequent - %s\n",root->truthValue==0?(root->mean==0.0?"true":"false"):(root->mean==1.0?"true":"false"));
                         #endif
 			FILE* fp;
 			if(assertFileName==NULL){
@@ -2982,45 +2985,45 @@ int amsMine(struct treeNode* root, int target, int numberOfPORVs, int N, int dep
 			fclose(fp);
 			
 			#ifdef VERBOSE_LOW
-				printTruthListToFilePtr(root->truthList,logFile);
-				fprintf(logFile,"\n------------ Printing Sequence For Assertion: -----------\n");
-                                printSequencePositionsToFile(root->parent,logFile);
-				fprintf(logFile,"\n---------------------------------------------------------\n");
-				printListOfIntervalListsToFilePtr(root->intervalList,logFile);
+				printTruthListToFilePtr(root->truthList,getLogFilePtr());
+				fprintf(getLogFilePtr(),"\n------------ Printing Sequence For Assertion: -----------\n");
+                                printSequencePositionsToFile(root->parent,getLogFilePtr());
+				fprintf(getLogFilePtr(),"\n---------------------------------------------------------\n");
+				printListOfIntervalListsToFilePtr(root->intervalList,getLogFilePtr());
                         
-                                fprintf(logFile,"\nAdding to Cov:\n");
+                                fprintf(getLogFilePtr(),"\nAdding to Cov:\n");
                         #endif
                                 
                         assertCount++;
                         
                         #ifdef VERBOSE_LOW
-				printIntervalListToFilePtr(coveredList,logFile);
-				fprintf(logFile,"\n");
+				printIntervalListToFilePtr(coveredList,getLogFilePtr());
+				fprintf(getLogFilePtr(),"\n");
                         #endif
 			assertionList = addNodeToList(assertionList,root);
 			
 			if(continueFlag == 0){ return 1;}
 		}
-		fflush(logFile);
+		fflush(getLogFilePtr());
 		
 		if(root->traceLength==0.0){			
                         return 1;
                 }
                 
 		#ifdef MINER_DEBUG
-		fprintf(logFile,"[amsMine] >>> No Termination\n");
+		fprintf(getLogFilePtr(),"[amsMine] >>> No Termination\n");
 		#endif
                 
                 if(depth == 0 || root->splittingPredicate_id == -1){
                         #ifdef VERBOSE_LOW
-                                fprintf(logFile,"[amsMine] %s - ENDING HERE\n\n",depth==0?"Depth Expired":"No further improvement in gain. (Splitting Predicate is -1)");
+                                fprintf(getLogFilePtr(),"[amsMine] %s - ENDING HERE\n\n",depth==0?"Depth Expired":"No further improvement in gain. (Splitting Predicate is -1)");
 			#endif
                         
                         return 1;
 		}
 		
 		#ifdef MINER_DEBUG
-                        fprintf(logFile,"[amsMine] Computing TruthLists\n");
+                        fprintf(getLogFilePtr(),"[amsMine] Computing TruthLists\n");
 		#endif
 		
 		struct truthAssignmentListStruct* newTruthList_false = duplicateTruthAssignmentList(root->truthList);
@@ -3037,21 +3040,21 @@ int amsMine(struct treeNode* root, int target, int numberOfPORVs, int N, int dep
 		addToTruthAssignmentList(&newTruthList_true,createTruthListStruct(asgmtTrue));
 		
 		#ifdef MINER_DEBUG
-                        fprintf(logFile,"[amsMine] Truth List -- FALSE \n");
-			printTruthListToFilePtr(newTruthList_false,logFile); 
-			fprintf(logFile,"\n[amsMine] --------------------\n");
-                        fprintf(logFile,"[amsMine] Truth List -- TRUE \n");
-			printTruthListToFilePtr(newTruthList_true,logFile);
-			fprintf(logFile,"\n[amsMine] --------------------\n");
+                        fprintf(getLogFilePtr(),"[amsMine] Truth List -- FALSE \n");
+			printTruthListToFilePtr(newTruthList_false,getLogFilePtr()); 
+			fprintf(getLogFilePtr(),"\n[amsMine] --------------------\n");
+                        fprintf(getLogFilePtr(),"[amsMine] Truth List -- TRUE \n");
+			printTruthListToFilePtr(newTruthList_true,getLogFilePtr());
+			fprintf(getLogFilePtr(),"\n[amsMine] --------------------\n");
 		#endif
 		
 		
 		#ifdef MINER_DEBUG
-                        fprintf(logFile,"[amsMine] Computing Constrained Interval Sets\n");
+                        fprintf(getLogFilePtr(),"[amsMine] Computing Constrained Interval Sets\n");
 		#endif
 		
 		#ifdef MINER_DEBUG
-                        fprintf(logFile,"[amsMine] Computing Predicate List for P[%d] : False\n",root->splittingPredicate_id);
+                        fprintf(getLogFilePtr(),"[amsMine] Computing Predicate List for P[%d] : False\n",root->splittingPredicate_id);
 		#endif
 
 		//Get the influence lists for each partial prefix.
@@ -3071,9 +3074,9 @@ int amsMine(struct treeNode* root, int target, int numberOfPORVs, int N, int dep
 		}
 		
 		#ifdef VERBOSE_LOW
-		fprintf(logFile,"[amsMine] Position 3 - no use case after this\n");
-		printTruthListToFilePtr(newTruthList_false,logFile);
-		printTruthListToFilePtr(newTruthList_true,logFile);
+		fprintf(getLogFilePtr(),"[amsMine] Position 3 - no use case after this\n");
+		printTruthListToFilePtr(newTruthList_false,getLogFilePtr());
+		printTruthListToFilePtr(newTruthList_true,getLogFilePtr());
 		#endif
 				
 		char choice = 'N';
@@ -3097,14 +3100,14 @@ int amsMine(struct treeNode* root, int target, int numberOfPORVs, int N, int dep
 			int exploreLeft = 1; int exploreRight = 1;
 			
 			#ifdef MINER_DEBUG
-                                fprintf(logFile,"[amsMine] Left (FALSE) Node, Now Preparing\n");
+                                fprintf(getLogFilePtr(),"[amsMine] Left (FALSE) Node, Now Preparing\n");
 			#endif
 			//if(first){//REMOVE	
 			if(root->left==NULL){
 				#ifdef MINER_DEBUG
-                                        fprintf(logFile,"[amsMine] Computing Left (FALSE) Node\n");
-					printTruthListToFilePtr(newTruthList_false,logFile);
-					fprintf(stdout,"[amsMine] Computing Left (FALSE) Node\n");
+					fprintf(getLogFilePtr(),"[amsMine] Computing Left (FALSE) Node\n");
+					printTruthListToFilePtr(newTruthList_false,getLogFilePtr());
+					/*fprintf(stdout,"[amsMine] Computing Left (FALSE) Node\n");
 					printTruthListToFilePtr(newTruthList_false,stdout);
 					fprintf(stdout,"[amsMine] End Match:\n");
 					int k=0;
@@ -3115,6 +3118,7 @@ int amsMine(struct treeNode* root, int target, int numberOfPORVs, int N, int dep
 					}
 					
 					fflush(stdout);
+					*/
 				#endif
 				root->left = createTreeNode( 
 							newTruthList_false,
@@ -3162,11 +3166,11 @@ int amsMine(struct treeNode* root, int target, int numberOfPORVs, int N, int dep
 				root->left->truthValue = dominantTruth;
 				
 				#ifdef MINER_DEBUG
-				fprintf(logFile,"[amsMine] After creating Left (FALSE) Node\nThe Constraint Set");
-				printTruthListToFilePtr(newTruthList_false,logFile);
-				fprintf(stdout,"[amsMine] After creating Left (FALSE) Node\n");
+				fprintf(getLogFilePtr(),"[amsMine] After creating Left (FALSE) Node\nThe Constraint Set");
+				printTruthListToFilePtr(newTruthList_false,getLogFilePtr());
+				//fprintf(stdout,"[amsMine] After creating Left (FALSE) Node\n");
 				printTreeNodeToFilePtr(root->left,stdout,targetPORV_id);
-				printTreeNodeToFilePtr(root->left,logFile,targetPORV_id);
+				printTreeNodeToFilePtr(root->left,getLogFilePtr(),targetPORV_id);
 				#endif
 				
 			} else {
@@ -3179,7 +3183,7 @@ int amsMine(struct treeNode* root, int target, int numberOfPORVs, int N, int dep
 				
 				root->left->targetInfluence = 0;
 				#ifdef MINER_DEBUG
-					fprintf(logFile,"Assertion Found : Consequent - %s\n",root->left->truthValue==0?(root->left->mean==0.0?"true":"false"):(root->left->mean==1.0?"true":"false"));
+					fprintf(getLogFilePtr(),"Assertion Found : Consequent - %s\n",root->left->truthValue==0?(root->left->mean==0.0?"true":"false"):(root->left->mean==1.0?"true":"false"));
                                 #endif
 				
                                 FILE* fp;
@@ -3200,10 +3204,10 @@ int amsMine(struct treeNode* root, int target, int numberOfPORVs, int N, int dep
 				//printTruthListToFile(root->left->truthList);
 				
 				#ifdef MINER_DEBUG
-					printTruthListToFilePtr(root->left->truthList,logFile);
-					fprintf(logFile,"\n------------ Printing Sequence : -----------\n");
-                                        printSequencePositionsToFile(root->left,logFile);
-					fprintf(logFile,"\n--------------------------------------------\n");
+					printTruthListToFilePtr(root->left->truthList,getLogFilePtr());
+					fprintf(getLogFilePtr(),"\n------------ Printing Sequence : -----------\n");
+                                        printSequencePositionsToFile(root->left,getLogFilePtr());
+					fprintf(getLogFilePtr(),"\n--------------------------------------------\n");
                                 #endif
                                 //coveredSet = unionIntervalSets(coveredSet,root->left->intervalList);
                                 //coveredList = unionIntervalLists(coveredList,computeForwardInfluenceForAnAssertion(root->left,target,K));
@@ -3221,20 +3225,20 @@ int amsMine(struct treeNode* root, int target, int numberOfPORVs, int N, int dep
 				}
 			}
 			#ifdef MINER_DEBUG
-				fprintf(logFile,"[amsMine] Left (FALSE) Node - Prepared\n");
-				fprintf(stdout,"[amsMine] Left (FALSE) Node - Prepared\n");
-				fprintf(logFile,"[amsMine] Right (TRUE) Node, Now Preparing\n");
+				fprintf(getLogFilePtr(),"[amsMine] Left (FALSE) Node - Prepared\n");
+				//fprintf(stdout,"[amsMine] Left (FALSE) Node - Prepared\n");
+				fprintf(getLogFilePtr(),"[amsMine] Right (TRUE) Node, Now Preparing\n");
 			#endif
 			//}//REMOVE
 			if(root->right==NULL){
 				if(root->left->id == 3){
-					fprintf(logFile,"\nCHECK WHATS HAPPENING HERE --- ABC ---\n");
+					fprintf(getLogFilePtr(),"\nCHECK WHATS HAPPENING HERE --- ABC ---\n");
 				}
 				#ifdef MINER_DEBUG
-					fprintf(logFile,"[amsMine] Computing Right (TRUE) Node\n");
-					fprintf(stdout,"[amsMine] Computing Right (TRUE) Node\n");
+					fprintf(getLogFilePtr(),"[amsMine] Computing Right (TRUE) Node\n");
+					//fprintf(stdout,"[amsMine] Computing Right (TRUE) Node\n");
 					printTruthListToFilePtr(newTruthList_true,stdout);
-					fprintf(stdout,"[amsMine] End Match:\n");
+					//fprintf(stdout,"[amsMine] End Match:\n");
 					int k=0;
 					for(k=0;k<traceCount;k++){
 						printf("Trace[%d]:\t",k+1);
@@ -3293,14 +3297,14 @@ int amsMine(struct treeNode* root, int target, int numberOfPORVs, int N, int dep
 				
 				
 				#ifdef MINER_DEBUG
-					fprintf(logFile,"[amsMine] Right (TRUE) Node Created.\n");
+					fprintf(getLogFilePtr(),"[amsMine] Right (TRUE) Node Created.\n");
 				#endif
 				#ifdef MINER_DEBUG
-					fprintf(logFile,"[amsMine] After creating Right (TRUE) Node\n");
-				printTruthListToFilePtr(newTruthList_true,logFile);
-				fprintf(stdout,"[amsMine] After creating Right (TRUE) Node\n");
+					fprintf(getLogFilePtr(),"[amsMine] After creating Right (TRUE) Node\n");
+				printTruthListToFilePtr(newTruthList_true,getLogFilePtr());
+				//fprintf(stdout,"[amsMine] After creating Right (TRUE) Node\n");
 				printTreeNodeToFilePtr(root->right,stdout,targetPORV_id);
-				printTreeNodeToFilePtr(root->right,logFile,targetPORV_id);
+				printTreeNodeToFilePtr(root->right,getLogFilePtr(),targetPORV_id);
 				#endif	
 					
 			} else {
@@ -3309,14 +3313,14 @@ int amsMine(struct treeNode* root, int target, int numberOfPORVs, int N, int dep
 			}
 			
 			#ifdef MINER_DEBUG
-			printTreeNodeToFilePtr(root->right,logFile,targetPORV_id);
-                                fprintf(logFile,"[amsMine] N = %d\n",N);
+			printTreeNodeToFilePtr(root->right,getLogFilePtr(),targetPORV_id);
+                                fprintf(getLogFilePtr(),"[amsMine] N = %d\n",N);
 			#endif
-			//fprintf(logFile,"[amsMine] traceLength = %lf\n",root->right->traceLength);
-			//fprintf(logFile,"[amsMine] (fabs(root->right->mean) == 0.0 || root->right->mean == 1.0) = %d\n",(fabs(root->right->mean) == 0.0 || root->right->mean == 1.0));
-			//fprintf(logFile,"[amsMine] fabs(root->right->error) == 0.0 = %d\n",fabs(root->right->error) == 0.0);
-			//fprintf(logFile,"[amsMine] fabs(root->right->error) = %lf\n",fabs(root->right->error) );
-			//fprintf(logFile,"[amsMine] fabs(root->right->error) = %10.10lf\n",(double)(((int)(fabs(root->right->error)*10e5))/10e5));
+			//fprintf(getLogFilePtr(),"[amsMine] traceLength = %lf\n",root->right->traceLength);
+			//fprintf(getLogFilePtr(),"[amsMine] (fabs(root->right->mean) == 0.0 || root->right->mean == 1.0) = %d\n",(fabs(root->right->mean) == 0.0 || root->right->mean == 1.0));
+			//fprintf(getLogFilePtr(),"[amsMine] fabs(root->right->error) == 0.0 = %d\n",fabs(root->right->error) == 0.0);
+			//fprintf(getLogFilePtr(),"[amsMine] fabs(root->right->error) = %lf\n",fabs(root->right->error) );
+			//fprintf(getLogFilePtr(),"[amsMine] fabs(root->right->error) = %10.10lf\n",(double)(((int)(fabs(root->right->error)*10e5))/10e5));
 			
 			if(N<=1 && (root->right->traceLength>0.0 && (fabs(root->right->mean) == 0.0 || root->right->mean == 1.0) && ((float)(((int)(fabs(root->right->error)*10e5))/10e5) == 0.0))){
 				root->right->error = 0.0;
@@ -3344,10 +3348,10 @@ int amsMine(struct treeNode* root, int target, int numberOfPORVs, int N, int dep
 				//printTruthListToFile(root->right->truthList);
 				
 				#ifdef MINER_DEBUG
-				printTruthListToFilePtr(root->right->truthList,logFile);
-				fprintf(logFile,"\n------------ Printing Sequence : -----------\n");
-				printSequencePositionsToFile(root->right,logFile);
-				fprintf(logFile,"\n--------------------------------------------\n");
+				printTruthListToFilePtr(root->right->truthList,getLogFilePtr());
+				fprintf(getLogFilePtr(),"\n------------ Printing Sequence : -----------\n");
+				printSequencePositionsToFile(root->right,getLogFilePtr());
+				fprintf(getLogFilePtr(),"\n--------------------------------------------\n");
                                 #endif
                                 
                                 //printAssertion(root->truthList);
@@ -3356,7 +3360,7 @@ int amsMine(struct treeNode* root, int target, int numberOfPORVs, int N, int dep
 //                                 coveredList = unionIntervalLists(coveredList,computeForwardInfluenceForAnAssertion(root->right,target,K));
 //                                 
 //                                 #ifdef VERBOSE_LOW
-// 				printIntervalListToFilePtr(coveredList,logFile);fprintf(logFile,"\n");
+// 				printIntervalListToFilePtr(coveredList,getLogFilePtr());fprintf(getLogFilePtr(),"\n");
 //                                 #endif
                                 
                                 exploreRight = 0;
@@ -3365,7 +3369,7 @@ int amsMine(struct treeNode* root, int target, int numberOfPORVs, int N, int dep
 				//if(continueFlag==0) return 1;
 			} else { 
 				if(rightGainFlag)
-				{	fprintf(logFile,"[amsMine] Compute Gain for Right Node\n");
+				{	fprintf(getLogFilePtr(),"[amsMine] Compute Gain for Right Node\n");
 					root->right = findBestGain(root->right->listOfIntervalSets,target,numberOfPORVs,N,root->right,targetPORV_id);
 					if(root->right->splittingPredicate_id == -1)
 						rightGainFlag = 0;
@@ -3373,23 +3377,23 @@ int amsMine(struct treeNode* root, int target, int numberOfPORVs, int N, int dep
 			}
 			
 			#ifdef MINER_DEBUG
-				fprintf(logFile,"[amsMine] Right (TRUE) Node Prepared\n");
-				fprintf(stdout,"[amsMine] Right (TRUE) Node - Prepared\n");
-				fprintf(logFile,"[amsMine] Going Deeper Node ID [%d]\n",root->id);fflush(logFile);
+				fprintf(getLogFilePtr(),"[amsMine] Right (TRUE) Node Prepared\n");
+				//fprintf(stdout,"[amsMine] Right (TRUE) Node - Prepared\n");
+				fprintf(getLogFilePtr(),"[amsMine] Going Deeper Node ID [%d]\n",root->id);fflush(getLogFilePtr());
 			#endif
                         
                         int test1 = 1; int test2 = 1;
 			
 			#ifdef MINER_DEBUG
-			fprintf(logFile,"State of exploration at Node-%d for children [Node-%d ; Node-%d] = [%d,%d]\n", root->id, root->left?root->left->id:-1, root->right?root->right->id:-1, exploreLeft, exploreRight);fflush(logFile);
+			fprintf(getLogFilePtr(),"State of exploration at Node-%d for children [Node-%d ; Node-%d] = [%d,%d]\n", root->id, root->left?root->left->id:-1, root->right?root->right->id:-1, exploreLeft, exploreRight);fflush(getLogFilePtr());
 			#endif 
-			fflush(logFile);
+			fflush(getLogFilePtr());
 			
 			//if(first && exploreLeft && root->left && root->left->traceLength>0.0){
 			if(exploreLeft && root->left && root->left->traceLength>0.0){
                                 //pause();
 				#ifdef MINER_DEBUG
-                                fprintf(logFile,"[amsMine] @Current Depth = %d : Exploring CHILD NODE - LEFT \n",depth);
+                                fprintf(getLogFilePtr(),"[amsMine] @Current Depth = %d : Exploring CHILD NODE - LEFT \n",depth);
                                 #endif
 				//fprintf(stdout,"[amsMine] Mining Left Node , DEPTH = %d\n",depth-1);
 				test1 = amsMine(root->left,target,numberOfPORVs,N,depth-1,targetPORV_id);
@@ -3399,7 +3403,7 @@ int amsMine(struct treeNode* root, int target, int numberOfPORVs, int N, int dep
 			if(exploreRight && root->right && root->right->traceLength>0.0){
                                 //pause();
                                 #ifdef MINER_DEBUG
-				fprintf(logFile,"[amsMine] @Current Depth = %d : Exploring CHILD NODE - RIGHT\n",depth);
+				fprintf(getLogFilePtr(),"[amsMine] @Current Depth = %d : Exploring CHILD NODE - RIGHT\n",depth);
                                 #endif
 				//fprintf(stdout,"[amsMine] Mining Right Node , DEPTH = %d\n",depth-1);
 				test2 = amsMine(root->right,target,numberOfPORVs,N,depth-1,targetPORV_id);
@@ -3412,7 +3416,7 @@ int amsMine(struct treeNode* root, int target, int numberOfPORVs, int N, int dep
 			fflush(stdin);
 			if(depth==0 || (leftGainFlag == 0 && rightGainFlag == 0)) {
 				#ifdef MINER_DEBUG
-				fprintf(logFile,"[amsMine] ENDED - depth 0 or left/right gain flag is 0\n");
+				fprintf(getLogFilePtr(),"[amsMine] ENDED - depth 0 or left/right gain flag is 0\n");
 				#endif
 				return 1;
 			}
@@ -3420,7 +3424,7 @@ int amsMine(struct treeNode* root, int target, int numberOfPORVs, int N, int dep
 			if(test1==0 && test2==0){
 				//#ifdef MINER_DEBUG
                                 #ifdef VERBOSE_LOW
-				fprintf(logFile,"[amsMine] Both Child Nodes Test Negative --- ENDED\n");
+				fprintf(getLogFilePtr(),"[amsMine] Both Child Nodes Test Negative --- ENDED\n");
 				#endif
 				return 0;
 			}
@@ -3428,15 +3432,15 @@ int amsMine(struct treeNode* root, int target, int numberOfPORVs, int N, int dep
 			//scanf("%c",&choice);
 			
 		//}while(choice!='Y' && choice!='y');
-		fflush(logFile);
+		fflush(getLogFilePtr());
 	} else if(root && depth == 0){
-		fprintf(logFile,"[amsMine] AT MAX DEPTH with NON NULL Node\n");
+		fprintf(getLogFilePtr(),"[amsMine] AT MAX DEPTH with NON NULL Node\n");
                  //if(root->traceLength==0 || (root->mean == 0 || root->mean == 1) || root->error == 0){
                 if(root->traceLength>0.0 && (root->mean == 0.0 || root->mean == 1.0) || root->error == 0.0){
-			fprintf(logFile,"[amsMine] INSIDE IF\n");
-			fflush(logFile);
+			fprintf(getLogFilePtr(),"[amsMine] INSIDE IF\n");
+			fflush(getLogFilePtr());
                         #ifdef VERBOSE_LOW
-			fprintf(logFile,"\n-----------------------------------------------------------------\nAssertion Found : Consequent - %s\n",root->truthValue==0?(root->mean==0.0?"true":"false"):(root->mean==1.0?"true":"false"));
+			fprintf(getLogFilePtr(),"\n-----------------------------------------------------------------\nAssertion Found : Consequent - %s\n",root->truthValue==0?(root->mean==0.0?"true":"false"):(root->mean==1.0?"true":"false"));
                         #endif
                         
 			FILE* fp;
@@ -3449,46 +3453,46 @@ int amsMine(struct treeNode* root, int target, int numberOfPORVs, int N, int dep
                         //FILE* fp = fopen("assertions.txt","a");
                         fprintf(fp,"\n-----------------------------------------------------------------\n");fprintf(fp,"Assertion Found @0 : Consequent - %s\n",root->truthValue==0?(root->mean==0.0?"true":"false"):(root->mean==1.0?"true":"false"));
                         fprintf(fp,"Continue = %d\n",continueFlag);
-			fprintf(logFile,"[amsMine] PRINTING ASSERTIONS\n");
-			fflush(logFile);
+			fprintf(getLogFilePtr(),"[amsMine] PRINTING ASSERTIONS\n");
+			fflush(getLogFilePtr());
 			//printTruthListToFilePtr(root->truthList,fp);
 			printAssertions(root,fp, targetPORV_id);
 			fprintf(fp,"-----------------------------------------------------------------\n");
-			fprintf(logFile,"[amsMine] ADDING NODE TO LIST OF ASSERTION NODES\n");
-			fflush(logFile);
+			fprintf(getLogFilePtr(),"[amsMine] ADDING NODE TO LIST OF ASSERTION NODES\n");
+			fflush(getLogFilePtr());
                         assertionList = addNodeToList(assertionList,root);
                         fclose(fp);
-			fprintf(logFile,"[amsMine] ADDED\n");
+			fprintf(getLogFilePtr(),"[amsMine] ADDED\n");
                         //printTruthListToFile(root->truthList);
                         
                         #ifdef VERBOSE_LOW
-				printTruthListToFilePtr(root->truthList,logFile);
-				fprintf(logFile,"\n------------ Printing Sequence : -----------\n");
-				printSequencePositionsToFile(root->parent,logFile);
-				printListOfIntervalListsToFilePtr(root->intervalList,logFile);
-				fprintf(logFile,"\n--------------------------------------------\n");
+				printTruthListToFilePtr(root->truthList,getLogFilePtr());
+				fprintf(getLogFilePtr(),"\n------------ Printing Sequence : -----------\n");
+				printSequencePositionsToFile(root->parent,getLogFilePtr());
+				printListOfIntervalListsToFilePtr(root->intervalList,getLogFilePtr());
+				fprintf(getLogFilePtr(),"\n--------------------------------------------\n");
                         #endif
                         
                         //coveredSet = unionIntervalSets(coveredSet,root->intervalList);
 //                         coveredList = unionIntervalLists(coveredList,computeForwardInfluenceForAnAssertion(root,target,K));
 //                         
 //                         #ifdef VERBOSE_LOW
-// 				printIntervalListToFilePtr(coveredList,logFile);fprintf(logFile,"\n");
+// 				printIntervalListToFilePtr(coveredList,getLogFilePtr());fprintf(getLogFilePtr(),"\n");
 //                         #endif
                         
                         assertCount++;
                         //return 1;
                 } else {
-			fprintf(logFile,"[amsMine] INSIDE ELSE\n");
-			fflush(logFile);
+			fprintf(getLogFilePtr(),"[amsMine] INSIDE ELSE\n");
+			fflush(getLogFilePtr());
 			
                         printf("\n Further exploration needed\n");
                 }
         } 
-        fflush(logFile);
+        fflush(getLogFilePtr());
 	#ifdef MINER_DEBUG
-		fprintf(logFile,"[amsMine] ENDED\n");
-		fflush(logFile);
+		fprintf(getLogFilePtr(),"[amsMine] ENDED\n");
+		fflush(getLogFilePtr());
 	#endif
 	return 1;
 }
@@ -3586,7 +3590,7 @@ void printTreeNodeToFilePtr(struct treeNode* node, FILE* fp,int targetPORV_id){
                         fprintf(fp,"MEAN\t= %lf\n",node->mean);
                         fprintf(fp,"ERROR\t= %lf\n",node->error);
 			
-			
+			/*
 			int i =0;
 			struct truthAssignmentListStruct* temp = node->truthList;
 			
@@ -3611,20 +3615,19 @@ void printTreeNodeToFilePtr(struct treeNode* node, FILE* fp,int targetPORV_id){
 					fprintf(fp,"[%d] traceLength = [%lf], targetTrue = [%lf], targetFalse = [%lf]\n",j,traceLength,targetTrue,targetFalse);
 				}
 			}
-			
+			*/
 			//fprintf(fp,"Gains:\n");
 			//printFloat2DArraryToFile(N*2,numberOfPORVs,node->gains,fp);
-                        fprintf(fp,"TARGET TRUTH\t= %d\n",node->truthValue);
+			fprintf(fp,"TARGET TRUTH\t= %d\n",node->truthValue);
 			fprintf(fp,"LEARN TYPE\t= %d\n",node->predType);
-                        fprintf(fp,"LIST OF EXPLORED DECISIONS\t: \n");
-                        printIndexCoupleListToFilePtr(node->explored,fp);
-                        fprintf(fp,"\n");
+			fprintf(fp,"LIST OF EXPLORED DECISIONS\t: \n");
+			printIndexCoupleListToFilePtr(node->explored,fp);
+			fprintf(fp,"\n");
 
-                        
-                        fprintf(fp,"--------------------------------------------------------\n");                        
+			fprintf(fp,"--------------------------------------------------------\n");                        
 			fflush(fp);
-                }
-        }
+		}
+	}
 }
 
 /*
@@ -3633,25 +3636,25 @@ void printTreeNodeToFilePtr(struct treeNode* node, FILE* fp,int targetPORV_id){
  */
 int indexInList(struct indexCouple* root, int predicate, int target){
 	#ifdef SUP_DEBUG
-	fprintf(logFile,"[indexInList] STARTED\n");
+	fprintf(getLogFilePtr(),"[indexInList] STARTED\n");
 	#endif
 	if(root){
 		while(root){
 			if(root->predicate == predicate && root->target == target && root->type==0){
 				#ifdef SUP_DEBUG
-				fprintf(logFile,"[indexInList] ENDED - IS in list\n");
+				fprintf(getLogFilePtr(),"[indexInList] ENDED - IS in list\n");
 				#endif
 				return 1;
 			}
 			root = root->next;
 		}
 		#ifdef SUP_DEBUG
-		fprintf(logFile,"[indexInList] ENDED - NOT in list\n");
+		fprintf(getLogFilePtr(),"[indexInList] ENDED - NOT in list\n");
 		#endif
 		return 0;
 	}
 	#ifdef SUP_DEBUG
-	fprintf(logFile,"[indexInList] ENDED\n");
+	fprintf(getLogFilePtr(),"[indexInList] ENDED\n");
 	#endif
 	return 0;
 }
@@ -3754,7 +3757,7 @@ double getTraceLength(){
  */
 void prepareBackwardInfluenceTraces(struct listOfIntervalListsStruct** localIntervalSets, int target, int N, double K, int strict){
 	#ifdef VERBOSE_LOW
-		fprintf(logFile,"[prepareBackwardInfluenceTraces] STARTED\n");
+		fprintf(getLogFilePtr(),"[prepareBackwardInfluenceTraces] STARTED\n");
 	#endif
 	
 	int setCount = 0;
@@ -3779,7 +3782,7 @@ void prepareBackwardInfluenceTraces(struct listOfIntervalListsStruct** localInte
 	
         //printListOfIntervalLists(backwardInfluence);        
         #ifdef VERBOSE_LOW
-		fprintf(logFile,"[prepareBackwardInfluenceTraces] ENDED\n");
+		fprintf(getLogFilePtr(),"[prepareBackwardInfluenceTraces] ENDED\n");
 	#endif        
 }
 /*
@@ -3787,7 +3790,7 @@ void prepareBackwardInfluenceTraces(struct listOfIntervalListsStruct** localInte
  */
 void prepareRoot(struct treeNode* root,struct listOfIntervalListsStruct** localIntervalSet, int targetPORV_id, int numberOfPORVs,int N){
 	#ifdef SUP_DEBUG
-		fprintf(logFile,"[prepareRoot] STARTED\n");fflush(logFile);
+		fprintf(getLogFilePtr(),"[prepareRoot] STARTED\n");fflush(getLogFilePtr());
 	#endif
 	
         root->listOfIntervalSets = localIntervalSet;
@@ -3831,35 +3834,35 @@ void prepareRoot(struct treeNode* root,struct listOfIntervalListsStruct** localI
 			Hfalse = computeFalseEntropy(getListsAtPosition(listOfIntervalSets,targetPORV_id),validLists);//createIntervalList(createIntervalStruct(0,root->traceLength)));
 			root->error = computeEntropy(getListsAtPosition(listOfIntervalSets,targetPORV_id),validLists);//endMatchForPrefix(NULL));
 // 		}
-		//printf("here\n");fflush(stdout);fflush(logFile);
+		//printf("here\n");fflush(stdout);fflush(getLogFilePtr());
 		
 		dominantTruth = Htrue<=Hfalse?1:0;//error(trueMean)<error(falseMean)?1:0;
 		root->mean = dominantTruth==0?falseMean:trueMean;
 		
 		root->truthValue = dominantTruth;
 	} 
-	fflush(logFile);
+	fflush(getLogFilePtr());
 	root = findBestGain(localIntervalSet,targetPORV_id,numberOfPORVs,N,root,targetPORV_id);
 	
 	
         #ifdef VERBOSE_LOW
-        fprintf(logFile,"[prepareRoot] Index Couple List \n{ -- \n");
-	printIndexCoupleListToFilePtr(root->explored,logFile);
-	fprintf(logFile,"\n[prepareRoot] --  } \n\n");
+        fprintf(getLogFilePtr(),"[prepareRoot] Index Couple List \n{ -- \n");
+	printIndexCoupleListToFilePtr(root->explored,getLogFilePtr());
+	fprintf(getLogFilePtr(),"\n[prepareRoot] --  } \n\n");
         //printf(">>> [MAIN] BEST GAIN [%d:%d] Error [Mean = %lf Error = %lf]\n",\
         root->targetInfluence,root->splittingPredicate_id,root->mean,root->error);
         #endif
         
         #ifdef MAIN_DEBUG
-        fprintf(logFile,"[prepareRoot] Printing Truth Set\n");
-        printListOfIntervalListsToFilePtr(localIntervalSet,logFile);
-	fprintf(logFile,"[prepareRoot] Done\n");
+        fprintf(getLogFilePtr(),"[prepareRoot] Printing Truth Set\n");
+        printListOfIntervalListsToFilePtr(localIntervalSet,getLogFilePtr());
+	fprintf(getLogFilePtr(),"[prepareRoot] Done\n");
         #endif
         //exit(0);
         //printf("root->parent = %p, root = %p\n",root->parent,root);
         //return depth; 
 	#ifdef SUP_DEBUG
-		fprintf(logFile,"[prepareRoot] ENDED\n");
+		fprintf(getLogFilePtr(),"[prepareRoot] ENDED\n");
 	#endif
 	
 }
@@ -3891,7 +3894,7 @@ struct intervalListStruct* forwardInfluence(struct intervalListStruct* source, i
 //Compute forward influence for an assertion given target truth
 struct intervalListStruct* computeForwardInfluenceForAnAssertionForTruth(struct treeNode* assertion,int targetID,double k,int truth){
 	#ifdef SUP_DEBUG
-	fprintf(logFile,"[computeForwardInfluenceForAnAssertion] BEGIN\n");
+	fprintf(getLogFilePtr(),"[computeForwardInfluenceForAnAssertion] BEGIN\n");
 	#endif
 	if(assertion){
 		if(assertion->truthList && intervalSet){
@@ -3947,13 +3950,13 @@ struct intervalListStruct* computeForwardInfluenceForAnAssertionForTruth(struct 
 				influence = targetList;
 			} 
 			#ifdef SUP_DEBUG
-			fprintf(logFile,"[computeForwardInfluenceForAnAssertion] ENDED\n");
+			fprintf(getLogFilePtr(),"[computeForwardInfluenceForAnAssertion] ENDED\n");
 			#endif
 			return influence;
 		}
 	}
 	#ifdef SUP_DEBUG
-	fprintf(logFile,"[computeForwardInfluenceForAnAssertion] ENDED\n");
+	fprintf(getLogFilePtr(),"[computeForwardInfluenceForAnAssertion] ENDED\n");
 	#endif
 	return NULL;
 }
@@ -3962,7 +3965,7 @@ struct intervalListStruct* computeForwardInfluenceForAnAssertionForTruth(struct 
 /*
 struct intervalListStruct* computeForwardInfluenceForAnAssertionForTruth(struct treeNode* assertion,int targetID,double k,int truth){
 	#ifdef SUP_DEBUG
-	fprintf(logFile,"[computeForwardInfluenceForAnAssertionForTruth] BEGIN\n");
+	fprintf(getLogFilePtr(),"[computeForwardInfluenceForAnAssertionForTruth] BEGIN\n");
 	#endif
 	if(assertion){
 		if(assertion->truthList && assertion->intervalList){
@@ -3998,13 +4001,13 @@ struct intervalListStruct* computeForwardInfluenceForAnAssertionForTruth(struct 
 				bucket = bucket->next;
 			}
 			#ifdef SUP_DEBUG
-			fprintf(logFile,"[computeForwardInfluenceForAnAssertionForTruth] ENDED\n");
+			fprintf(getLogFilePtr(),"[computeForwardInfluenceForAnAssertionForTruth] ENDED\n");
 			#endif
 			return influence;
 		}
 	}
 	#ifdef SUP_DEBUG
-	fprintf(logFile,"[computeForwardInfluenceForAnAssertionForTruth] ENDED\n");
+	fprintf(getLogFilePtr(),"[computeForwardInfluenceForAnAssertionForTruth] ENDED\n");
 	#endif
 	return NULL;
 }
@@ -4013,7 +4016,7 @@ struct intervalListStruct* computeForwardInfluenceForAnAssertionForTruth(struct 
 
 struct intervalListStruct** computeForwardInfluenceForAnAssertion(struct treeNode* assertion,int targetID,double k){
 	#ifdef SUP_DEBUG
-	fprintf(logFile,"[computeForwardInfluenceForAnAssertion] BEGIN\n");
+	fprintf(getLogFilePtr(),"[computeForwardInfluenceForAnAssertion] BEGIN\n");
 	#endif
 	if(assertion){
                 if(assertion->truthList && listOfIntervalSets){
@@ -4038,14 +4041,14 @@ struct intervalListStruct** computeForwardInfluenceForAnAssertion(struct treeNod
 			}
 			
 			#ifdef SUP_DEBUG
-			fprintf(logFile,"[computeForwardInfluenceForAnAssertion] ENDED\n");
+			fprintf(getLogFilePtr(),"[computeForwardInfluenceForAnAssertion] ENDED\n");
 			#endif
 			
 			return forwardInfluenceIntervalList;                              
                 }
         }
         #ifdef SUP_DEBUG
-        fprintf(logFile,"[computeForwardInfluenceForAnAssertion] ENDED\n");
+        fprintf(getLogFilePtr(),"[computeForwardInfluenceForAnAssertion] ENDED\n");
 	#endif
         return NULL;
 }
@@ -4075,11 +4078,11 @@ struct intervalListStruct** endMatchesForPrefix(struct truthAssignmentListStruct
 		
 		int i;
 		for(i=0;i<traceCount;i++){
-			fprintf(logFile,"\n[endMatchesForPrefix] EM for Trace [%d]\n",i);
+			fprintf(getLogFilePtr(),"\n[endMatchesForPrefix] EM for Trace [%d]\n",i);
 			intervalSet = listOfIntervalSets[i];
 			endMatchIntervalList[i] = endMatchForPrefix(prefix);
 			
-			printIntervalListToFilePtr(endMatchIntervalList[i],logFile);fprintf(logFile,"\n");
+			printIntervalListToFilePtr(endMatchIntervalList[i],getLogFilePtr());fprintf(getLogFilePtr(),"\n");
 		}
 		return endMatchIntervalList;	
 	}
@@ -4093,10 +4096,10 @@ struct intervalListStruct** endMatchesForPrefix(struct truthAssignmentListStruct
  */
 struct intervalListStruct* endMatchForPrefix(struct truthAssignmentListStruct* tempConstraintList){
 	#ifdef SUP_DEBUG
-	fprintf(logFile,"[endMatchForPrefix] BEGIN\n");fflush(logFile);
-	fprintf(logFile,"Constraint List:");
-	printTruthListToFilePtr(tempConstraintList,logFile);
-	fflush(logFile);
+	fprintf(getLogFilePtr(),"[endMatchForPrefix] BEGIN\n");fflush(getLogFilePtr());
+	fprintf(getLogFilePtr(),"Constraint List:");
+	printTruthListToFilePtr(tempConstraintList,getLogFilePtr());
+	fflush(getLogFilePtr());
 	#endif
 	
 	//printf("[endMatchForPrefix] BEGIN\n");
@@ -4106,13 +4109,13 @@ struct intervalListStruct* endMatchForPrefix(struct truthAssignmentListStruct* t
 	
 	if(tempConstraintList){
 		if(tempConstraintList && intervalSet){
-			fprintf(logFile,"\n[endMatchForPrefix] List of Interval Lists:\n");
-			printListOfIntervalListsToFilePtr(intervalSet,logFile);
+			fprintf(getLogFilePtr(),"\n[endMatchForPrefix] List of Interval Lists:\n");
+			printListOfIntervalListsToFilePtr(intervalSet,getLogFilePtr());
 			
 			//Prepare a sorted list of prefix constraints
 			struct truthAssignmentListStruct* constraintList = duplicateTruthAssignmentList(tempConstraintList);
 			sortTruthAssignmentList(&constraintList);
-			//fprintf(logFile,"Yo yo\n");fflush(logFile);
+			//fprintf(getLogFilePtr(),"Yo yo\n");fflush(getLogFilePtr());
 			
 			//Compute the forward influence
 			struct truthAssignmentListStruct* bucket = constraintList;
@@ -4131,7 +4134,7 @@ struct intervalListStruct* endMatchForPrefix(struct truthAssignmentListStruct* t
 				//bucket->asgmt->truth    //true or false list
 				//assertion->mean         //target truth
 				
-				//fprintf(logFile,"Predicate %s%d - Truth = %d \n",bucket->asgmt->type?"LP":"KP",bucket->asgmt->predicate_id,bucket->asgmt->truth);fflush(logFile);
+				//fprintf(getLogFilePtr(),"Predicate %s%d - Truth = %d \n",bucket->asgmt->type?"LP":"KP",bucket->asgmt->predicate_id,bucket->asgmt->truth);fflush(getLogFilePtr());
 				
 				// Intersect all constraints in the same bucket
 				struct listOfIntervalListsStruct* source = getListAtPosition(bucket->asgmt->type?learnedIntervalSet:intervalSet,bucket->asgmt->predicate_id);
@@ -4171,11 +4174,11 @@ struct intervalListStruct* endMatchForPrefix(struct truthAssignmentListStruct* t
 				//Or two buckets exist, one bucket that is in the past <-lastBucketID-> 
 				//and one under consideration <-bucketID->.		[CASE 2]
 				bucket = bucket->next;
-				//fprintf(logFile,"bucketID = %d \n",bucketID);fflush(logFile);
+				//fprintf(getLogFilePtr(),"bucketID = %d \n",bucketID);fflush(getLogFilePtr());
 				
 			}
 			//Merge everything
-			//fprintf(logFile,"About to go to Case 2\n");fflush(logFile);
+			//fprintf(getLogFilePtr(),"About to go to Case 2\n");fflush(getLogFilePtr());
 			
 			if(conjunct0!=NULL && conjunct1!=NULL){ //[CASE 2]
 				conjunct0 = forwardInfluence(conjunct0,lastBucketID-bucketID,K,conjunct1);
@@ -4184,12 +4187,12 @@ struct intervalListStruct* endMatchForPrefix(struct truthAssignmentListStruct* t
 				influence = conjunct1;//minkowskiSumList(conjunct1,(double)0,((double)bucketID)*K);
 			} else if(conjunct1 == NULL){
 				influence = NULL;
-				//fprintf(logFile,"Houston we have a problem... Expected Conjunct1 to be NON-NULL, thus fwd inf is 0\n");
+				//fprintf(getLogFilePtr(),"Houston we have a problem... Expected Conjunct1 to be NON-NULL, thus fwd inf is 0\n");
 				//exit(0);
 			} 
 			#ifdef SUP_DEBUG
-			printTruthListToFilePtr(tempConstraintList,logFile);
-			fprintf(logFile,"[endMatchForPrefix] ENDED\n");fflush(logFile);
+			printTruthListToFilePtr(tempConstraintList,getLogFilePtr());
+			fprintf(getLogFilePtr(),"[endMatchForPrefix] ENDED\n");fflush(getLogFilePtr());
 			#endif
 			//printf("[endMatchForPrefix] Influence Computed to be:");
 			//printIntervalListToFilePtr(influence,stdout);
@@ -4200,12 +4203,12 @@ struct intervalListStruct* endMatchForPrefix(struct truthAssignmentListStruct* t
 		/*
 		 * When the constraint list is empty, the influence is the entire trace
 		 */
-		fprintf(logFile,"[endMatchForPrefix] ENDED\n");fflush(logFile);
+		fprintf(getLogFilePtr(),"[endMatchForPrefix] ENDED\n");fflush(getLogFilePtr());
 		return createIntervalList(createIntervalStruct(0,getMaxIntervalSet(intervalSet)));
 	}
 	
 	#ifdef SUP_DEBUG
-	fprintf(logFile,"[endMatchForPrefix] ENDED\n");fflush(logFile);
+	fprintf(getLogFilePtr(),"[endMatchForPrefix] ENDED\n");fflush(getLogFilePtr());
 	#endif
 	return NULL;
 }
@@ -4230,7 +4233,7 @@ int cfileexists(const char * filename){
 
 double getCorrelation(struct truthAssignmentListStruct* truthList, struct intervalListStruct* targetList, int targetPORV_id){
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[getCorrelation] STARTED\n");
+	fprintf(getLogFilePtr(),"[getCorrelation] STARTED\n");
 	#endif
 	
 	if(truthList && targetList){
@@ -4245,7 +4248,7 @@ double getCorrelation(struct truthAssignmentListStruct* truthList, struct interv
 		correlation=maxFloat(lengthOfIntervalList(overlap)/totalTrueLength,lengthOfIntervalList(overlap)/totalFalseLength);
 		
 		#ifdef VERBOSE_LOW
-		fprintf(logFile,"[getCorrelation] ENDED\n");
+		fprintf(getLogFilePtr(),"[getCorrelation] ENDED\n");
 		#endif
 		
 		return correlation;
@@ -4253,7 +4256,7 @@ double getCorrelation(struct truthAssignmentListStruct* truthList, struct interv
 	} 
 	
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[getCorrelation] ENDED\n");
+	fprintf(getLogFilePtr(),"[getCorrelation] ENDED\n");
 	#endif
 	
 	return 0;
@@ -4261,7 +4264,7 @@ double getCorrelation(struct truthAssignmentListStruct* truthList, struct interv
 
 double getCorrelationForTruth(struct truthAssignmentListStruct* truthList, struct intervalListStruct* targetList, int truth, int targetPORV_id){
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[getCorrelationForTruth] STARTED\n");
+	fprintf(getLogFilePtr(),"[getCorrelationForTruth] STARTED\n");
 	#endif
 	
 	if(truthList && targetList){
@@ -4276,7 +4279,7 @@ double getCorrelationForTruth(struct truthAssignmentListStruct* truthList, struc
 		correlation= truth?lengthOfIntervalList(overlap)/totalTrueLength:lengthOfIntervalList(overlap)/totalFalseLength;
 		
 		#ifdef VERBOSE_LOW
-		fprintf(logFile,"[getCorrelationForTruth] ENDED\n");
+		fprintf(getLogFilePtr(),"[getCorrelationForTruth] ENDED\n");
 		#endif
 		
 		return correlation;
@@ -4284,7 +4287,7 @@ double getCorrelationForTruth(struct truthAssignmentListStruct* truthList, struc
 	} 
 	
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[getCorrelationForTruth] ENDED\n");
+	fprintf(getLogFilePtr(),"[getCorrelationForTruth] ENDED\n");
 	#endif
 	
 	return 0;
@@ -4293,7 +4296,7 @@ double getCorrelationForTruth(struct truthAssignmentListStruct* truthList, struc
 
 double getSupport(struct truthAssignmentListStruct* truthList, struct intervalListStruct* targetList, int targetPORV_id){
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[getSupport] STARTED\n");
+	fprintf(getLogFilePtr(),"[getSupport] STARTED\n");
 	#endif
 	
 	if(truthList && targetList){
@@ -4309,14 +4312,14 @@ double getSupport(struct truthAssignmentListStruct* truthList, struct intervalLi
 		support = lengthOfIntervalList(overlap)/totalTraceLength;
 		
 		#ifdef VERBOSE_LOW
-		fprintf(logFile,"[getSupport] ENDED\n");
+		fprintf(getLogFilePtr(),"[getSupport] ENDED\n");
 		#endif
 			
 		return support;
 	} 
 	
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[getSupport] ENDED\n");
+	fprintf(getLogFilePtr(),"[getSupport] ENDED\n");
 	#endif
 	
 	return 0;
@@ -4324,7 +4327,7 @@ double getSupport(struct truthAssignmentListStruct* truthList, struct intervalLi
 
 int testCorrelationSupport(struct truthAssignmentListStruct* truthList, struct intervalListStruct* targetList, int targetPORV_id){
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[testCorrelationSupport] STARTED\n");
+	fprintf(getLogFilePtr(),"[testCorrelationSupport] STARTED\n");
 	#endif
 	
 	if(truthList && targetList){
@@ -4342,7 +4345,7 @@ int testCorrelationSupport(struct truthAssignmentListStruct* truthList, struct i
 		
 		if(correlation>=correlationThreshold && support>=supportThreshold){
 			#ifdef VERBOSE_LOW
-			fprintf(logFile,"[testCorrelationSupport] ENDED\n");
+			fprintf(getLogFilePtr(),"[testCorrelationSupport] ENDED\n");
 			#endif
 			
 			return 1;
@@ -4351,7 +4354,7 @@ int testCorrelationSupport(struct truthAssignmentListStruct* truthList, struct i
 	} 
 	
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[testCorrelationSupport] ENDED\n");
+	fprintf(getLogFilePtr(),"[testCorrelationSupport] ENDED\n");
 	#endif
 	
 	return 0;
@@ -4359,7 +4362,7 @@ int testCorrelationSupport(struct truthAssignmentListStruct* truthList, struct i
 
 int testCorrelationSupportForTruth(struct truthAssignmentListStruct* truthList, int truth, int targetPORV_id){
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[testCorrelationSupport] STARTED\n");
+	fprintf(getLogFilePtr(),"[testCorrelationSupport] STARTED\n");
 	#endif
 	
 	if(truthList){
@@ -4379,10 +4382,10 @@ int testCorrelationSupportForTruth(struct truthAssignmentListStruct* truthList, 
 		
 		//fprintf(stdout,"\nthresh = %lf\n",supportThreshold);
 		printTruthListToFilePtr(truthList,stdout);
-		fprintf(stdout,"correlation = %lf, support = %lf\n",correlation,support);
+		//fprintf(stdout,"correlation = %lf, support = %lf\n",correlation,support);
 		if(correlation>=correlationThreshold && support>=supportThreshold){
 			#ifdef VERBOSE_LOW
-			fprintf(logFile,"[testCorrelationSupport] ENDED\n");
+			fprintf(getLogFilePtr(),"[testCorrelationSupport] ENDED\n");
 			#endif
 			
 			return 1;
@@ -4391,7 +4394,7 @@ int testCorrelationSupportForTruth(struct truthAssignmentListStruct* truthList, 
 	} 
 	
 	#ifdef VERBOSE_LOW
-	fprintf(logFile,"[testCorrelationSupport] ENDED\n");
+	fprintf(getLogFilePtr(),"[testCorrelationSupport] ENDED\n");
 	#endif
 	
 	return 0;
@@ -4403,18 +4406,18 @@ int testCorrelationSupportForTruth(struct truthAssignmentListStruct* truthList, 
  */
 struct intervalListStruct** computeBuckets(struct treeNode* node){
         if(node){
-		fprintf(logFile,"0-HERE-1-1-1\n");fflush(logFile);
+		fprintf(getLogFilePtr(),"0-HERE-1-1-1\n");fflush(getLogFilePtr());
                 sortTruthAssignmentList(&node->truthList);
-		fprintf(logFile,"1-HERE-1-1-1\n");fflush(logFile);
+		fprintf(getLogFilePtr(),"1-HERE-1-1-1\n");fflush(getLogFilePtr());
                 struct truthAssignmentListStruct* constraintList = node->truthList;
                 int bucketCount = 0;
                 
                 if(constraintList!=NULL){
                         bucketCount = constraintList->asgmt->position;
-                        fprintf(logFile,"HERE-1-1-1\n");fflush(logFile);
+                        fprintf(getLogFilePtr(),"HERE-1-1-1\n");fflush(getLogFilePtr());
                         struct intervalListStruct** bucket = (struct intervalListStruct**)malloc(sizeof(struct intervalListStruct*)*(bucketCount+1));
 			bzero(bucket,sizeof(struct intervalListStruct*)*(bucketCount+1));
-			fprintf(logFile,"HERE-1-1-2\n");fflush(logFile);
+			fprintf(getLogFilePtr(),"HERE-1-1-2\n");fflush(getLogFilePtr());
                         constraintList = node->truthList;
                         int i = 0;
 			int j=0;
@@ -4422,7 +4425,7 @@ struct intervalListStruct** computeBuckets(struct treeNode* node){
 			for(j=0;j<traceCount;j++){
 				printf("TRACE[%d]\n",j);
 				while(constraintList){
-					fprintf(logFile,"HERE-1-2-1\n");fflush(logFile);
+					fprintf(getLogFilePtr(),"HERE-1-2-1\n");fflush(getLogFilePtr());
 					
 					
 					struct listOfIntervalListsStruct* currentIntervalSet = listOfIntervalSets[j];
@@ -4435,28 +4438,28 @@ struct intervalListStruct** computeBuckets(struct treeNode* node){
 						bucket[i] = duplicateIntervalList((constraintList->asgmt->truth)?tempList->trueList:tempList->falseList);
 					}
 					
-					fprintf(logFile,"HERE-1-2-2\n");fflush(logFile);
+					fprintf(getLogFilePtr(),"HERE-1-2-2\n");fflush(getLogFilePtr());
 					constraintList = constraintList->next;
 				}
 				i = bucketCount;
 				
 				for(i=bucketCount;i>=0;i--){
-					fprintf(stdout,"\nBucket[%d]:\n",i);
-					printIntervalListToFilePtr(bucket[i],stdout);
-					fprintf(stdout,"\n");
+					//fprintf(stdout,"\nBucket[%d]:\n",i);
+					//printIntervalListToFilePtr(bucket[i],stdout);
+					//fprintf(stdout,"\n");
 					bucket[i]=NULL;
 				}
 				
 			}
-                        fprintf(logFile,"HERE-1-1-3\n");fflush(logFile);
+                        fprintf(getLogFilePtr(),"HERE-1-1-3\n");fflush(getLogFilePtr());
                         //Print Buckets
                         #ifdef SUP_DEBUG
                         
                         #endif
-                        fprintf(logFile,"END-HERE-1\n");fflush(logFile);
+                        fprintf(getLogFilePtr(),"END-HERE-1\n");fflush(getLogFilePtr());
                         return bucket;
                 } else {
-			fprintf(logFile,"END-HERE-2\n");fflush(logFile);
+			fprintf(getLogFilePtr(),"END-HERE-2\n");fflush(getLogFilePtr());
                         return NULL;
                         
                 }
@@ -4540,25 +4543,25 @@ struct intervalStruct* computeTightSeparation(struct intervalListStruct* list1,s
 /* Compute tight temporal separation interval between the target and a given bucket = list1-list2
  */
 struct intervalStruct* computeTightSeparation(struct intervalListStruct* list1,struct intervalListStruct* list2, int distance){
-	fprintf(logFile,"[computeTightSeparation] STARTED: List1[%p] List2 [%p] Distance[%d].\n",list1,list2,distance);
-	fflush(logFile);
+	fprintf(getLogFilePtr(),"[computeTightSeparation] STARTED: List1[%p] List2 [%p] Distance[%d].\n",list1,list2,distance);
+	fflush(getLogFilePtr());
 	if(list1 && list2){
 		struct intervalListStruct* forwardInfInterval = minkowskiSumList(list1,(double)0,((double)distance)*K);
 		struct intervalListStruct* targetIntervalList = intersectIntervalList(forwardInfInterval,list2);
 		
 		#ifdef SUP_DEBUG
-		fprintf(logFile,"------- forward list pos [%d] with k [%lf] ----------\n",distance,K);
-		printIntervalListToFilePtr(forwardInfInterval,logFile);
-		fprintf(logFile,"\n------------------------------\n\n");
-		fprintf(logFile,"------- target Initial----------\n");
-		printIntervalListToFilePtr(list2,logFile);
-		fprintf(logFile,"\n------------------------------\n\n");
+		fprintf(getLogFilePtr(),"------- forward list pos [%d] with k [%lf] ----------\n",distance,K);
+		printIntervalListToFilePtr(forwardInfInterval,getLogFilePtr());
+		fprintf(getLogFilePtr(),"\n------------------------------\n\n");
+		fprintf(getLogFilePtr(),"------- target Initial----------\n");
+		printIntervalListToFilePtr(list2,getLogFilePtr());
+		fprintf(getLogFilePtr(),"\n------------------------------\n\n");
 		
-		fprintf(logFile,"-------- target list----------\n");
-		printIntervalListToFilePtr(targetIntervalList,logFile);
-		fprintf(logFile,"\n------------------------------\n\n");
+		fprintf(getLogFilePtr(),"-------- target list----------\n");
+		printIntervalListToFilePtr(targetIntervalList,getLogFilePtr());
+		fprintf(getLogFilePtr(),"\n------------------------------\n\n");
 		#endif
-		fflush(logFile);
+		fflush(getLogFilePtr());
 		struct intervalListStruct* bucketInterval = list1;
 		struct intervalListStruct* listOfSeparations = NULL;
 		struct intervalListStruct* dummyList = createIntervalList(NULL);
@@ -4586,7 +4589,7 @@ struct intervalStruct* computeTightSeparation(struct intervalListStruct* list1,s
 				partInterval = minkowskiDiff(intersectList->interval,bucketInterval->interval->l,bucketInterval->interval->r);
 				
 				#ifdef SUP_DEBUG
-				fprintf(logFile,"PART INTERVAL: [%lf:%lf] - [%lf:%lf]: ",intersectList->interval->l,intersectList->interval->r,bucketInterval->interval->l,bucketInterval->interval->r);printIntervalToFilePtr(partInterval,logFile);fprintf(logFile,"\n"); fflush(logFile);
+				fprintf(getLogFilePtr(),"PART INTERVAL: [%lf:%lf] - [%lf:%lf]: ",intersectList->interval->l,intersectList->interval->r,bucketInterval->interval->l,bucketInterval->interval->r);printIntervalToFilePtr(partInterval,getLogFilePtr());fprintf(getLogFilePtr(),"\n"); fflush(getLogFilePtr());
 				#endif
 				
 				//Make sure the part interval is only within the window of influence.
@@ -4608,11 +4611,11 @@ struct intervalStruct* computeTightSeparation(struct intervalListStruct* list1,s
 			bucketInterval = bucketInterval->next;
 			
 		}
-		fprintf(logFile,"[computeTightSeparation] ENDED: Calling widenIntervalSet\n");
-		fflush(logFile);
+		fprintf(getLogFilePtr(),"[computeTightSeparation] ENDED: Calling widenIntervalSet\n");
+		fflush(getLogFilePtr());
 		return widenIntervalSet(listOfSeparations);
 	}
-	fprintf(logFile,"[computeTightSeparation] ENDED: NULL\n");
+	fprintf(getLogFilePtr(),"[computeTightSeparation] ENDED: NULL\n");
 	return NULL;
 }
 
@@ -4622,7 +4625,7 @@ struct intervalStruct* computeTightSeparation(struct intervalListStruct* list1,s
  */
 struct intervalStruct* computeSeparationAnyMatch(struct intervalListStruct** bucket,int bucketPos,struct intervalListStruct** targetList, int targetPos, int smallestBucketID){
 	//Potential for SEGFAULT
-	fprintf(logFile,"[computeSeparationAnyMatch] STARTED : Bucket Postition = %d\n",bucketPos);
+	fprintf(getLogFilePtr(),"[computeSeparationAnyMatch] STARTED : Bucket Postition = %d\n",bucketPos);
 	
 	if(targetList && bucketPos>=targetPos){
 		/*
@@ -4648,7 +4651,7 @@ struct intervalStruct* computeSeparationAnyMatch(struct intervalListStruct** buc
 				}
 			}
 			
-			fprintf(logFile,"Next bucket position = %d\n",nextBucketPos);
+			fprintf(getLogFilePtr(),"Next bucket position = %d\n",nextBucketPos);
 			
 			//Compute Difference
 			position = bucketPos-nextBucketPos;
@@ -4667,10 +4670,10 @@ struct intervalStruct* computeSeparationAnyMatch(struct intervalListStruct** buc
 			}
 		}
 		
-		fprintf(logFile,"[computeSeparationAnyMatch] ENDED - Calling computeTightSeparation\n");
+		fprintf(getLogFilePtr(),"[computeSeparationAnyMatch] ENDED - Calling computeTightSeparation\n");
 		return separation;
 	}
-	fprintf(logFile,"[computeSeparationAnyMatch] ENDED: NULL\n");
+	fprintf(getLogFilePtr(),"[computeSeparationAnyMatch] ENDED: NULL\n");
 	return NULL;
 }
 
@@ -4750,9 +4753,9 @@ struct intervalStruct* computeSeparation(struct intervalListStruct* list1,struct
 
 struct intervalStruct* widenIntervalSet(struct intervalListStruct* list){
         #ifdef SUP_DEBUG
-        fprintf(logFile,"[widenIntervalSet] STARTED\n");
+        fprintf(getLogFilePtr(),"[widenIntervalSet] STARTED\n");
         #endif
-        fflush(logFile);
+        fflush(getLogFilePtr());
         if(list){
                 double left,right;
                 left = DBL_MAX;
@@ -4762,9 +4765,9 @@ struct intervalStruct* widenIntervalSet(struct intervalListStruct* list){
                 struct intervalListStruct* item = list;
                 while(item){
 			#ifdef SUP_DEBUG
-			fprintf(logFile,"[widenIntervalSet] item [%p][%p]\n",item,item->next);
+			fprintf(getLogFilePtr(),"[widenIntervalSet] item [%p][%p]\n",item,item->next);
 			#endif
-			fflush(logFile);
+			fflush(getLogFilePtr());
                         if(item->interval->l < left){
                                 left = item->interval->l;
                         }
@@ -4776,39 +4779,39 @@ struct intervalStruct* widenIntervalSet(struct intervalListStruct* list){
                         item = item->next;
                 }
                 #ifdef SUP_DEBUG
-                        fprintf(logFile,"[widenIntervalSet] ENDED\n");
+                        fprintf(getLogFilePtr(),"[widenIntervalSet] ENDED\n");
                 #endif
-		fflush(logFile);
+		fflush(getLogFilePtr());
                 return createIntervalStruct(left,right);
         }
         
         #ifdef SUP_DEBUG
-        fprintf(logFile,"[widenIntervalSet] ENDED - NULL\n");
+        fprintf(getLogFilePtr(),"[widenIntervalSet] ENDED - NULL\n");
         #endif
-	fflush(logFile);
+	fflush(getLogFilePtr());
         return NULL;
 }
 
 void writeAssertionWithTruthToStruct(struct assertionStruct* assertion, struct intervalListStruct** targetList, struct intervalListStruct** bucket, int bucketCount, int truth, struct treeNode* node,int position, int targetPORV_id){
 	#ifdef SUP_DEBUG
-	fprintf(logFile,"[writeAssertionWithTruthToStruct] STARTED : bucketCount = %d\n",bucketCount);
+	fprintf(getLogFilePtr(),"[writeAssertionWithTruthToStruct] STARTED : bucketCount = %d\n",bucketCount);
 	//printTreeNodeToFilePtr(node,fp);
 	#endif
 	char* tempStr = (char*)malloc(sizeof(char)*MAX_STR_LENGTH);
 	bzero(tempStr,sizeof(char)*MAX_STR_LENGTH);
 	
-	fflush(logFile);
+	fflush(getLogFilePtr());
 	if(assertion && targetList && bucket && (bucketCount>=0) && node){
 		//Compute Seperations
 		//Widen(B+[0:pos*k] intersect Target - B)
 		//fprintf(fp,"Internal (1)\n");
 		
 		#ifdef SUP_DEBUG
-		fprintf(logFile,"[writeAssertionWithTruthToStruct] TargetPos[%d] Truth = %d\n",position,truth);            
-		fprintf(logFile,"[writeAssertionWithTruthToStruct] Constraint Set\n");
-		printTruthListToFilePtr(node->truthList,logFile);
+		fprintf(getLogFilePtr(),"[writeAssertionWithTruthToStruct] TargetPos[%d] Truth = %d\n",position,truth);            
+		fprintf(getLogFilePtr(),"[writeAssertionWithTruthToStruct] Constraint Set\n");
+		printTruthListToFilePtr(node->truthList,getLogFilePtr());
 		//fprintf(fp,"[writeAssertionWithTruthToStruct] Bucket Count = %d\n",bucketCount);                
-		fprintf(logFile,"[writeAssertionWithTruthToStruct] Bucket Count = %d\n",bucketCount); 
+		fprintf(getLogFilePtr(),"[writeAssertionWithTruthToStruct] Bucket Count = %d\n",bucketCount); 
 		#endif
 		
 		double support = 0.0;
@@ -4859,8 +4862,8 @@ void writeAssertionWithTruthToStruct(struct assertionStruct* assertion, struct i
 			support = totalEvidence/totalTraceLength;
 		}
 		
-		fprintf(logFile,"SUPPORT = [%lf]\n",support*100.0);
-		fprintf(logFile,"CORRELATION = [%lf]\n",correlation*100.0);
+		fprintf(getLogFilePtr(),"SUPPORT = [%lf]\n",support*100.0);
+		fprintf(getLogFilePtr(),"CORRELATION = [%lf]\n",correlation*100.0);
 		
 		
 		#ifdef ASSERT_PRINT_DEBUG
@@ -4894,7 +4897,7 @@ void writeAssertionWithTruthToStruct(struct assertionStruct* assertion, struct i
 			}
 			
 			#ifdef SUP_DEBUG
-			fprintf(logFile,"[writeAssertionWithTruthToStruct] ENDED\n");
+			fprintf(getLogFilePtr(),"[writeAssertionWithTruthToStruct] ENDED\n");
 			#endif
 			
 			return;
@@ -4912,20 +4915,20 @@ void writeAssertionWithTruthToStruct(struct assertionStruct* assertion, struct i
 			bucketSepIntervals[i] = computeBucketSeparation(bucket,targetList,i,position,smallestBucketID);
 			
 			#ifdef SUP_DEBUG
-			fprintf(logFile,"\n[writeAssertionWithTruthToStruct] Bucket %d\n",i);
-			fflush(logFile);
+			fprintf(getLogFilePtr(),"\n[writeAssertionWithTruthToStruct] Bucket %d\n",i);
+			fflush(getLogFilePtr());
 			if(bucket[i]) {
-				fprintf(logFile,"\n[writeAssertionWithTruthToStruct] Bucket Interval List: ");
-				printIntervalListToFilePtr(bucket[i],logFile);
-				fprintf(logFile,"\n");
+				fprintf(getLogFilePtr(),"\n[writeAssertionWithTruthToStruct] Bucket Interval List: ");
+				printIntervalListToFilePtr(bucket[i],getLogFilePtr());
+				fprintf(getLogFilePtr(),"\n");
 			}
-			fflush(logFile);
+			fflush(getLogFilePtr());
 			if(bucketSepIntervals[i]!=NULL){
-				fprintf(logFile,"[writeAssertionWithTruthToStruct] For bucket %d Seperation [%lf:%lf]\n",i,bucketSepIntervals[i]->l,bucketSepIntervals[i]->r);                                
-			} else fprintf(logFile,"[writeAssertionWithTruthToStruct] For bucket %d Seperation [0 : 0]\n",i);
+				fprintf(getLogFilePtr(),"[writeAssertionWithTruthToStruct] For bucket %d Seperation [%lf:%lf]\n",i,bucketSepIntervals[i]->l,bucketSepIntervals[i]->r);                                
+			} else fprintf(getLogFilePtr(),"[writeAssertionWithTruthToStruct] For bucket %d Seperation [0 : 0]\n",i);
 			#endif
 		}      
-		fflush(logFile);
+		fflush(getLogFilePtr());
 		
 		i = bucketCount;
 		int flag = 0;
@@ -4952,7 +4955,7 @@ void writeAssertionWithTruthToStruct(struct assertionStruct* assertion, struct i
 			
 			i--;
 		}
-		fprintf(logFile,"YY %d allNull =[%d]\n",smallestBucketID,allNull);fflush(logFile);
+		fprintf(getLogFilePtr(),"YY %d allNull =[%d]\n",smallestBucketID,allNull);fflush(getLogFilePtr());
 		
 		char *targetName = getPredicateName(targetPORV_id);
 		char newTargetName[MAX_STR_LENGTH]; 
@@ -4976,23 +4979,23 @@ void writeAssertionWithTruthToStruct(struct assertionStruct* assertion, struct i
 				sprintf(tempStr,"|=> %s\n",newTargetName);strcat(assertion->assertion,tempStr);
 			}
 		}
-		fprintf(logFile,"YY %d allNull =[%d]\n",smallestBucketID,allNull);fflush(logFile);
+		fprintf(getLogFilePtr(),"YY %d allNull =[%d]\n",smallestBucketID,allNull);fflush(getLogFilePtr());
 		
 	}
 	
 	#ifdef SUP_DEBUG
-	fprintf(logFile,"[writeAssertionWithTruthToStruct] ENDED\n");
+	fprintf(getLogFilePtr(),"[writeAssertionWithTruthToStruct] ENDED\n");
 	#endif
-	fflush(logFile);
+	fflush(getLogFilePtr());
 }
 
 
 void printAssertionWithTruthToFile(FILE* fp, struct intervalListStruct** targetList, struct intervalListStruct** bucket, int bucketCount, int truth, struct treeNode* node,int position, int targetPORV_id){
         #ifdef SUP_DEBUG
-                fprintf(logFile,"[printAssertionWithTruthToFile] STARTED : bucketCount = %d\n",bucketCount);
+                fprintf(getLogFilePtr(),"[printAssertionWithTruthToFile] STARTED : bucketCount = %d\n",bucketCount);
 		//printTreeNodeToFilePtr(node,fp);
         #endif
-        fflush(logFile);
+        fflush(getLogFilePtr());
         if(fp && targetList && bucket && (bucketCount>=0) && node){
                 //Compute Seperations
                 //Widen(B+[0:pos*k] intersect Target - B)
@@ -5004,11 +5007,11 @@ void printAssertionWithTruthToFile(FILE* fp, struct intervalListStruct** targetL
 		#endif
 		
                 #ifdef SUP_DEBUG
-			fprintf(logFile,"[printAssertionWithTruthToFile] TargetPos[%d] Truth = %d\n",position,truth);            
-			fprintf(logFile,"[printAssertionWithTruthToFile] Constraint Set\n");
-			printTruthListToFilePtr(node->truthList,logFile);
+			fprintf(getLogFilePtr(),"[printAssertionWithTruthToFile] TargetPos[%d] Truth = %d\n",position,truth);            
+			fprintf(getLogFilePtr(),"[printAssertionWithTruthToFile] Constraint Set\n");
+			printTruthListToFilePtr(node->truthList,getLogFilePtr());
 			//fprintf(fp,"[printAssertionWithTruthToFile] Bucket Count = %d\n",bucketCount);                
-			fprintf(logFile,"[printAssertionWithTruthToFile] Bucket Count = %d\n",bucketCount); 
+			fprintf(getLogFilePtr(),"[printAssertionWithTruthToFile] Bucket Count = %d\n",bucketCount); 
 		#endif
 		
 		double support = 0.0;
@@ -5059,8 +5062,8 @@ void printAssertionWithTruthToFile(FILE* fp, struct intervalListStruct** targetL
 			support = totalEvidence/totalTraceLength;
 		}
 			
-		fprintf(logFile,"SUPPORT = [%lf]\n",support*100.0);
-		fprintf(logFile,"CORRELATION = [%lf]\n",correlation*100.0);
+		fprintf(getLogFilePtr(),"SUPPORT = [%lf]\n",support*100.0);
+		fprintf(getLogFilePtr(),"CORRELATION = [%lf]\n",correlation*100.0);
 		
 		
 		#ifdef ASSERT_PRINT_DEBUG
@@ -5094,7 +5097,7 @@ void printAssertionWithTruthToFile(FILE* fp, struct intervalListStruct** targetL
 			fprintf(fp,"CORRELATION\t= [%lf]\n",correlation*100.0);
 			
                         #ifdef SUP_DEBUG
-				fprintf(logFile,"[printAssertionWithTruthToFile] ENDED\n");
+				fprintf(getLogFilePtr(),"[printAssertionWithTruthToFile] ENDED\n");
                         #endif
 			
                         return;
@@ -5105,10 +5108,10 @@ void printAssertionWithTruthToFile(FILE* fp, struct intervalListStruct** targetL
                 bzero(bucketSepIntervals,sizeof(struct intervalStruct*)*bucketCount);
 		int i;
 		
-		//printTruthListToFilePtr(node->truthList,logFile);
+		//printTruthListToFilePtr(node->truthList,getLogFilePtr());
 		
 		int smallestBucketID = getSmallestBucketID(node->truthList);
-		//fprintf(logFile,"SBI=%d\n",smallestBucketID);
+		//fprintf(getLogFilePtr(),"SBI=%d\n",smallestBucketID);
 		//int deltaPosition = smallestBucketID-position;
 		//if(deltaPosition<0)
                 for(i=bucketCount;i>=0;i--){
@@ -5116,20 +5119,20 @@ void printAssertionWithTruthToFile(FILE* fp, struct intervalListStruct** targetL
 			bucketSepIntervals[i] = computeBucketSeparation(bucket,targetList,i,position,smallestBucketID);
                         
                         #ifdef SUP_DEBUG
-                        fprintf(logFile,"\n[printAssertionWithTruthToFile] Bucket %d\n",i);
-			fflush(logFile);
+                        fprintf(getLogFilePtr(),"\n[printAssertionWithTruthToFile] Bucket %d\n",i);
+			fflush(getLogFilePtr());
                         if(bucket[i]) {
-				fprintf(logFile,"\n[printAssertionWithTruthToFile] Bucket Interval List: ");
-				printIntervalListToFilePtr(bucket[i],logFile);
-				fprintf(logFile,"\n");
+				fprintf(getLogFilePtr(),"\n[printAssertionWithTruthToFile] Bucket Interval List: ");
+				printIntervalListToFilePtr(bucket[i],getLogFilePtr());
+				fprintf(getLogFilePtr(),"\n");
 			}
-			fflush(logFile);
+			fflush(getLogFilePtr());
 			if(bucketSepIntervals[i]!=NULL){
-				fprintf(logFile,"[printAssertionWithTruthToFile] For bucket %d Seperation [%lf:%lf]\n",i,bucketSepIntervals[i]->l,bucketSepIntervals[i]->r);                                
-			} else fprintf(logFile,"[printAssertionWithTruthToFile] For bucket %d Seperation [0 : 0]\n",i);
+				fprintf(getLogFilePtr(),"[printAssertionWithTruthToFile] For bucket %d Seperation [%lf:%lf]\n",i,bucketSepIntervals[i]->l,bucketSepIntervals[i]->r);                                
+			} else fprintf(getLogFilePtr(),"[printAssertionWithTruthToFile] For bucket %d Seperation [0 : 0]\n",i);
                         #endif
                 }      
-                fflush(logFile);
+                fflush(getLogFilePtr());
                 
 		i = bucketCount;
                 int flag = 0;
@@ -5137,7 +5140,7 @@ void printAssertionWithTruthToFile(FILE* fp, struct intervalListStruct** targetL
 		
 		while(i>=0){
 			if(bucketSepIntervals[i]==NULL){
-				//fprintf(logFile,"\nNull for Bucket [%i]\n",i);
+				//fprintf(getLogFilePtr(),"\nNull for Bucket [%i]\n",i);
 				//fprintf(fp,"\nNull for Bucket [%i]\n",i);
                                 if(i==0){
                                         printTruthListForIndex(node->truthList,0,fp,0);
@@ -5146,12 +5149,12 @@ void printAssertionWithTruthToFile(FILE* fp, struct intervalListStruct** targetL
                                 }
                                 
 			} else if(bucketSepIntervals[i]!=NULL && i==smallestBucketID){
-				//fprintf(logFile,"\nNot-Null for Bucket [%i] - smallest\n",i);
+				//fprintf(getLogFilePtr(),"\nNot-Null for Bucket [%i] - smallest\n",i);
 				allNull = 0;
 				printTruthListForIndex(node->truthList,i,fp,0);
 				break;
 			} else if(bucketSepIntervals[i]!=NULL){
-				//fprintf(logFile,"\nNot-Null for Bucket [%i]\n",i);
+				//fprintf(getLogFilePtr(),"\nNot-Null for Bucket [%i]\n",i);
 				allNull = 0;
 				printTruthListForIndex(node->truthList,i,fp,0);
 				fprintf(fp," ##[ %e : %e ] ",bucketSepIntervals[i]->l,bucketSepIntervals[i]->r);
@@ -5180,7 +5183,7 @@ void printAssertionWithTruthToFile(FILE* fp, struct intervalListStruct** targetL
 			//}
                         i--;
                 }
-                fprintf(logFile,"YY %d allNull =[%d]\n",smallestBucketID,allNull);fflush(logFile);
+                fprintf(getLogFilePtr(),"YY %d allNull =[%d]\n",smallestBucketID,allNull);fflush(getLogFilePtr());
 		
 		char *targetName = getPredicateName(targetPORV_id);
 		char newTargetName[MAX_STR_LENGTH]; 
@@ -5209,14 +5212,14 @@ void printAssertionWithTruthToFile(FILE* fp, struct intervalListStruct** targetL
 			fprintf(fp,"SUPPORT\t\t= [%lf]\n",support*100.0);
 			fprintf(fp,"CORRELATION\t= [%lf]\n",correlation*100.0);
 		}
-		fprintf(logFile,"YY %d allNull =[%d]\n",smallestBucketID,allNull);fflush(logFile);
+		fprintf(getLogFilePtr(),"YY %d allNull =[%d]\n",smallestBucketID,allNull);fflush(getLogFilePtr());
 		
         }
         
         #ifdef SUP_DEBUG
-                fprintf(logFile,"[printAssertionWithTruthToFile] ENDED\n");
+                fprintf(getLogFilePtr(),"[printAssertionWithTruthToFile] ENDED\n");
         #endif
-	fflush(logFile);
+	fflush(getLogFilePtr());
 }
 
 
@@ -5225,15 +5228,15 @@ void printAssertionWithTruthToFile(FILE* fp, struct intervalListStruct** targetL
  */
 void printAssertions(struct treeNode* node, FILE* fp, int targetPORV_id){
         #ifdef SUP_DEBUG
-        fprintf(logFile,"[printAssertions] STARTED\n");
+        fprintf(getLogFilePtr(),"[printAssertions] STARTED\n");
 	#endif
 	if(node->id==4){
-		fprintf(logFile,"\nCHECK WHATS HAPPENING HERE --- ABC ---\n");
+		fprintf(getLogFilePtr(),"\nCHECK WHATS HAPPENING HERE --- ABC ---\n");
 	}
         if(node && fp){
 	        #ifdef SUP_DEBUG
-                        printTreeNodeToFilePtr(node, logFile,targetPORV_id);
-			fflush(logFile);
+                        printTreeNodeToFilePtr(node, getLogFilePtr(),targetPORV_id);
+			fflush(getLogFilePtr());
                 #endif
 
 		sortTruthAssignmentList(&node->truthList);
@@ -5242,10 +5245,10 @@ void printAssertions(struct treeNode* node, FILE* fp, int targetPORV_id){
                 int bucketCount = 0;
 		
 		#ifdef SUP_DEBUG
-			fprintf(logFile,"*******************CONSTRAINT LIST PTR [%p]***********************\n",constraintList);
-			printTruthListToFilePtr(constraintList,logFile);
+			fprintf(getLogFilePtr(),"*******************CONSTRAINT LIST PTR [%p]***********************\n",constraintList);
+			printTruthListToFilePtr(constraintList,getLogFilePtr());
 			//REMOVING THIS FFLUSH CAN CAUSE A SEGFAULT: AND I HAVE NO IDEA WHY :-( 
-			fflush(logFile);
+			fflush(getLogFilePtr());
 		#endif
 			
 		#ifdef ASSERT_PRINT_DEBUG
@@ -5266,9 +5269,9 @@ void printAssertions(struct treeNode* node, FILE* fp, int targetPORV_id){
 			if(node->error!=0.0){
 				//fprintf(fp,"here - error not zero L4769\n");
 				#ifdef SUP_DEBUG
-					fprintf(logFile,"ENTERING HERE\n");
-					fprintf(logFile,"[%lf]\n",node->error);
-					printTreeNodeToFilePtr(node,logFile,targetPORV_id);
+					fprintf(getLogFilePtr(),"ENTERING HERE\n");
+					fprintf(getLogFilePtr(),"[%lf]\n",node->error);
+					printTreeNodeToFilePtr(node,getLogFilePtr(),targetPORV_id);
 				#endif
 					
                                 return;
@@ -5281,7 +5284,7 @@ void printAssertions(struct treeNode* node, FILE* fp, int targetPORV_id){
                         constraintList = node->truthList;
                         int i = 0;
 			int j = 0;
-			fflush(logFile);
+			fflush(getLogFilePtr());
                         
 			while(constraintList){
 				i = constraintList->asgmt->position;
@@ -5304,9 +5307,9 @@ void printAssertions(struct treeNode* node, FILE* fp, int targetPORV_id){
 				i = bucketCount;
 				for(i=bucketCount;i>=0;i--){
 					for(j=0;j<traceCount;j++){
-						fprintf(logFile,"\n[printAssertions] Bucket[%d][trace<%d>]:\n",i,j);
-						printIntervalListToFilePtr(bucket[i][j],logFile);
-						fprintf(logFile,"\n");fflush(logFile);
+						fprintf(getLogFilePtr(),"\n[printAssertions] Bucket[%d][trace<%d>]:\n",i,j);
+						printIntervalListToFilePtr(bucket[i][j],getLogFilePtr());
+						fprintf(getLogFilePtr(),"\n");fflush(getLogFilePtr());
 					}
 				}
                         #endif
@@ -5423,7 +5426,7 @@ void printAssertions(struct treeNode* node, FILE* fp, int targetPORV_id){
         }
         fflush(fp);
         #ifdef SUP_DEBUG
-        fprintf(logFile,"[printAssertions] ENDED\n");
+        fprintf(getLogFilePtr(),"[printAssertions] ENDED\n");
 	//fprintf(fp,"[printAssertions] ENDED\n");
         #endif
 }
@@ -5442,7 +5445,7 @@ void printFloatArrayToFile(double* array, int size, FILE* fp){
 
 
 void printFloat2DArraryToFile(int size1, int size2, double array[][size2], FILE* fp){
-	fprintf(logFile,"[printFloat2DArraryToFile] STARTED size-1 = [%d] ; size-2 = [%d].\n",size1,size2);
+	fprintf(getLogFilePtr(),"[printFloat2DArraryToFile] STARTED size-1 = [%d] ; size-2 = [%d].\n",size1,size2);
 	if(array && fp){
 		int i = 0;
 		int j = 0;
@@ -5462,7 +5465,7 @@ void printFloat2DArraryToFile(int size1, int size2, double array[][size2], FILE*
 
 /*
  * void printFloat2DArraryToFile(int size1, int size2, double array[][size2], FILE* fp){
- * fprintf(logFile,"[printFloat2DArraryToFile] STARTED size-1 = [%d] ; size-2 = [%d].\n",size1,size2);
+ * fprintf(getLogFilePtr(),"[printFloat2DArraryToFile] STARTED size-1 = [%d] ; size-2 = [%d].\n",size1,size2);
  * if(array && fp && (size1%2==0)){
  *	int i = 0;
  *	int j = 0;
@@ -5481,7 +5484,7 @@ void printFloat2DArraryToFile(int size1, int size2, double array[][size2], FILE*
  } */
 
 void copyMatrix(double ** target, int m, int n, double source[][n]){
-	fprintf(logFile,"[copyMatrix] STARTED\n");
+	fprintf(getLogFilePtr(),"[copyMatrix] STARTED\n");
 	int i,j;
 	
 	target = (double **) malloc(m * sizeof(double *));
@@ -5493,7 +5496,7 @@ void copyMatrix(double ** target, int m, int n, double source[][n]){
 			target[i][j] = source[i][j];
 		}
 	}
-	fprintf(logFile,"[copyMatrix] ENDED\n");
+	fprintf(getLogFilePtr(),"[copyMatrix] ENDED\n");
 }
 
 
@@ -5513,7 +5516,7 @@ void copyMatrix(double ** target, int m, int n, double source[][n]){
  */
 /*struct indexCouple* findError(struct treeNode* node){ 
 	#ifdef SUP_DEBUG
-	fprintf(logFile,"[findError] STARTED\n");
+	fprintf(getLogFilePtr(),"[findError] STARTED\n");
 	#endif
 	if(node){
 		struct indexCouple* list = NULL;
@@ -5522,8 +5525,8 @@ void copyMatrix(double ** target, int m, int n, double source[][n]){
 		
 		#ifdef SUP_DEBUG
 		//FILE* testout = fopen(assertFileName?assertFileName:"assertions.txt","a");
-		fprintf(logFile,"ERRORS:");
-		printFloatArrayToFile(errors,N*2,logFile);
+		fprintf(getLogFilePtr(),"ERRORS:");
+		printFloatArrayToFile(errors,N*2,getLogFilePtr());
 		//fclose(testout);
 		#endif
 		
@@ -5537,26 +5540,26 @@ void copyMatrix(double ** target, int m, int n, double source[][n]){
 		}
 		
 		#ifdef SUP_DEBUG
-		printIndexCoupleListToFilePtr(list,logFile);
-		fprintf(logFile,"[findError] ENDED\n");
+		printIndexCoupleListToFilePtr(list,getLogFilePtr());
+		fprintf(getLogFilePtr(),"[findError] ENDED\n");
 		#endif
 		return list;
 	}
 	#ifdef SUP_DEBUG
-	fprintf(logFile,"[findError] ENDED\n");
+	fprintf(getLogFilePtr(),"[findError] ENDED\n");
 	#endif
 	return NULL;
 }
 */
 int countCombinations(struct listOfIntervalListsStruct* truthSet, int* predList, int len){
 	#ifdef SUP_DEBUG
-	fprintf(logFile,"[countCombinations] STARTED\n");
+	fprintf(getLogFilePtr(),"[countCombinations] STARTED\n");
 	#endif
 	
 	
 	
 	#ifdef SUP_DEBUG
-	fprintf(logFile,"[countCombinations] ENDED\n");
+	fprintf(getLogFilePtr(),"[countCombinations] ENDED\n");
 	#endif
 }
 
@@ -5807,4 +5810,44 @@ int checkCreateLogDir(){
 			exit(0);
 		}
 	}
+}
+
+FILE* getLogFilePtr(){	
+	//printf("[getLogFilePtr] logFile [%p]\n",logFile);fflush(stdout);
+	static int logID = 0;
+	static char log_filename[MAX_STR_LENGTH];
+	static char timeOfDay[MAX_STR_LENGTH];
+	
+	//printf("[getLogFilePtr] Timestamp [%s] length [%d]\n",timeOfDay,strlen(timeOfDay));fflush(stdout);
+	if(strlen(timeOfDay)==0){
+		time_t t = time(NULL);
+		struct tm *tme = localtime(&t);
+		sprintf(timeOfDay,"%d%d%d%d%d%d",tme->tm_year + 1900, tme->tm_mon + 1, tme->tm_mday, tme->tm_hour, tme->tm_min, tme->tm_sec);
+		//printf("[getLogFilePtr] Created timestamp [%s]\n",timeOfDay);fflush(stdout);
+	}
+
+	if(logFile == NULL){
+		//If this is the first time the logFile is being created
+		//Initialize the name and file pointer
+		printf("[getLogFilePtr] First time the logFile is opened.\n");fflush(stdout);
+		logID++;
+		sprintf(log_filename,"logs/log_%s_%d.txt", timeOfDay,logID);
+		logFile = fopen(log_filename,"w");
+		
+	} else {//If this is not the first time, then
+		//printf("[getLogFilePtr] Flushing Log\n");fflush(stdout);
+		fflush(logFile);//Flush the current log
+		//printf("[getLogFilePtr] Getting size of log\n");
+		if(getFileSize(log_filename)/(1024*1024)>=MAX_LOG_FILE_SIZE_MB){// if the size of the file is too large then (measured in MB)
+			printf("[getLogFilePtr] Creating new log ");fflush(stdout);
+			fclose(logFile);//Close the existing file
+			logID++;
+			sprintf(log_filename,"logs/log_%s_%d.txt", timeOfDay,logID);
+			printf("[%s]\n",log_filename);fflush(stdout);
+			logFile = fopen(log_filename,"w");
+		}
+	}
+	//printf("[getLogFilePtr] Returning Logfile\n");fflush(stdout);
+	//Return the logFile Pointer
+	return logFile;
 }
