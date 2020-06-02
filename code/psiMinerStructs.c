@@ -3681,7 +3681,7 @@ FILE* processInput(int argc, char* argv[], int* N, double* K, int* depth, int re
                 
 	FILE* intervalListin =  fopen(argv[1], "r");
 	if(intervalListin==0){
-		printf("[ERROR] File \"%s\" does not exist.\n",argv[1]);
+		printf("[ERROR] Input File \"%s\" does not exist.\n",argv[1]);
 		exit(0);
 	}
 	return intervalListin;
@@ -3694,7 +3694,7 @@ FILE* processConfig(int argc, char* argv[]){
 		case 2:
 			configin =  fopen(argv[1], "r");
 			if(configin==0){
-				printf("[ERROR] File \"%s\" does not exist.\n",argv[1]);
+				printf("[ERROR] Configuration File \"%s\" does not exist.\n",argv[1]);
 				exit(0);
 			}
 			return configin;
@@ -3703,7 +3703,7 @@ FILE* processConfig(int argc, char* argv[]){
 		case 3:
 			configin =  fopen(argv[1], "r");
 			if(configin==0){
-				printf("[ERROR] File \"%s\" does not exist.\n",argv[1]);
+				printf("[ERROR] Configuration File \"%s\" does not exist.\n",argv[1]);
 				exit(0);
 			}
 			targetBias = atoi(argv[2]);
