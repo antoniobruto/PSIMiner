@@ -1562,7 +1562,7 @@ void booleanize(){
         pid_t pyPID=fork();
         if (pyPID==0)
         { //child process 
-                execlp("python3","python3","translate.py",(char*)NULL);
+                execlp("python","python","translate.py",(char*)NULL);
                 printf("ERROR: FAILED TO RUN Python Script translate.py\n");
                 exit(127); // only if execv fails 
         }
