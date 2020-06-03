@@ -92,6 +92,7 @@ struct config{
 	int maxTreeDepth;
 	double traceLength;
 	int learnType;
+	double epsilon;
 };
 
 /*---------------------DECLARATIONS-----------------------*/

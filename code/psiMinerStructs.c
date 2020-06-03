@@ -81,6 +81,8 @@ static int first=0;
 extern struct assertionStruct* allAssertions;
 struct intervalListStruct** validLists = NULL;
 static int superFlag=1;
+extern double epsilon;
+
 /*-----------------------IDENTIFIER-----------------------------*/
 /*
 struct identifier* createIdentifier(unsigned int state){
@@ -4830,6 +4832,7 @@ void writeAssertionWithTruthToStruct(struct assertionStruct* assertion, struct i
 			double totalEvidence = 0.0;
 			double totalOverlap = 0.0;
 			for(i=0;i<traceCount;i++){
+				fprintf(getLogFilePtr(),"[writeAssertionWithTruthToStruct] Computing Influence for trace ID = %d, traceCount=%d\n",i+1,traceCount); 
 				forwardInfList[i] = forwardInfluence(endMatch[i],position,K,targetList[i]);
 				totalEvidence += lengthOfIntervalList(forwardInfList[i]);
 				
@@ -4851,6 +4854,7 @@ void writeAssertionWithTruthToStruct(struct assertionStruct* assertion, struct i
 			double totalEvidence = 0.0;
 			double totalOverlap = 0.0;
 			for(i=0;i<traceCount;i++){
+				fprintf(getLogFilePtr(),"[writeAssertionWithTruthToStruct] Computing Influence for trace ID = %d, traceCount=%d\n",i+1,traceCount); 
 				forwardInfList[i] = forwardInfluence(endMatch[i],position,K,targetList[i]);
 				totalEvidence += lengthOfIntervalList(forwardInfList[i]);
 				
@@ -4862,8 +4866,8 @@ void writeAssertionWithTruthToStruct(struct assertionStruct* assertion, struct i
 			support = totalEvidence/totalTraceLength;
 		}
 		
-		fprintf(getLogFilePtr(),"SUPPORT = [%lf]\n",support*100.0);
-		fprintf(getLogFilePtr(),"CORRELATION = [%lf]\n",correlation*100.0);
+		fprintf(getLogFilePtr(),"[writeAssertionWithTruthToStruct] SUPPORT = [%lf]\n",support*100.0);
+		fprintf(getLogFilePtr(),"[writeAssertionWithTruthToStruct] CORRELATION = [%lf]\n",correlation*100.0);
 		
 		
 		#ifdef ASSERT_PRINT_DEBUG

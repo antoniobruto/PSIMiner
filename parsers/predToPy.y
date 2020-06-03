@@ -5,6 +5,7 @@
 			#define MAX_STR_LENGTH 10240
 	#endif
 	
+	//#define PROCESS_TRACES
 	#include <stdio.h>
 	#include <stdlib.h>
 	#include <string.h>
@@ -50,7 +51,7 @@
 %}
 
 //Lexical Tokens
-%token <string> TRACEFILE TRACECOUNT SEQLENGTH DELAYRES DEPTH BESTCOUNT TMAX TMIN START PBEGIN PEND OPENROUND CLOSEROUND ATPOSEDGE ATNEGEDGE ATANYEDGE RATIONAL ARITHOP EQ LEQ GEQ LT GT SEMICOLON DOLLARTIME ATOM BAND BOR EEQ PREDLEARN COMMA;
+%token <string> TRACEFILE TRACECOUNT SEQLENGTH DELAYRES DEPTH BESTCOUNT TMAX TMIN START PBEGIN PEND OPENROUND CLOSEROUND ATPOSEDGE ATNEGEDGE ATANYEDGE RATIONAL ARITHOP EQ LEQ GEQ LT GT SEMICOLON DOLLARTIME ATOM BAND BOR EEQ PREDLEARN COMMA TIMEPRECISION;
 
 //Start Production Rule
 %start configSpec
@@ -68,7 +69,7 @@
 	int code;
 }
 
-%type <string> rational arithExpr arithStatement traceFile traceFileList sequenceLength delayResolution bestGainCount tempMax tempMin treeDepth learningType traceCT;
+%type <string> rational arithExpr arithStatement traceFile traceFileList sequenceLength delayResolution bestGainCount tempMax tempMin treeDepth learningType traceCT timePrecision;
 %type <id> variableMapList variableMap;
 //%type <event> eventExpr;
 %type <porvType> porv predicateList;
@@ -192,6 +193,16 @@ inputList:
 							inputConfig->learnType = atoi($2);
 						
 						}
+	|	inputList timePrecision	{
+							#ifdef YACC_DEBUG_ON 
+								printf("PARSER: Matched input-learningType statement\n");
+							#endif
+							if(!inputConfig){
+								inputConfig = createConfig();
+							} 
+							inputConfig->epsilon = atof($2);
+						
+						}					
 	|	traceFile			{	
 							#ifdef YACC_DEBUG_ON 
 								printf("PARSER: Matched lone-input-traceFile statement\n");
@@ -289,6 +300,16 @@ inputList:
 							}
 							inputConfig->traceCount = atoi($1);
 							traceCount = atoi($1);;
+						
+						}
+	|	 timePrecision	{
+							#ifdef YACC_DEBUG_ON 
+								printf("PARSER: Matched input-learningType statement\n");
+							#endif
+							if(!inputConfig){
+								inputConfig = createConfig();
+							} 
+							inputConfig->epsilon = atof($1);
 						
 						}
 	;
@@ -418,7 +439,15 @@ tempMin: TMIN EEQ rational 		{
 						//printf("[%s]\n",$2);
 						strcpy($$,$3); 
 					};
-	
+
+timePrecision: TIMEPRECISION EEQ rational {
+						#ifdef YACC_DEBUG_ON 
+								printf("PARSER: Matched tempMin statement\n");
+						#endif
+						//printf("[%s]\n",$2);
+						strcpy($$,$3); 
+					};
+
 predicateSpec:
         startExpr variableMapList { idList = $2;} PBEGIN predicateList endPList expressList {      
                                                                 #ifdef YACC_DEBUG_ON 
@@ -432,11 +461,13 @@ predicateSpec:
                                                                 predicateMap->exprList = $7;
                                                                 //printPredicateMap(predicateMap);
                                                                 struct identifier* id = inputConfig->traceFileNames;
+                                                                #ifdef PROCESS_TRACES
                                                                 while(id){
 																	preparePy(predicateMap,id->name);
 																	booleanize();
 																	id = id->next;
                                                                 }
+                                                                #endif
                                                                 //preparePy(predicateMap,traceFileName);
                                                                 //booleanize();
                                                                 //printf("\nInterval Sets are In: \"%s.dat\"\n",traceFileName);
@@ -453,11 +484,13 @@ predicateSpec:
                                                                 predicateMap->exprList = $6;
                                                                 //printPredicateMap(predicateMap);                                                                
                                                                 struct identifier* id = inputConfig->traceFileNames;
+                                                                #ifdef PROCESS_TRACES
                                                                 while(id){
 																	preparePy(predicateMap,id->name);
 																	booleanize();
 																	id = id->next;
                                                                 }
+                                                                #endif
                                                                 //preparePy(predicateMap,traceFileName);
                                                                 //booleanize();
                                                                 //printf("\nInterval Sets are In: \"%s.dat\"\n",traceFileName);

@@ -4,7 +4,7 @@
 	#ifndef MAX_STR_LENGTH
 		#define MAX_STR_LENGTH 10240
 	#endif
-	
+	//#define epsilon 10e-5
 	#include <stdio.h>
 	#include <stdlib.h>
 	#include <string.h>
@@ -23,6 +23,7 @@
 	extern struct listOfIntervalListsStruct** listOfIntervalSets;
 	extern int traceID;
 	extern double tl;
+	extern double epsilon;
 	
 	//Global Objects
 	int errNo,err1No,err2No,err3No,err4No,err5No,err6No;
@@ -141,8 +142,12 @@ interval: INTERVAL_BEGIN RATIONAL SEPARATOR RATIONAL INTERVAL_END
                                                         #ifdef YACC_DEBUG_ON
                                                                 printf("[interval] [%s:%s)\n",$2,$4);fflush(stdout);
 							#endif
-							
-							$$ = createIntervalStruct(atof($2),atof($4));
+							double l = atof($2);
+							double r = atof($4);
+							if(r<=l+epsilon){
+								r = l+epsilon;
+							}
+							$$ = createIntervalStruct(l,r);
 							
 							#ifdef YACC_DEBUG_ON
                                                                 printInterval($$);

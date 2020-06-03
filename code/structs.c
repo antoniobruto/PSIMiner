@@ -24,7 +24,8 @@
 #include <sys/stat.h> /* for file statistics */
 #include "structs.h"
 
-#define epsilon 0.0001
+#define defPrecision 10e-6
+extern double epsilon;
 
 int timeCol = 0;
 /*-----------------------Operator Maps-------------------------*/
@@ -55,6 +56,7 @@ struct config* createConfig(){
 	inputConfigTemp->tmax = 20;
 	inputConfigTemp->bestGainCount = 5;
 	inputConfigTemp->learnType = 0;
+	inputConfigTemp->epsilon = defPrecision;
 	inputConfigTemp->traceFileNames = NULL;
 	bzero(inputConfigTemp->traceFileName,sizeof(char)*MAX_STR_LENGTH);
 	bzero(inputConfigTemp->intervalSetFileName,sizeof(char)*MAX_STR_LENGTH);
@@ -1417,6 +1419,8 @@ void printExpressionToFile(FILE* fp, struct file* predicateMap, struct expressio
 		fprintf(fp,"\t\t\telse:\n");
 		fprintf(fp,"\t\t\t\tif switch[%d] == 1:\n",id);
 		fprintf(fp,"\t\t\t\t\tr[%d] = float(row[%d])\n",id,timeCol-1);
+		fprintf(fp,"\t\t\t\t\tif r[%d] <= l[%d]:\n",id,id);
+		fprintf(fp,"\t\t\t\t\t\tr[%d] = l[%d]+%lf\n",id,id,epsilon);
 		fprintf(fp,"\t\t\t\t\tswitch[%d] = 0\n",id);
 		fprintf(fp,"\t\t\t\t\tintervalSet[%d] = intervalSet[%d] + [[l[%d],r[%d]]]\n",id,id,id,id);
 		fprintf(fp,"\t\t\t\t\tl[%d] = -1.0\n",id);

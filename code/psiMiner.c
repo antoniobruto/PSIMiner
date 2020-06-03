@@ -72,6 +72,7 @@ extern int learnedOPparse(void);
 struct predicateDetail* details = NULL;
 //struct predicateDetail* allDetails = NULL;	//Sorted Accumulator of predicates learned
 int logging = 1;	//Logging is 1 if logs are enabled and 0 otherwise
+double epsilon;
 
 //----------------------------------------
 
@@ -163,6 +164,7 @@ int main(int argc, char *argv[]) {
 		predToPyin = processConfig(argc,argv);
 		predToPyparse();
 		printConfig(inputConfig);
+		epsilon = inputConfig->epsilon;
 		//--------------------------------------------------------------
 		
 		learnMode = getLearnType(inputConfig);
