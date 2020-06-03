@@ -93,6 +93,7 @@ struct config{
 	double traceLength;
 	int learnType;
 	double epsilon;
+	char pythonPath[MAX_STR_LENGTH];
 };
 
 /*---------------------DECLARATIONS-----------------------*/

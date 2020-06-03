@@ -25,6 +25,8 @@
 #include "structs.h"
 
 #define defPrecision 10e-6
+#define pyVer "python"
+
 extern double epsilon;
 
 int timeCol = 0;
@@ -58,6 +60,7 @@ struct config* createConfig(){
 	inputConfigTemp->learnType = 0;
 	inputConfigTemp->epsilon = defPrecision;
 	inputConfigTemp->traceFileNames = NULL;
+	bzero(inputConfigTemp->pythonPath,sizeof(char)*MAX_STR_LENGTH);
 	bzero(inputConfigTemp->traceFileName,sizeof(char)*MAX_STR_LENGTH);
 	bzero(inputConfigTemp->intervalSetFileName,sizeof(char)*MAX_STR_LENGTH);
 	return inputConfigTemp;
@@ -76,6 +79,7 @@ void printConfig(struct config* inputConfig){
 		printf("Trace File Names    = "); printIdentifierList(inputConfig->traceFileNames);//printf("\n");
 		//printf("Data File Name      = %s\n",inputConfig->intervalSetFileName);
 		printf("Learning Mode          = %s\n",inputConfig->learnType==0?"Knowledge Only":(inputConfig->learnType==1?"Learn only if required":(inputConfig->learnType==2?"Best of both worlds":"Use only learned knowledge")));
+		printf("Time Precisionion	= %le\n",inputConfig->epsilon);
 		printf("----------------------------------------------------\n");
 	}
 }
@@ -1412,7 +1416,7 @@ void printExpressionToFile(FILE* fp, struct file* predicateMap, struct expressio
 		fprintf(fp,"\t\t\t\tif switch[%d] == 0:\n",id);
 		fprintf(fp,"\t\t\t\t\tswitch[%d] = 1\n",id);
 		fprintf(fp,"\t\t\t\t\tl[%d] = float(row[%d])\n",id, timeCol-1);
-		fprintf(fp,"\t\t\t\t\tr[%d] = float(row[%d])+%f\n",id, timeCol-1,epsilon);
+		fprintf(fp,"\t\t\t\t\tr[%d] = float(row[%d])+%le\n",id, timeCol-1,epsilon);
 		fprintf(fp,"\t\t\t\telse:\n");
 		fprintf(fp,"\t\t\t\t\tr[%d] = float(row[%d])\n",id, timeCol-1);
 		
@@ -1420,7 +1424,7 @@ void printExpressionToFile(FILE* fp, struct file* predicateMap, struct expressio
 		fprintf(fp,"\t\t\t\tif switch[%d] == 1:\n",id);
 		fprintf(fp,"\t\t\t\t\tr[%d] = float(row[%d])\n",id,timeCol-1);
 		fprintf(fp,"\t\t\t\t\tif r[%d] <= l[%d]:\n",id,id);
-		fprintf(fp,"\t\t\t\t\t\tr[%d] = l[%d]+%lf\n",id,id,epsilon);
+		fprintf(fp,"\t\t\t\t\t\tr[%d] = l[%d]+%le\n",id,id,epsilon);
 		fprintf(fp,"\t\t\t\t\tswitch[%d] = 0\n",id);
 		fprintf(fp,"\t\t\t\t\tintervalSet[%d] = intervalSet[%d] + [[l[%d],r[%d]]]\n",id,id,id,id);
 		fprintf(fp,"\t\t\t\t\tl[%d] = -1.0\n",id);
@@ -1562,13 +1566,20 @@ void printCSV(FILE* fp,struct file* predicateMap,char* csvFile){
         }
 }
 
-void booleanize(){
+void booleanize(char* pythonPath){
         pid_t pyPID=fork();
         if (pyPID==0)
         { //child process 
-                execlp("python","python","translate.py",(char*)NULL);
-                printf("ERROR: FAILED TO RUN Python Script translate.py\n");
-                exit(127); // only if execv fails 
+				if(pythonPath){
+					execlp(pythonPath,pythonPath,"translate.py",(char*)NULL);
+					printf("ERROR: FAILED TO RUN Python Script translate.py\n");
+					exit(127); // only if execv fails 
+				} else {
+					execlp(pyVer,pyVer,"translate.py",(char*)NULL);
+					printf("ERROR: FAILED TO RUN Python Script translate.py\n");
+					exit(127); // only if execv fails 
+				}
+                
         }
         else
         { // pid!=0; parent process 

@@ -194,6 +194,16 @@
 								return TIMEPRECISION;
                         }
 
+"pythonPath"			{		predToPy_multiLine=0;
+								#ifdef LEX_DEBUG_ON
+									printf("lex: keyword [traceCount]\n");
+								#endif
+								predToPy_charPos+=yyleng;
+								strcat(line,yytext);
+								strcpy(yylval.string,yytext);
+								return PYTHONPATH;
+						}
+
 "("                     {       predToPy_multiLine=0;
                                 #ifdef LEX_DEBUG_ON
                                 printf("lex: (\n");

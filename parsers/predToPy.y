@@ -5,7 +5,7 @@
 			#define MAX_STR_LENGTH 10240
 	#endif
 	
-	//#define PROCESS_TRACES
+	#define PROCESS_TRACES
 	#include <stdio.h>
 	#include <stdlib.h>
 	#include <string.h>
@@ -26,6 +26,7 @@
 	extern struct identifier* idList;
 	extern struct config* inputConfig;
 	extern struct identifier* traceFileNames;
+	extern double epsilon;
 	
 	//Local Objects
 	char* traceFileName = NULL;
@@ -51,7 +52,7 @@
 %}
 
 //Lexical Tokens
-%token <string> TRACEFILE TRACECOUNT SEQLENGTH DELAYRES DEPTH BESTCOUNT TMAX TMIN START PBEGIN PEND OPENROUND CLOSEROUND ATPOSEDGE ATNEGEDGE ATANYEDGE RATIONAL ARITHOP EQ LEQ GEQ LT GT SEMICOLON DOLLARTIME ATOM BAND BOR EEQ PREDLEARN COMMA TIMEPRECISION;
+%token <string> TRACEFILE TRACECOUNT SEQLENGTH DELAYRES DEPTH BESTCOUNT TMAX TMIN START PBEGIN PEND OPENROUND CLOSEROUND ATPOSEDGE ATNEGEDGE ATANYEDGE RATIONAL ARITHOP EQ LEQ GEQ LT GT SEMICOLON DOLLARTIME ATOM BAND BOR EEQ PREDLEARN COMMA TIMEPRECISION PYTHONPATH;
 
 //Start Production Rule
 %start configSpec
@@ -69,7 +70,7 @@
 	int code;
 }
 
-%type <string> rational arithExpr arithStatement traceFile traceFileList sequenceLength delayResolution bestGainCount tempMax tempMin treeDepth learningType traceCT timePrecision;
+%type <string> rational arithExpr arithStatement traceFile traceFileList sequenceLength delayResolution bestGainCount tempMax tempMin treeDepth learningType traceCT timePrecision pythonPath;
 %type <id> variableMapList variableMap;
 //%type <event> eventExpr;
 %type <porvType> porv predicateList;
@@ -201,8 +202,17 @@ inputList:
 								inputConfig = createConfig();
 							} 
 							inputConfig->epsilon = atof($2);
-						
-						}					
+							epsilon = atof($2);
+						}
+	|	inputList pythonPath	{
+							#ifdef YACC_DEBUG_ON 
+								printf("PARSER: Matched input-learningType statement\n");
+							#endif
+							if(!inputConfig){
+								inputConfig = createConfig();
+							} 
+							sprintf(inputConfig->pythonPath,"%s",$2);
+						}
 	|	traceFile			{	
 							#ifdef YACC_DEBUG_ON 
 								printf("PARSER: Matched lone-input-traceFile statement\n");
@@ -310,7 +320,16 @@ inputList:
 								inputConfig = createConfig();
 							} 
 							inputConfig->epsilon = atof($1);
-						
+							epsilon = atof($1);
+						}
+	|	pythonPath		{
+							#ifdef YACC_DEBUG_ON 
+								printf("PARSER: Matched input-learningType statement\n");
+							#endif
+							if(!inputConfig){
+								inputConfig = createConfig();
+							} 
+							sprintf(inputConfig->pythonPath,"%s",$1);
 						}
 	;
 
@@ -448,6 +467,14 @@ timePrecision: TIMEPRECISION EEQ rational {
 						strcpy($$,$3); 
 					};
 
+pythonPath: PYTHONPATH EEQ ATOM {
+						#ifdef YACC_DEBUG_ON 
+								printf("PARSER: Matched tempMin statement\n");
+						#endif
+						//printf("[%s]\n",$2);
+						strcpy($$,$3); 
+			};
+
 predicateSpec:
         startExpr variableMapList { idList = $2;} PBEGIN predicateList endPList expressList {      
                                                                 #ifdef YACC_DEBUG_ON 
@@ -464,7 +491,7 @@ predicateSpec:
                                                                 #ifdef PROCESS_TRACES
                                                                 while(id){
 																	preparePy(predicateMap,id->name);
-																	booleanize();
+																	booleanize(inputConfig->pythonPath);
 																	id = id->next;
                                                                 }
                                                                 #endif
@@ -487,7 +514,7 @@ predicateSpec:
                                                                 #ifdef PROCESS_TRACES
                                                                 while(id){
 																	preparePy(predicateMap,id->name);
-																	booleanize();
+																	booleanize(inputConfig->pythonPath);
 																	id = id->next;
                                                                 }
                                                                 #endif
