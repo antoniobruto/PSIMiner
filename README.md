@@ -26,7 +26,8 @@ Requires
 
 TOOL USAGE:
 The binary of the tool is built in the "build" directory created by 
-build.sh
+build.sh 
+If this directory does not exist, please create it before running the build script.
 
 For TraceFiles:
 It is assumed that there is a time reference in column 1.
@@ -36,6 +37,5 @@ The prefix of the name of the assertion file will be the name of the config file
 **************************************************************************
 
 EXAMPLES: Examples are available at:
-				http://cse.iitkgp.ac.in/~bdcaa/PSIMiner
-
+	https://github.com/antoniobruto/PSIMiner-Examples
 
