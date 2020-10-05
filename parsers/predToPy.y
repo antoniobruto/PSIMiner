@@ -50,7 +50,7 @@
 %}
 
 //Lexical Tokens
-%token <string> TRACEFILE TRACECOUNT SEQLENGTH DELAYRES DEPTH BESTCOUNT TMAX TMIN START PBEGIN PEND OPENROUND CLOSEROUND ATPOSEDGE ATNEGEDGE ATANYEDGE RATIONAL ARITHOP EQ LEQ GEQ LT GT SEMICOLON DOLLARTIME ATOM BAND BOR EEQ PREDLEARN COMMA;
+%token <string> TRACEFILE TRACECOUNT SEQLENGTH DELAYRES DEPTH BESTCOUNT TMAX TMIN START PBEGIN PEND OPENROUND CLOSEROUND ATPOSEDGE ATNEGEDGE ATANYEDGE RATIONAL ARITHOP EQ LEQ GEQ LT GT SEMICOLON DOLLARTIME ATOM BAND BOR EEQ PREDLEARN COMMA STRICT OBJECTIVE USEOVERLAP;
 
 //Start Production Rule
 %start configSpec
@@ -68,7 +68,7 @@
 	int code;
 }
 
-%type <string> rational arithExpr arithStatement traceFile traceFileList sequenceLength delayResolution bestGainCount tempMax tempMin treeDepth learningType traceCT;
+%type <string> rational arithExpr arithStatement traceFile traceFileList sequenceLength delayResolution bestGainCount tempMax tempMin treeDepth learningType traceCT strictness objectiveFunction useOverlap;
 %type <id> variableMapList variableMap;
 //%type <event> eventExpr;
 %type <porvType> porv predicateList;
@@ -192,6 +192,33 @@ inputList:
 							inputConfig->learnType = atoi($2);
 						
 						}
+	|	inputList strictness		{
+							#ifdef YACC_DEBUG_ON 
+								printf("PARSER: Matched input-learningType statement\n");
+							#endif
+							if(!inputConfig){
+								inputConfig = createConfig();
+							} 
+							inputConfig->strict = atoi($2);
+						}
+	|	inputList objectiveFunction		{
+							#ifdef YACC_DEBUG_ON 
+								printf("PARSER: Matched input-learningType statement\n");
+							#endif
+							if(!inputConfig){
+								inputConfig = createConfig();
+							} 
+							inputConfig->objective = atoi($2);
+						}
+	|	inputList useOverlap		{
+							#ifdef YACC_DEBUG_ON 
+								printf("PARSER: Matched input-learningType statement\n");
+							#endif
+							if(!inputConfig){
+								inputConfig = createConfig();
+							} 
+							inputConfig->useOverlap = atoi($2);
+						}
 	|	traceFile			{	
 							#ifdef YACC_DEBUG_ON 
 								printf("PARSER: Matched lone-input-traceFile statement\n");
@@ -291,6 +318,36 @@ inputList:
 							traceCount = atoi($1);;
 						
 						}
+	| 	strictness		{
+							#ifdef YACC_DEBUG_ON 
+								printf("PARSER: Matched input-traceCount statement\n");
+							#endif
+							if(!inputConfig){
+								inputConfig = createConfig();
+							} 
+							
+							inputConfig->strict = atoi($1);
+						}
+	| 	objectiveFunction		{
+							#ifdef YACC_DEBUG_ON 
+								printf("PARSER: Matched input-traceCount statement\n");
+							#endif
+							if(!inputConfig){
+								inputConfig = createConfig();
+							} 
+							
+							inputConfig->objective = atoi($1);
+						}
+	| 	useOverlap		{
+							#ifdef YACC_DEBUG_ON 
+								printf("PARSER: Matched input-traceCount statement\n");
+							#endif
+							if(!inputConfig){
+								inputConfig = createConfig();
+							} 
+							
+							inputConfig->useOverlap = atoi($1);
+						}
 	;
 
 learningType: PREDLEARN EEQ rational	{
@@ -310,6 +367,30 @@ traceCT:	TRACECOUNT EEQ rational	{
                                                 strcpy($$,$3); 
 					};
 
+strictness:	STRICT EEQ rational	{
+												#ifdef YACC_DEBUG_ON 
+                                                        printf("PARSER: Matched strictness statement\n");
+                                                #endif
+                                                //printf("[%s]\n",$2);
+                                                strcpy($$,$3); 
+					};
+
+objectiveFunction:	OBJECTIVE EEQ rational	{
+												#ifdef YACC_DEBUG_ON 
+                                                        printf("PARSER: Matched strictness statement\n");
+                                                #endif
+                                                //printf("[%s]\n",$2);
+                                                strcpy($$,$3); 
+					};
+					
+useOverlap:	USEOVERLAP EEQ rational	{
+												#ifdef YACC_DEBUG_ON 
+                                                        printf("PARSER: Matched strictness statement\n");
+                                                #endif
+                                                //printf("[%s]\n",$2);
+                                                strcpy($$,$3); 
+					};
+					
 traceFile: TRACEFILE EEQ traceFileList	{
 						strcpy($$,$3);
 					};

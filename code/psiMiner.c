@@ -123,6 +123,8 @@ int cumulative = 0;			//	Determine how gain is computed.
 struct assertionStruct* allAssertions=NULL;
 int main(int argc, char *argv[]) {
 	checkCreateLogDir();
+	clock_t begin_process_input,end_process_input,begin_gen_tree,end_gen_tree;
+	
 	int targetPORV_id = 1;
 	N = 0;              //Number of parts of the sequence 
 	K = 0.0;                //Maximum delay seperation
@@ -158,6 +160,7 @@ int main(int argc, char *argv[]) {
 	#ifdef COV_TEST
 	while(1){
 	#endif
+		begin_process_input=clock();
 		//-------Read the Config into an "inputConfig" structure---------
 		predToPyin = processConfig(argc,argv);
 		predToPyparse();
@@ -166,7 +169,7 @@ int main(int argc, char *argv[]) {
 		
 		learnMode = getLearnType(inputConfig);
 		printf("Learning Mode = %d\n",learnMode);
-		
+		strict = inputConfig->strict;
 		N = inputConfig->N+1;
 		K = inputConfig->K;
 		
@@ -233,6 +236,9 @@ int main(int argc, char *argv[]) {
 		
 		printPredicateList(predicateMap);
 		
+
+		end_process_input = clock();
+		
 		//----------------------------------Choose a target PORV-------------------------------------
 		printf("NUMBER = %d\n",numberOfPORVs);
 		targetPORV_id = getTarget(numberOfPORVs);        //REMOVE LATER
@@ -283,14 +289,16 @@ int main(int argc, char *argv[]) {
 		//struct listOfIntervalListsStruct* backwardInfluence = prepareBackwardInfluenceTraces(listOfIntervalSets,target,N,K,strict);
 		prepareBackwardInfluenceTraces(listOfIntervalSets,targetPORV_id,N,K,strict);        
 		// At this point target, and numberOfPORVs+1 to numberOfPORVs+(N-1) are the target interval lists
-			
+		end_process_input = clock();	
 		printTreeNodeToFilePtr(root,logFile,targetPORV_id);
 		fflush(logFile);
 		
 		int recreate_iterator = 0;
 		for(recreate_iterator=0;recreate_iterator<RECREATE_COUNT;recreate_iterator++){
+			begin_gen_tree=clock();
 			prepareRoot(root,listOfIntervalSets,targetPORV_id,numberOfPORVs,N);                
 			amsMine(root,targetPORV_id,numberOfPORVs,N,depth,targetPORV_id);
+			end_gen_tree=clock();
 			printTree(root,targetPORV_id);
 			purgeTruthListForTreeNode(root);
 		}
@@ -318,17 +326,23 @@ int main(int argc, char *argv[]) {
 	fflush(predLogFile);
 	fclose(predLogFile);
 	
+	fprintf(stdout,"\nList of Assertions - (from internal data-structures)\n");
 	struct assertionStruct* temp = allAssertions;
-	while(temp){
-		
+	FILE* tempAssertFile = fopen("psi-properties.txt","w");
+	while(temp){		
 		if(((int)strlen(temp->assertion))>0){
 			fprintf(stdout,"\n%s",temp->assertion);
 			fprintf(stdout,"SUPPORT = %lf\n",temp->support);
 			fprintf(stdout,"CORRELATION = %lf\n",temp->correlation);
+			
+			fprintf(tempAssertFile,"\n%s",temp->assertion);
+			fprintf(tempAssertFile,"SUPPORT = %lf\n",temp->support);
+			fprintf(tempAssertFile,"CORRELATION = %lf\n",temp->correlation);
 		}
 		temp = temp->next;
 	}
-	
+	fprintf(tempAssertFile,"\n Process Pseudo-Targets = %lf\n",(double)(end_process_input - begin_process_input)/CLOCKS_PER_SEC);
+	fprintf(tempAssertFile,"\n Process Decision Tree = %lf\n",(double)(end_gen_tree - begin_gen_tree)/CLOCKS_PER_SEC);
 	printf("\nAssertions are listed in the file \"%s\"\nCoverage information is in the file \"cov.txt\"\n",assertFileName);
 	return 0;
 	

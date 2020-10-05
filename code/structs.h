@@ -87,11 +87,14 @@ struct config{
 	struct identifier* traceFileNames;
 	char intervalSetFileName[MAX_STR_LENGTH];
 	int bestGainCount;
+	int objective;
+	int useOverlap;
 	double tmin;
 	double tmax;
 	int maxTreeDepth;
 	double traceLength;
 	int learnType;
+	int strict;
 };
 
 /*---------------------DECLARATIONS-----------------------*/
