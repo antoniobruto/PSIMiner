@@ -89,13 +89,13 @@ int separationType = 1;
 double correlationThreshold = 1.0;
 double supportThreshold = 0.001;
 
-int targetBias = 0;			/*	
+int targetBias = 0;		/*	
 						targetBias biases the algorithm to learn 
 						for specific target truths. 
 							-1 -> 	a negatedd target, 
 							+1 -> 	a true target, 
 							0  -> 	no bias.
-					*/
+							*/
 int learnMode = 0;		/*	
 						learnMode indicates the level at which
 						learning is performed. 
@@ -114,7 +114,7 @@ int learnMode = 0;		/*
 								knowledge.
 							3 ->	Ignorance is bliss:
 								Only use learned predicates	
-					*/
+						*/
 
 FILE* logFile;				/*	The Log File used for logging function calls	*/
 FILE* predLogFile;			/*	The Predicate Log for logging learned predicates that are used in the decision process*/
@@ -180,20 +180,23 @@ int main(int argc, char *argv[]) {
 		
 		depth = getDepth(inputConfig);
 		char* tempF;
-				assertFileName = (char*)malloc(sizeof(char)*(strlen(argv[1])+50));
+		assertFileName = (char*)malloc(sizeof(char)*(strlen(argv[1])+50));
 		strcpy(assertFileName,argv[1]);
 		tempF = assertFileName;
+		
 		while(*tempF!='\0' && *tempF!='.'){
 			tempF++;
 		}
+		
 		if(*tempF == '.'){
 			*tempF = '\0';
 		}
 		
 		//---------------------------------Parsing Interval Sets--------------------------------------
 		#ifdef MAIN_DEBUG
-		fprintf(logFile,"[AMSMiner] Parsing Intervals.\n");fflush(logFile);
+			fprintf(logFile,"[AMSMiner] Parsing Intervals.\n");fflush(logFile);
 		#endif
+		
 		setbuf(stdout, NULL);
 		
 		struct identifier* traceFileNames = duplicateTraceFileNames(inputConfig);//Do not call duplicateIdentifiers because pointers one hierarchy in, created by other files, are not accessible from this file.
@@ -204,7 +207,6 @@ int main(int argc, char *argv[]) {
 			printf("\nNo traces to analyze! Gimme something to chew on :) \n");
 			exit(0);//printIdentifierList(traceFileNames);
 		}
-	
 	
 		while(id){
 			char* traceName = id->name;
@@ -345,5 +347,4 @@ int main(int argc, char *argv[]) {
 	fprintf(tempAssertFile,"\n Process Decision Tree = %lf\n",(double)(end_gen_tree - begin_gen_tree)/CLOCKS_PER_SEC);
 	printf("\nAssertions are listed in the file \"%s\"\nCoverage information is in the file \"cov.txt\"\n",assertFileName);
 	return 0;
-	
 }
