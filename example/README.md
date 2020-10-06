@@ -1,5 +1,3 @@
-__________________________________________________________________________
-
 **************************************************************************
                           PSIMiner - Example
 
@@ -11,7 +9,7 @@ __________________________________________________________________________
 
 **************************************************************************
 
-			   Use: A first examples for using PSI-Miner
+		Use: A first examples for using PSI-Miner
 
 **************************************************************************
 Disease has been reported among passengers arriving by ship. The origin point of all passengers is the same, however, the routes the ships take may differ. Routes may share common way-points and paths. Passengers arrive at two locations, one is the labelled SOURCE, and the other is a labelled HARBOUR. We hope to discover locations that could be disease hot-spots. For each passenger, their movement data is tagged as risky or non-risky. A non-risky tag is used on passenger movements not carrying disease, while movements of passengers reporting disease symptoms are tagged as risky. 
@@ -34,4 +32,3 @@ To run the examples, after running "build.sh" in the root directory, copy the "p
 
 OTHER EXAMPLES: Examples are available at:
 	https://github.com/antoniobruto/PSIMiner-Examples
-
