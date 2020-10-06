@@ -20,7 +20,9 @@ TO BUILD: Run the build-script 'build' in the folder forFET
 Requires 
 1. C, C++ compilers
 2. flex, bison
-3. python
+3. python >2.7
+
+Supported on Linux (Ubuntu >16.xx verified) and MacOSX (Mojave, Catalina verified)
 
 **************************************************************************
 

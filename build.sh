@@ -1,13 +1,19 @@
-#clear
+clear
+echo "---------------------------------------------------------------"
+echo "              Prefix-Sequence Inference Miner"
+echo "                        (PSIMiner)"
+echo "          Code developed by Antonio A. Bruto da Costa"
+echo "   Submit issues at https://github.com/antoniobruto/PSIMiner"
+echo "---------------------------------------------------------------"
 BUILD_DIR=build 
 
-#if [ ! -d "$BUILD_DIR" ]; then
+if [ ! -d "$BUILD_DIR" ]; then
 	# Control will enter here if $BUILD_DIR doesn't exist.
-#	mkdir build  
-#else
-#	rm -rf build  
-#	mkdir build  
-#fi
+	mkdir build  
+else
+	rm -rf build  
+	mkdir build  
+fi
 
 cp -f parsers/*.l build/ 
 cp -f parsers/*.y build/  
