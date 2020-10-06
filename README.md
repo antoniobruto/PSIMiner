@@ -38,6 +38,7 @@ The prefix of the name of the assertion file will be the name of the config file
 
 **************************************************************************
 
-EXAMPLES: Examples are available at:
+A primary (small) example to get you started off can be found in the directory "example".
+OTHER EXAMPLES: A broader set of examples are available at:
 	https://github.com/antoniobruto/PSIMiner-Examples
 

@@ -72,11 +72,11 @@ struct expressionList{
 };
 
 struct file{
-        int start;
-        struct identifier* varList;
-        struct PORV* porvList;
+	int start;
+	struct identifier* varList;
+	struct PORV* porvList;
 	struct identifier* predicates;
-        struct expressionList* exprList;
+	struct expressionList* exprList;
 };
 
 struct config{
