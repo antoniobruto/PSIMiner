@@ -80,6 +80,9 @@ struct treeNode{					// --------- DECISION BUCKET ----------
 	struct treeNode* left;
 	struct treeNode* right;
 	struct treeNode* parent;
+	//duplicate node pointers
+	struct treeNode* dupToOriginal; 
+	struct treeNode** originalToDup; //should be an array
 	struct indexCouple* explored;
         int id;                                         //To keep track of the number of nodes created
         int truthValue;
@@ -134,6 +137,7 @@ struct identifier* getIdentifierWithID(struct identifier* list, int id);
 */
 
 //Truth Assignments
+struct truthAssignmentListStruct* createAss();
 struct truthAssignmentStruct* createTruthAssignment(int predicate_id, int truth, int position);
 void addToTruthAssignmentList(struct truthAssignmentListStruct** root, struct truthAssignmentListStruct* listItem);
 struct truthAssignmentListStruct* getLastListOfTruthAssignmentList(struct truthAssignmentListStruct* root);
@@ -141,6 +145,7 @@ struct truthAssignmentListStruct* duplicateTruthAssignmentList(struct truthAssig
 int predicateInList(struct truthAssignmentListStruct* root, int predicate);
 void printTruthList(struct truthAssignmentListStruct* root);
 int  printTruthListForIndex(struct truthAssignmentListStruct* root, int index, FILE* fp, int andprinter);
+char* getPredicateName(int id);
 int  writeTruthListForIndex(struct truthAssignmentListStruct* root, int index, char* str, int andprinter);
 void printTruthListToFile(struct truthAssignmentListStruct* root);
 void printTruthListToFilePtr(struct truthAssignmentListStruct* root, FILE* fp);
@@ -185,6 +190,8 @@ void addToListOfIntervalLists(struct listOfIntervalListsStruct** root, struct li
 struct listOfIntervalListsStruct* addListToListOfIntervalLists(struct listOfIntervalListsStruct* root, struct listOfIntervalListsStruct* listItem);
 struct listOfIntervalListsStruct* getLastListOfIntervalsInList(struct listOfIntervalListsStruct* root);
 void printListOfIntervalLists(struct listOfIntervalListsStruct* list);
+
+int printLengthOfIntervalLists(struct listOfIntervalListsStruct* list);
 void printListOfIntervalListsToFilePtr(struct listOfIntervalListsStruct* list, FILE* fp);
 void deleteListOfIntervalLists(struct listOfIntervalListsStruct* lists);
 struct listOfIntervalListsStruct* duplicateIntervalSet(struct listOfIntervalListsStruct* root);
@@ -237,7 +244,7 @@ double computeBinaryEntropy(struct listOfIntervalListsStruct** localIntervalSet,
 
 //Gain
 void computeAllGains(struct listOfIntervalListsStruct** localIntervalSet, int target, int *trueFalseFlag, double* bestGain, int i, int j, int PORVCount, struct treeNode* currentNode, double* falseEntropy, double* trueEntropy,int targetPORV_id);
-struct treeNode* findBestGain(struct listOfIntervalListsStruct** localIntervalSets, int target, int PORVCount, int N, struct treeNode* currentNode, int targetPORV_id);
+struct treeNode* findBestGain(struct listOfIntervalListsStruct** localIntervalSets,struct listOfIntervalListsStruct*** pseudoTargetLists, int target, int PORVCount,int numTargets, int N, struct treeNode* currentNode, int targetPORV_id);
 
 struct listOfIntervalListsStruct* computeConstrainedIntervalSet(struct listOfIntervalListsStruct* list, int predicate_id, int truth, struct truthAssignmentListStruct* constraintList);
 
@@ -251,7 +258,7 @@ struct intervalStruct* minkowskiIntervalDiff(struct intervalStruct* interval1, s
 struct intervalListStruct* minkowskiSumList(struct intervalListStruct* list, double l, double r);
 struct intervalListStruct* minkowskiDiffList(struct intervalListStruct* list, double l, double r);
 
-int amsMine(struct treeNode* root,int target, int numberOfPORVs, int N,int depth,int targetPORV_id);
+int amsMine(struct treeNode* root,struct listOfIntervalListsStruct*** pseudoTargetLists,int target, int numberOfPORVs,int numTargets, int N,int depth,int targetPORV_id);
 void printTreeNode(struct treeNode* node,int targetPORV_id);
 void printTreeNodeToFile(struct treeNode* node,int depth,int targetPORV_id);
 void printTreeNodeToFilePtr(struct treeNode* root,FILE* fp,int targetPORV_id);
@@ -263,7 +270,8 @@ FILE* processConfig(int argc, char* argv[]);
 int getTarget(int numberOfPORVs);
 double getTraceLength();
 void prepareBackwardInfluenceTraces(struct listOfIntervalListsStruct** localIntervalSets, int target, int N, double K, int strict);
-void prepareRoot(struct treeNode* root,struct listOfIntervalListsStruct** intervalSet, int target, int numberOfPORVs,int N);
+void prepareBackwardInfluenceTraces2(struct listOfIntervalListsStruct** localIntervalSets,struct listOfIntervalListsStruct*** pseudoTargetLists, int target, int N, double K, int strict,int numberOfPORVs,int numTargets);
+void prepareRoot(struct treeNode* root,struct listOfIntervalListsStruct** intervalSet,struct listOfIntervalListsStruct*** pseudoTargetLists, int target,int numTargets, int numberOfPORVs,int N);
 void choicePause();
 
 struct intervalListStruct* forwardInfluence(struct intervalListStruct* source, int i, double k, struct intervalListStruct* target);
@@ -313,7 +321,7 @@ struct predicateDetail* addPredicateDetailToList(struct predicateDetail* root, s
 void printPredicateDetailToFilePtr(struct predicateDetail* detail,FILE* fp);
 void printPredicateDetailListToFilePtr(struct predicateDetail* list,FILE* fp);
 void deletePredicateDetails(struct predicateDetail* node);
-
+struct predicateDetail* duplicatePredicateDetail(struct predicateDetail* root);
 void printRequestForNewPredicate(struct config* configuration, struct identifier* varList,  struct intervalListStruct** buckets, int bucketCount, struct intervalListStruct* targetTrueList);
 
 void learnNewPredicates();
@@ -322,7 +330,14 @@ char* convertToDatFileName(char* temp);
 double lengthOfIntervalLists(struct intervalListStruct **intervalLists);
 struct intervalListStruct** endMatchesForPrefix(struct truthAssignmentListStruct* prefix);
 struct intervalListStruct** createValidLists();
+//edited- added methods
+_Bool is_stop(struct treeNode* root, int target,struct listOfIntervalListsStruct** listOfIntervalSets);
+_Bool is_leaf(struct treeNode *root,int depth);
+void updateLeaf(struct treeNode* root,struct listOfIntervalListsStruct*** pseudoTargetLists, int target, int numberOfPORVs,int numTargets, int N);
+int amsMine2(struct treeNode* original, struct treeNode* duproot,struct listOfIntervalListsStruct*** pseudoTargetLists, int target, int numberOfPORVs,int numTargets, int N, int origDepth, int dupDepth,int isroot,struct listOfIntervalListsStruct** listOfIntervalSets);
+
 
 int checkCreateLogDir();
 int ignorePredicate(int predicateID);
+double newPrecision(double n, double i);
 #endif

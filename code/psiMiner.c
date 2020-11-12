@@ -1,10 +1,10 @@
 /*****************************************************************
-*                      CODE WRITTEN BY                          *
-*                                                               *
-*             Antonio Anastasio Bruto da Costa                  *
-*     Formal Method Laboratory, Dept. of CSE, IIT Kharagpur     *
-*                                                               *
-*****************************************************************/
+ *                      CODE WRITTEN BY                          *
+ *                                                               *
+ *             Antonio Anastasio Bruto da Costa                  *
+ *     Formal Method Laboratory, Dept. of CSE, IIT Kharagpur     *
+ *                                                               *
+ *****************************************************************/
 
 #define MAIN_DEBUG
 
@@ -77,6 +77,7 @@ int logging = 1;	//Logging is 1 if logs are enabled and 0 otherwise
 
 char* assertFileName;
 int numberOfPORVs = 0;
+int numTargets =0;
 double K;
 int N;
 //int targetPORV_id;
@@ -95,9 +96,9 @@ int targetBias = 0;		/*
 							-1 -> 	a negatedd target, 
 							+1 -> 	a true target, 
 							0  -> 	no bias.
-							*/
-int learnMode = 0;		/*	
-						learnMode indicates the level at which
+					*/
+int learnPredicates = 0;		/*	
+						learnPredicates indicates the level at which
 						learning is performed. 
 							0 ->	Knowledge Only:
 								Given a Predicate Alphabet,
@@ -121,21 +122,65 @@ FILE* predLogFile;			/*	The Predicate Log for logging learned predicates that ar
 
 int cumulative = 0;			//	Determine how gain is computed.
 struct assertionStruct* allAssertions=NULL;
+void copyContents(struct treeNode* root, struct treeNode* newRoot){
+	newRoot->truthList = duplicateTruthAssignmentList(root->truthList);
+	newRoot->listOfIntervalSets = root->listOfIntervalSets;
+	newRoot->mean = root->mean;
+	newRoot->error = root->error;
+	newRoot->targetInfluence = root->targetInfluence;
+	newRoot->splittingPredicate_id = root->splittingPredicate_id;
+	newRoot->traceLength = root->traceLength;
+	newRoot->id = root->id;
+	newRoot->truthValue = root->truthValue;
+	newRoot->predType = root->predType;
+	newRoot->learnedPredicates =  root->learnedPredicates;
+}
+
+struct treeNode* duplicateTree(struct treeNode* root, int ind){
+	if(root == NULL) return NULL;
+	printf("@ ");
+	struct treeNode* duproot = createTreeNode(
+                                                  NULL,//Truth List
+                                                  listOfIntervalSets,//IntervalSet
+                                                  0,0,totalTraceLength,NULL,NULL);
+	//root->originalToDup[ind] = newroot;
+	duproot->dupToOriginal = root;
+	copyContents(root,duproot);
+	duproot->left = duplicateTree(root->left,ind);
+	duproot->right = duplicateTree(root->right,ind);
+	return duproot;
+}
+
+void deleteExtraLists(struct listOfIntervalListsStruct* lists, int numberOfPORVs)
+{
+	int ptr_ind=1;
+	//printf("before=%d\n",printLengthOfIntervalLists(lists));
+	while(ptr_ind<numberOfPORVs) 
+	{
+		ptr_ind++;
+		lists = lists->nextList;
+	}
+	//if(i==2) printf("@\n");	   
+	lists->nextList = NULL;
+	//deleteListOfIntervalLists(lists);
+	//printf("after=%d\n",printLengthOfIntervalLists(listOfIntervalSets[0]));
+}
+
 int main(int argc, char *argv[]) {
 	checkCreateLogDir();
 	clock_t begin_process_input,end_process_input,begin_gen_tree,end_gen_tree;
 	
 	int targetPORV_id = 1;
-	N = 0;              //Number of parts of the sequence 
-	K = 0.0;                //Maximum delay seperation
-	int i = 0;
-	coveredSet = NULL;
-	int repeatFlag = 0;
-	int depth = 0;
-	struct intervalListStruct* bcov = NULL;
-	FILE* fcov = fopen("logs/cov.txt","w");
-	int assertCountOld = 0;
-	assertionList = NULL;
+        N = 0;              //Number of parts of the sequence 
+        K = 0.0;                //Maximum delay seperation
+        int i = 0;
+        coveredSet = NULL;
+        int repeatFlag = 0;
+        int depthOrig = 0,depthDup=0;
+        struct intervalListStruct* bcov = NULL;
+        FILE* fcov = fopen("logs/cov.txt","w");
+        int assertCountOld = 0;
+        assertionList = NULL;
 	
 	time_t t = time(NULL);
 	struct tm *tm = localtime(&t);
@@ -167,9 +212,9 @@ int main(int argc, char *argv[]) {
 		printConfig(inputConfig);
 		//--------------------------------------------------------------
 		
-		learnMode = getLearnType(inputConfig);
-		printf("Learning Mode = %d\n",learnMode);
-		strict = inputConfig->strict;
+		learnPredicates = getLearnType(inputConfig);
+		printf("Learning Mode = %d\n",learnPredicates);
+		
 		N = inputConfig->N+1;
 		K = inputConfig->K;
 		
@@ -177,8 +222,9 @@ int main(int argc, char *argv[]) {
 		bzero(listOfIntervalSets,sizeof(struct listOfIntervalListsStruct*)*(inputConfig->traceCount));
 		
 		traceLengths = (double*)malloc(sizeof(double)*inputConfig->traceCount);
-		
-		depth = getDepth(inputConfig);
+
+		depthOrig = getDepth(inputConfig);
+		depthDup = getExDepth(inputConfig);
 		char* tempF;
 		assertFileName = (char*)malloc(sizeof(char)*(strlen(argv[1])+50));
 		strcpy(assertFileName,argv[1]);
@@ -222,19 +268,38 @@ int main(int argc, char *argv[]) {
 			} else {
 				printListOfIntervalLists(listOfIntervalSets[traceID]);
 			}
+			//printIntervalList(intervalSet[traceID]->trueList);
+			//printf("\n[%d]\n",traceID);
+			///printListOfIntervalListsToFilePtr(intervalSet[traceID],stdout);fflush(stdout);
 			traceLengths[traceID] = tl;
 			traceID++;
+			//printf("traceLength = %lf\n",traceLengths[traceID]);
 			id = getNextIdentifier(id);
 		}
 		//exit(0);
 		traceCount = inputConfig->traceCount;
-				
-		//Count the number of truth sets
+// 		intervalListin =  fopen(inputConfig->intervalSetFileName,"r");
+// 		if(intervalListin==0){
+// 			printf("[ERROR] File \"%s\" does not exist.\n",inputConfig->intervalSetFileName);
+// 			exit(0);
+// 		}
+//                 intervalListparse();
+		//-------------------------------------------------------------------------------------------
+		
+                
+//		#ifdef MAIN_DEBUG
+//		fprintf(logFile,"[AMSMiner] intervalSet = %p\n",intervalSet);
+//		fprintf(logFile,"[AMSMiner] From the Main Codebase:\n");fflush(logFile);
+//		printListOfIntervalListsToFilePtr(intervalSet,logFile);
+//		fflush(logFile);
+//		#endif
+                
+                //Count the number of truth sets
 		numberOfPORVs = countLists(listOfIntervalSets[0]);
-				
-		#ifdef MAIN_DEBUG
-			fprintf(logFile,"[AMSMiner] Number of PORVs = %d\n",numberOfPORVs);
-		#endif
+                
+                #ifdef MAIN_DEBUG
+		fprintf(logFile,"[AMSMiner] Number of PORVs = %d\n",numberOfPORVs);
+                #endif
 		
 		printPredicateList(predicateMap);
 		
@@ -242,21 +307,26 @@ int main(int argc, char *argv[]) {
 		end_process_input = clock();
 		
 		//----------------------------------Choose a target PORV-------------------------------------
-		printf("NUMBER = %d\n",numberOfPORVs);
-		targetPORV_id = getTarget(numberOfPORVs);        //REMOVE LATER
-				
+                printf("NUMBER = %d\n",numberOfPORVs);
+		//edited
+                //target = getTarget(numberOfPORVs);        //REMOVE LATER
+                //targetPORV_id = target;			//TODO: Merge this and the previous lines
+
 		#ifdef MAIN_DEBUG
-			fprintf(logFile,"[AMSMiner] Target PORV ID: P-%d\n",targetPORV_id);
+		fprintf(logFile,"[AMSMiner] Target PORV ID: P-%d\n",targetPORV_id);
 		#endif
-				//--------------------------------------------------------------------------------------------
+                //--------------------------------------------------------------------------------------------
 			
 		sprintf(assertFileName,"%s-assert-%d.txt",assertFileName,targetPORV_id);
 		//strcat(assertFileName,"-assert.txt");
 		aFile = fopen(assertFileName,"w");
 		fprintf(aFile,"ASSERTION LIST: \n\n");
 		fclose(aFile);	
+			
 		
-		//----Compute the traceLength - must be larger that largest constant in the interval set-----
+                //----Compute the traceLength - must be larger that largest constant in the interval set-----
+                
+		
 		double traceLength = 0.0;
 		for(i=0;i<traceCount;i++){
 			traceLength += traceLengths[i];
@@ -265,64 +335,252 @@ int main(int argc, char *argv[]) {
 		totalTraceLength = traceLength;//tempTraceLength>traceLength?tempTraceLength:traceLength;
 		setTraceLengthForConfig(inputConfig,totalTraceLength);
 		printf("Total Trace Length = %lf\n",totalTraceLength);
-	
+		
 		//-------------------Compute the Set of Intervals when FALSE for each PORV--------------------
-		for(i=0;i<traceCount;i++){
+                for(i=0;i<traceCount;i++)
 			computeFalseLists(listOfIntervalSets[i],traceLengths[i]);
-		}
 		//--------------------------------------------------------------------------------------------
-	
+		/*
 		totalTrueLength = 0.0;
-		for(i=0;i<traceCount;i++){
+		for(i=0;i<traceCount;i++)
 			totalTrueLength += lengthOfIntervalList(getListAtPosition(listOfIntervalSets[i],targetPORV_id)->trueList);
-		}
 		totalFalseLength = totalTraceLength-totalTrueLength;
+		   */
+                //Prepare Decision Tree Root Node
+                struct treeNode* root = createTreeNode(
+                                                        NULL,//Truth List
+                                                        listOfIntervalSets,//IntervalSet
+                                                        0,0,totalTraceLength,NULL,NULL);
+
+                decisionTree = root; //TODO: This and the previous line may be combined.
+                
+                //Compute Additional Interval Lists for Sequence Generation: Backward Influence for the Target
+                //Compute Pseudo-Targets
+                //struct listOfIntervalListsStruct* backwardInfluence = prepareBackwardInfluenceTraces(listOfIntervalSets,target,N,K,strict);
 		
-		//Prepare Decision Tree Root Node
-		struct treeNode* root = createTreeNode(
-												NULL,//Truth List
-												listOfIntervalSets,//IntervalSet
-												0,0,totalTraceLength,NULL,NULL);
-			
-		decisionTree = root; //TODO: This and the previous line may be combined.
 		
-		//Compute Additional Interval Lists for Sequence Generation: Backward Influence for the Target
-		//Compute Pseudo-Targets
-		//struct listOfIntervalListsStruct* backwardInfluence = prepareBackwardInfluenceTraces(listOfIntervalSets,target,N,K,strict);
-		prepareBackwardInfluenceTraces(listOfIntervalSets,targetPORV_id,N,K,strict);        
-		// At this point target, and numberOfPORVs+1 to numberOfPORVs+(N-1) are the target interval lists
-		end_process_input = clock();	
+		//printf("after=%d\n",printLengthOfIntervalLists(lists));  
+                // At this point target, and numberOfPORVs+1 to numberOfPORVs+(N-1) are the target interval lists
+               
+		 end_process_input = clock();	
 		printTreeNodeToFilePtr(root,logFile,targetPORV_id);
 		fflush(logFile);
-		
+		struct intervalListStruct* trueList = NULL;
+		struct listOfIntervalListsStruct* targetList =  NULL;
+		//edited (store targetList PORVID )
+
+		struct expressionList* tempList = predicateMap->targetList;
+		int ind=0,j;
+		numTargets=0;
+		while(tempList != NULL)
+		{
+		    numTargets++;
+		    tempList = tempList->next;
+		}
+		printf("num=%d\n",numberOfPORVs);
+		double totalTrueLengthList[numTargets], totalFalseLengthList[numTargets];
+		tempList = predicateMap->targetList;
+		int targetPORVID[numTargets];
+	//	struct listOfIntervalListsStruct* pseudoTargetLists[traceCount][numTargets];
+		struct listOfIntervalListsStruct*** pseudoTargetLists = (struct listOfIntervalListsStruct***)malloc(sizeof(struct listOfIntervalListsStruct**)*traceCount);
+		for(int k=0;k<traceCount;k++)
+                {
+			pseudoTargetLists[k] = (struct listOfIntervalListsStruct**)malloc(sizeof(struct listOfIntervalListsStruct*)*numTargets);
+		}
+		struct treeNode* listTree[numTargets][numTargets];
+		while(tempList != NULL)
+		{
+		    targetPORVID[ind++]=tempList->expr->disjunct->PORVID;
+		    //printf("%d",tempList->expr->disjunct->PORVID);
+		    tempList = tempList->next;
+		}
+		for(i=0;i<numTargets;i++) 
+		{
+			totalTrueLengthList[i] = 0.0;
+			for(int k=0;k<traceCount;k++)
+				totalTrueLengthList[i] += lengthOfIntervalList(getListAtPosition(listOfIntervalSets[k],targetPORVID[i])->trueList);
+			totalFalseLengthList[i] = totalTraceLength-totalTrueLengthList[i];
+			//printf("%d\n",targetPORVID[i]);
+			//prepareBackwardInfluenceTraces2(listOfIntervalSets,pseudoTargetLists,targetPORVID[i],N,K,strict,numberOfPORVs,numTargets);
+		}
+		/*printListOfIntervalLists(pseudoTargetLists[0][0]);
+		prepareBackwardInfluenceTraces(listOfIntervalSets,6,N,K,strict);
+		printf("0\n");
+		printListOfIntervalLists(listOfIntervalSets[0]);*/
+		/*struct treeNode* newroot = createTreeNode(
+		                                                NULL,//Truth List
+		                                                listOfIntervalSets,//IntervalSet
+		                                                0,0,totalTraceLength,NULL,NULL); */
 		int recreate_iterator = 0;
-		for(recreate_iterator=0;recreate_iterator<RECREATE_COUNT;recreate_iterator++){
+
+		for(recreate_iterator=0;recreate_iterator<RECREATE_COUNT;recreate_iterator++)
+		{
 			begin_gen_tree=clock();
-			prepareRoot(root,listOfIntervalSets,targetPORV_id,numberOfPORVs,N);                
-			amsMine(root,targetPORV_id,numberOfPORVs,N,depth,targetPORV_id);
+			for(i=0;i<numTargets;i++)
+			{
+				totalTrueLength=totalTrueLengthList[i];
+				totalFalseLength=totalFalseLengthList[i];
+				struct treeNode* newroot = createTreeNode(
+														NULL,//Truth List
+														listOfIntervalSets,//IntervalSet
+														0,0,totalTraceLength,NULL,NULL);
+				printf("Total true Length = %lf\n",totalTrueLength);
+				prepareBackwardInfluenceTraces(listOfIntervalSets,targetPORVID[i],N,K,strict);
+				/*struct truthAssignmentListStruct* truthList = createAss();
+				printTruthList(truthList);
+				struct intervalListStruct** endMatchIntervalList = endMatchesForPrefix(truthList);
+				for(int i=0;i<traceCount;i++){
+					printf("i=%d\n",i);
+					printIntervalList(endMatchIntervalList[i]);
+				}
+				//exit(0);
+				int mininmumBucketID = getSmallestBucketID(truthList);
+				int targetID = mininmumBucketID==0?7:(numberOfPORVs+mininmumBucketID);
+				double trueMean, falseMean, Htrue, Hfalse,mean, error;
+				double intervalLength = 0.0;
+				if(endMatchIntervalList){
+					intervalLength = lengthOfIntervalLists(endMatchIntervalList);
+				}
+				printf("IL=%lf\n",intervalLength);
+				int dominantTruth;
+				trueMean = computeMean(listOfIntervalSets,targetID,intervalLength,endMatchIntervalList);
+				falseMean = computeFalseMean(listOfIntervalSets,targetID,intervalLength,endMatchIntervalList);
+				Htrue = computeTrueEntropy(getListsAtPosition(listOfIntervalSets,targetID),endMatchIntervalList);
+				Hfalse = computeFalseEntropy(getListsAtPosition(listOfIntervalSets,targetID),endMatchIntervalList);
+				dominantTruth = Htrue<=Hfalse?1:0;//error(trueMean)<error(falseMean)?1:0;
+				mean = dominantTruth==0?falseMean:trueMean;
+				error = computeEntropy(getListsAtPosition(listOfIntervalSets,targetID),(endMatchIntervalList));
+				printf("mean=%lf\n",mean);
+				exit(0);*/
+				prepareRoot(newroot,listOfIntervalSets,pseudoTargetLists,targetPORVID[i],numberOfPORVs,numTargets,N);
+				printf("[PSIMiner] spid=%d\n",newroot->splittingPredicate_id);
+				//exit(0);
+				printf("[PSIMiner] Calling PSI-Miner for target= %d\n",targetPORVID[i]);
+				
+				FILE* aFile = fopen(assertFileName,"a");
+				char *targetName = getPredicateName(targetPORVID[j]);
+				char newTargetName[MAX_STR_LENGTH]; 
+				if(targetName){
+					sprintf(newTargetName,"%s",targetName);
+				} else {
+					sprintf(newTargetName,"P%d",targetPORVID[j]);
+				}
+				
+				fprintf(aFile,"\n****************** TARGET [%s] ********************\n",newTargetName);
+				fclose(aFile);
+				amsMine(newroot,pseudoTargetLists,targetPORVID[i],numberOfPORVs,numTargets,N,depthOrig,targetPORVID[i]);
+				printf("[PSIMiner] Completed PSI-Mining for target= %d\n",targetPORVID[i]);
+				
+				//exit(0);
+				printTruthList(newroot->right->truthList);
+				for(int k=0;k<traceCount;k++)
+				{
+					//printf("before=%d for trace=%d\n",printLengthOfIntervalLists(listOfIntervalSets[k]),k);
+					deleteExtraLists(listOfIntervalSets[k],numberOfPORVs);
+					//printf("after=%d for trace=%d\n",printLengthOfIntervalLists(listOfIntervalSets[k]),k);
+				}
+				//newRoot-> = (struct treeNode**)malloc(sizeof(struct treeNode*)*(numTargets));
+				listTree[i][i] = newroot;
+				//printTruthList(newroot);
+				for(j=0;j<numTargets;j++)
+				{
+					if(j != i)
+					{
+						struct treeNode* duproot;
+						prepareBackwardInfluenceTraces(listOfIntervalSets,targetPORVID[j],N,K,strict);
+						//newroot->originalToDup = (struct treeNode**)malloc(sizeof(struct treeNode*)*(numTargets));
+						//printf("1\n");
+						duproot = duplicateTree(newroot, j); //maintain correspondence here
+						totalTrueLength=totalTrueLengthList[j];
+						totalFalseLength=totalFalseLengthList[j];
+						//printf("1\n");
+						listTree[i][j] = duproot;
+						//printf("1\n");
+							//struct intervalListStruct** endMatchIntervalList = endMatchesForPrefix(root->truthList);
+						/*for(int k=0;k<traceCount;k++){
+							printIntervalList(endMatchIntervalList[k]);
+							}*/
+						printf("[PSIMiner] ------------------------ [ Calling amsMine2 for target= %d ] --------------------------\n",targetPORVID[j]);
+						
+						FILE* aFile = fopen(assertFileName,"a");
+						
+						char *targetName = getPredicateName(targetPORVID[j]);
+						char newTargetName[MAX_STR_LENGTH]; 
+						if(targetName){
+							sprintf(newTargetName,"%s",targetName);
+						} else {
+							sprintf(newTargetName,"P%d",targetPORVID[j]);
+						}
+
+						fprintf(aFile,"\n******** RELATED ASSERTIONS FOR TARGET [%s] ********\n",newTargetName);
+						fclose(aFile);
+					
+						amsMine2(newroot, duproot,pseudoTargetLists, targetPORVID[j], numberOfPORVs,numTargets, N, depthOrig, depthDup,1,listOfIntervalSets);
+						for(int k=0;k<traceCount;k++)
+						{
+							//printf("before=%d for trace=%d\n",printLengthOfIntervalLists(listOfIntervalSets[k]),k);
+							deleteExtraLists(listOfIntervalSets[k],numberOfPORVs);
+							//printf("after=%d for trace=%d\n",printLengthOfIntervalLists(listOfIntervalSets[k]),k);
+						}
+						//exit(0);
+					}
+				}
+				//printTree(newroot);
+				purgeTruthListForTreeNode(newroot); 
+			}
 			end_gen_tree=clock();
-			printTree(root,targetPORV_id);
-			purgeTruthListForTreeNode(root);
 		}
 
-			
-		fflush(stdout);
-		fflush(stdin);
-		fflush(fcov);
-			
-	#ifdef COV_TEST
-		pause();
-			
-		printf("N = ");
-		scanf("%d",&N);
-		printf("K = ");
-		scanf("%lf",&K);
-			
-		repeatFlag = 1;
-	
-	}
-	#endif
-	fclose(fcov);
+                /*
+		
+                printListOfIntervalLists(coveredSet);
+                struct listOfIntervalListsStruct* cov = getListAtPosition(coveredSet,target);
+                struct intervalListStruct* covList = unionIntervalLists(cov->falseList,cov->trueList);
+                printf("\nCOV = %lf\n",lengthOfIntervalList(covList)/traceLength);
+                
+                if(!bcov)
+                        bcov = flattenIntervalSet(coveredSet);
+                else 
+                        bcov = unionIntervalLists(bcov,flattenIntervalSet(coveredSet));
+                
+                printf("\nCUMULATIVE COVERAGE \n");
+                printIntervalList(bcov);
+                printf("\nBCOV = %lf\n",lengthOfIntervalList(bcov)/traceLength);
+                */
+		
+		
+                fflush(stdout);
+                fflush(stdin);
+                
+                //printListOfIntervalLists(coveredSet);
+                //printf("\nCoverage List \n");
+                //printIntervalList(coveredList);
+// 		fprintf(fcov,"\nCOVERAGE:\n");
+//                 fprintf(fcov,"\nAssertion Length (N) = %d\n",N);
+//                 fprintf(fcov,"\nResolution (K) = %lf\n",K);
+//                 fprintf(fcov,"\nTarget (Consequent) = %d\n",target);
+//                 fprintf(fcov,"\nCoverage List :\n");
+//                 printIntervalListToFilePtr(coveredList,fcov);
+//                 fprintf(fcov,"Coverage = %lf\n", lengthOfIntervalList(coveredList)/totalTraceLength);
+//                 fprintf(fcov,"\nCumulative Coverage = %lf\n", lengthOfIntervalList(coveredList)/totalTraceLength);
+//                 fprintf(fcov,"\nNew Assertions Found = %d\n", assertCount-assertCountOld);
+//                 fprintf(fcov,"\nCumulative Assertions Found = %d\n", assertCount);
+//                 assertCountOld = assertCount;
+                fflush(fcov);
+                
+        #ifdef COV_TEST
+                pause();
+                
+                printf("N = ");
+                scanf("%d",&N);
+                printf("K = ");
+                scanf("%lf",&K);
+                
+                repeatFlag = 1;
+        
+        }
+        #endif
+        fclose(fcov);
 	fflush(logFile);
 	fclose(logFile);
 	fflush(predLogFile);

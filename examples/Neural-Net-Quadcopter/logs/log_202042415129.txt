@@ -1,0 +1,1 @@
+[AMSMiner] Parsing Intervals.

@@ -76,7 +76,8 @@ struct file{
 	struct identifier* varList;
 	struct PORV* porvList;
 	struct identifier* predicates;
-	struct expressionList* exprList;
+        struct expressionList* exprList;
+        struct expressionList* targetList;
 };
 
 struct config{
@@ -92,6 +93,7 @@ struct config{
 	double tmin;
 	double tmax;
 	int maxTreeDepth;
+	int maxTreeExDepth;
 	double traceLength;
 	int learnType;
 	int strict;
@@ -107,6 +109,7 @@ void printConfig(struct config* inputConfig);
 void printConfigToFilePtr(struct config* inputConfig, FILE* fp);
 struct config* redirectConfig();
 int getDepth(struct config* inputConfig);
+int getExDepth(struct config* inputConfig);
 void setTraceLengthForConfig(struct config* configuration, double length);
 int getLearnType(struct config* inputConfig);
 
@@ -115,13 +118,12 @@ struct condition* createCondition(char *LHS, char* RHS, int op);
 struct condition* addConditionToList(struct condition* root, struct condition* cond);
 struct condition* addToConditionList(struct condition* root, char *LHS, char* RHS, int op);
 struct condition* duplicateConditionList(struct condition* root);
-
+struct condition* createIdentityResets(struct identifier* root);
 void printCondition(struct condition* cond);
 void printConditionList(struct condition* cond);
 void printConditionToFilePtr(struct condition* cond,FILE* fp);
 void printConditionToString(struct condition* cond, char* fp);
 void printConditionListToFilePtr(struct condition* cond, FILE* fp);
-
 struct condition* reverseConditionList(struct condition* root);
 int conditionCompare(struct condition* cond, char* LHS, char* RHS);
 int inConditionList(struct condition* list, char* LHS, char* RHS);

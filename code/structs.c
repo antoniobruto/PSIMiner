@@ -99,6 +99,12 @@ int getDepth(struct config* inputConfig){
 	return 0;
 }
 
+int getExDepth(struct config* inputConfig){
+	if(inputConfig){
+		return inputConfig->maxTreeExDepth;
+	}
+	return 0;
+}
 
 int getLearnType(struct config* inputConfig){
 	if(inputConfig){
@@ -279,6 +285,20 @@ void deleteConditionList(struct condition* node){
 		}
 		free(node);
 	}
+}
+
+struct condition* createIdentityResets(struct identifier* root){
+	struct condition* reset = NULL;
+	struct identifier* temp = root;
+	char nameD[MAX_STR_LENGTH];
+	
+	
+	while(temp!=NULL){
+		sprintf(nameD,"%s'",temp->name);
+		reset = addToConditionList(reset,nameD,temp->name,0);
+		temp = temp->next;
+	}
+	return reset;
 }
 
 void printCondition(struct condition* cond){
