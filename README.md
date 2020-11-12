@@ -42,3 +42,10 @@ A primary (small) example to get you started off can be found in the directory "
 OTHER EXAMPLES: A broader set of examples are available at:
 	https://github.com/antoniobruto/PSIMiner-Examples
 
+**************************************************************************
+Updates/Releases
+v1.1
+- Supports mining differences between targets over sets of time-series.
+
+v1.0
+- Mining temporal causal relations from sets of time-series.
