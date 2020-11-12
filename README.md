@@ -44,6 +44,7 @@ OTHER EXAMPLES: A broader set of examples are available at:
 
 **************************************************************************
 Updates/Releases
+
 v1.1
 - Supports mining differences between targets over sets of time-series.
 
