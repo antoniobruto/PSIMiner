@@ -47,9 +47,7 @@
 %}
 
 //Lexical Tokens
-==== BASE ====
-%token <string> TRACEFILE TRACECOUNT SEQLENGTH DELAYRES DEPTH EXDEPTH BESTCOUNT TMAX TMIN START PBEGIN PEND OPENROUND CLOSEROUND ATPOSEDGE ATNEGEDGE ATANYEDGE RATIONAL ARITHOP EQ LEQ GEQ LT GT SEMICOLON DOLLARTIME ATOM BAND BOR EEQ PREDLEARN COMMA STRICT OBJECTIVE USEOVERLAP;
-==== BASE ====
+%token <string> TRACEFILE TRACECOUNT SEQLENGTH DELAYRES DEPTH EXDEPTH BESTCOUNT TMAX TMIN START PBEGIN PEND OPENROUND CLOSEROUND ATPOSEDGE ATNEGEDGE ATANYEDGE RATIONAL ARITHOP EQ LEQ GEQ LT GT SEMICOLON DOLLARTIME ATOM BAND BOR EEQ PREDLEARN COMMA STRICT OBJECTIVE USEOVERLAP TARGET;
 
 //Start Production Rule
 %start configSpec
@@ -684,17 +682,6 @@ porv:   ATOM ineq arithExpr                {
                                                 }
         ;
 
-eventExpr:
-        eventType OPENROUND porv CLOSEROUND   {
-                                                        #ifdef YACC_DEBUG_ON 
-                                                                printf("PARSER: eventExpr: eventType FOPENROUND porv FCLOSEROUND\n");
-                                                        #endif
-                                                        
-                                                        $$=createEvent($1,$3);
-                                                        //$$=createCondition($1->name,EF_dummy,-1);//strcpy($$,$1);
-                                                }
-        ;
-
 ineq:
         LT                                     {       
                                                         #ifdef YACC_DEBUG_ON 
@@ -730,31 +717,6 @@ ineq:
                                                 }
         ;
         
-eventType:
-        ATPOSEDGE                              {       
-                                                        #ifdef YACC_DEBUG_ON 
-                                                                printf("PARSER: eventType: FATPOSEDGE [  %s  ]\n",$1);
-                                                        #endif
-                                                        $$ = 1;
-                                                        //$$=createCondition($1->name,EF_dummy,-1);//strcpy($$,$1);
-                                                }
-        |ATNEGEDGE                             {       
-                                                        #ifdef YACC_DEBUG_ON 
-                                                                printf("PARSER: eventType: FATNEGEDGE [  %s  ]\n",$1);
-                                                        #endif
-                                                        $$ = -1;
-                                                        //$$=createCondition($1->name,EF_dummy,-1);//strcpy($$,$1);
-                                                }
-        |ATANYEDGE                             {       
-                                                        #ifdef YACC_DEBUG_ON 
-                                                                printf("PARSER: eventType: FATANYEDGE [  %s  ]\n",$1);
-                                                        #endif
-                                                        
-                                                        $$ = 0;
-                                                        //$$=createCondition($1->name,EF_dummy,-1);//strcpy($$,$1);
-                                                }
-        ;
-
 arithExpr:
         arithStatement ARITHOP arithExpr               {       
                                                                 #ifdef YACC_DEBUG_ON 

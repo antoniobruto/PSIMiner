@@ -2201,7 +2201,7 @@ double computeBinaryEntropy(struct listOfIntervalListsStruct** localIntervalSet,
 		double pNeg = totalLength==0?0:negLength/totalLength;
 		if(predicate_id==4){
 			fprintf(logFile,"Target Position %d: Hpos = %lf, Hneg = %lf \n",pos,Hpos,Hneg);
-			fprintf(logFile,"                    pPos = %lf, pNeg = %lf \n",pos,pPos,pNeg);
+			fprintf(logFile,"                    pPos = %lf, pNeg = %lf \n",pPos,pNeg);
 		}
 		#ifdef SUP_DEBUG
 		fprintf(logFile,"[computeBinaryEntropy] Hpos = %lf \n",Hpos);
@@ -3655,7 +3655,7 @@ int amsMine(struct treeNode* root,struct listOfIntervalListsStruct*** pseudoTarg
 			fprintf(logFile,"[amsMine] @Current Depth = %d : Exploring CHILD NODE - LEFT \n",depth);
 			#endif
 			//fprintf(stdout,"[amsMine] Mining Left Node , DEPTH = %d\n",depth-1);
-			test1 = amsMine(root->left,target,numberOfPORVs,N,depth-1,targetPORV_id);
+			test1 = amsMine(root->left,pseudoTargetLists,target,numberOfPORVs,numTargets,N,depth-1,targetPORV_id);
 			//fprintf(stdout,"[amsMine] Left Node Mined , DEPTH = %d\n",depth-1);
 		}
 		//first = 1;
@@ -3665,7 +3665,7 @@ int amsMine(struct treeNode* root,struct listOfIntervalListsStruct*** pseudoTarg
 			fprintf(logFile,"[amsMine] @Current Depth = %d : Exploring CHILD NODE - RIGHT\n",depth);
 			#endif
 			//fprintf(stdout,"[amsMine] Mining Right Node , DEPTH = %d\n",depth-1);
-			test2 = amsMine(root->right,target,numberOfPORVs,N,depth-1,targetPORV_id);
+			test2 = amsMine(root->right,pseudoTargetLists,target,numberOfPORVs,numTargets,N,depth-1,targetPORV_id);
 			//fprintf(stdout,"[amsMine] Right Node Mined , DEPTH = %d\n",depth-1);
 		}
 		//fprintf(stdout,"[amsMine] Mined from Children, DEPTH = %d\n",depth-1);
@@ -5538,9 +5538,9 @@ void printAssertionWithTruthToFile(FILE* fp, struct intervalListStruct** targetL
 			fprintf(fp," ] ");
 			
 			if(!truth)
-				fprintf(fp,"!%s\n",bucketSepIntervals[smallestBucketID]->l,bucketSepIntervals[smallestBucketID]->r,newTargetName);
+				fprintf(fp,"!%s\n",newTargetName);
 			else
-				fprintf(fp,"%s\n",bucketSepIntervals[smallestBucketID]->l,bucketSepIntervals[smallestBucketID]->r,newTargetName);
+				fprintf(fp,"%s\n",newTargetName);
 			
 			fflush(fp);
 			fprintf(fp,"SUPPORT\t\t= [%lf]\n",support*100.0);
@@ -5745,12 +5745,11 @@ void printAssertions(struct treeNode* node, FILE* fp, int targetPORV_id){
 					fprintf(fp," ##[ %lf : %lf ] !P%d\n",(double)0,K*(targetInfluence),targetPORV_id);
 					foundFalse = 1;
 				}
-			} else {
+			}
+		} else {
 				fflush(fp);
 				fprintf(fp,"ERROR: False Alarm - No Assertion Here.\n");
-			}
 		}
-		
 	} else {
 		fflush(fp);
 		printf("ERROR: The node is empty. This should not have happened.\n");

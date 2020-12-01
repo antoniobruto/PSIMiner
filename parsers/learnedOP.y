@@ -51,15 +51,14 @@
 
 //Data Types Used for Tokens and Reduction Rules
 %union {
-                char string[MAX_STR_LENGTH];
-                double decimal;
-                struct PORV* porvType;
-                struct predicateDetail* predDetail;                
-		struct intervalStruct* intval;
-		struct intervalListStruct* intervalList;
-                int code;
-        }
-        
+	char string[MAX_STR_LENGTH];
+	double decimal;
+	struct PORV* porvType;
+	struct predicateDetail* predDetail;
+	struct intervalStruct* intval;
+	struct intervalListStruct* intervalList;
+	int code;
+}
 
 %type <string> rational arithExpr arithStatement;
 %type <decimal> gainExpr;
@@ -71,7 +70,7 @@
 
 %%
 
-detailList:	%empty				{		
+detailList:	%empty		{	
 							#ifdef YACC_DEBUG_ON 
 								fprintf(stdout,"\nNo details found\n");
 							#endif
@@ -84,12 +83,12 @@ detailList:	%empty				{
 							#endif
 							
 						}
-		| detail 		{ 
+		/*| detail 		{ 
 							#ifdef YACC_DEBUG_ON 
 								printf("PARSER: END\n");
 							#endif
 							
-						}
+						}*/
 		
 	;
 
