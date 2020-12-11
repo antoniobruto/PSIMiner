@@ -138,7 +138,7 @@ void copyContents(struct treeNode* root, struct treeNode* newRoot){
 
 struct treeNode* duplicateTree(struct treeNode* root, int ind){
 	if(root == NULL) return NULL;
-	printf("@ ");
+	//printf("@ ");
 	struct treeNode* duproot = createTreeNode(
                                                   NULL,//Truth List
                                                   listOfIntervalSets,//IntervalSet
@@ -198,9 +198,7 @@ int main(int argc, char *argv[]) {
 		fprintf(aFile,"ASSERTION LIST: \n\n");
 		fclose(aFile);
 	*/
-	FILE* aFile = getDTreeFilePtr();
-	fprintf(aFile,"___________________________________________________\n\n                   DECISION TREE\n________________________________________________________\n\n");
-	fclose(aFile);
+	FILE* aFile=NULL;
 	
 	#ifdef COV_TEST
 	while(1){
@@ -309,15 +307,15 @@ int main(int argc, char *argv[]) {
 		//----------------------------------Choose a target PORV-------------------------------------
                 printf("NUMBER = %d\n",numberOfPORVs);
 		//edited
-                //target = getTarget(numberOfPORVs);        //REMOVE LATER
-                //targetPORV_id = target;			//TODO: Merge this and the previous lines
+        //target = getTarget(numberOfPORVs);        //REMOVE LATER
+        //targetPORV_id = target;			//TODO: Merge this and the previous lines
 
-		#ifdef MAIN_DEBUG
-		fprintf(logFile,"[AMSMiner] Target PORV ID: P-%d\n",targetPORV_id);
-		#endif
+		//#ifdef MAIN_DEBUG
+		//fprintf(logFile,"[AMSMiner] Target PORV ID: P-%d\n",targetPORV_id);
+		//#endif
                 //--------------------------------------------------------------------------------------------
 			
-		sprintf(assertFileName,"%s-assert-%d.txt",assertFileName,targetPORV_id);
+		sprintf(assertFileName,"%s-assertions.txt",assertFileName);
 		//strcat(assertFileName,"-assert.txt");
 		aFile = fopen(assertFileName,"w");
 		fprintf(aFile,"ASSERTION LIST: \n\n");
@@ -362,9 +360,7 @@ int main(int argc, char *argv[]) {
 		//printf("after=%d\n",printLengthOfIntervalLists(lists));  
                 // At this point target, and numberOfPORVs+1 to numberOfPORVs+(N-1) are the target interval lists
                
-		 end_process_input = clock();	
-		printTreeNodeToFilePtr(root,logFile,targetPORV_id);
-		fflush(logFile);
+		end_process_input = clock();	
 		struct intervalListStruct* trueList = NULL;
 		struct listOfIntervalListsStruct* targetList =  NULL;
 		//edited (store targetList PORVID )
@@ -377,23 +373,22 @@ int main(int argc, char *argv[]) {
 		    numTargets++;
 		    tempList = tempList->next;
 		}
-		printf("num=%d\n",numberOfPORVs);
+		
 		double totalTrueLengthList[numTargets], totalFalseLengthList[numTargets];
 		tempList = predicateMap->targetList;
 		int targetPORVID[numTargets];
-	//	struct listOfIntervalListsStruct* pseudoTargetLists[traceCount][numTargets];
+	
 		struct listOfIntervalListsStruct*** pseudoTargetLists = (struct listOfIntervalListsStruct***)malloc(sizeof(struct listOfIntervalListsStruct**)*traceCount);
-		for(int k=0;k<traceCount;k++)
-                {
+		for(int k=0;k<traceCount;k++) {
 			pseudoTargetLists[k] = (struct listOfIntervalListsStruct**)malloc(sizeof(struct listOfIntervalListsStruct*)*numTargets);
 		}
 		struct treeNode* listTree[numTargets][numTargets];
 		while(tempList != NULL)
 		{
 		    targetPORVID[ind++]=tempList->expr->disjunct->PORVID;
-		    //printf("%d",tempList->expr->disjunct->PORVID);
 		    tempList = tempList->next;
 		}
+
 		for(i=0;i<numTargets;i++) 
 		{
 			totalTrueLengthList[i] = 0.0;
@@ -412,7 +407,7 @@ int main(int argc, char *argv[]) {
 		                                                listOfIntervalSets,//IntervalSet
 		                                                0,0,totalTraceLength,NULL,NULL); */
 		int recreate_iterator = 0;
-
+		FILE* dTree = NULL;
 		for(recreate_iterator=0;recreate_iterator<RECREATE_COUNT;recreate_iterator++)
 		{
 			begin_gen_tree=clock();
@@ -458,12 +453,12 @@ int main(int argc, char *argv[]) {
 				printf("[PSIMiner] Calling PSI-Miner for target= %d\n",targetPORVID[i]);
 				
 				FILE* aFile = fopen(assertFileName,"a");
-				char *targetName = getPredicateName(targetPORVID[j]);
+				char *targetName = getPredicateName(targetPORVID[i]);
 				char newTargetName[MAX_STR_LENGTH]; 
 				if(targetName){
 					sprintf(newTargetName,"%s",targetName);
 				} else {
-					sprintf(newTargetName,"P%d",targetPORVID[j]);
+					sprintf(newTargetName,"P%d",targetPORVID[i]);
 				}
 				
 				fprintf(aFile,"\n****************** TARGET [%s] ********************\n",newTargetName);
@@ -471,6 +466,10 @@ int main(int argc, char *argv[]) {
 				amsMine(newroot,pseudoTargetLists,targetPORVID[i],numberOfPORVs,numTargets,N,depthOrig,targetPORVID[i]);
 				printf("[PSIMiner] Completed PSI-Mining for target= %d\n",targetPORVID[i]);
 				
+				dTree = getDTreeFilePtrWithName(targetName);
+				fprintf(dTree,"___________________________________________________\n\n                   DECISION TREE\n                   [%s]\n________________________________________________________\n\n",targetName);
+				printTreeToFilePtr(newroot,dTree,targetPORVID[i]);
+				fflush(dTree); fclose(dTree);
 				//exit(0);
 				printTruthList(newroot->right->truthList);
 				for(int k=0;k<traceCount;k++)
@@ -525,7 +524,6 @@ int main(int argc, char *argv[]) {
 						//exit(0);
 					}
 				}
-				//printTree(newroot);
 				purgeTruthListForTreeNode(newroot); 
 			}
 			end_gen_tree=clock();

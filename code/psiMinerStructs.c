@@ -1659,13 +1659,15 @@ double computeMean(struct listOfIntervalListsStruct** localIntervalSets, int tar
 			
 			trueList = intersectIntervalList(trueList,influenceList[i]);
 			targetLength += lengthOfIntervalList(trueList);
-			printf("TL=%lf target=%d\n",targetLength,target);
 			#ifdef SUP_DEBUG
+			printf("[computeMean Target Length = %lf , Target = %d\n",targetLength,target);
 			fprintf(logFile,"[computeMean] Target-%d's Truth Lists for Trace [%d]\n",target,i);
 			fprintf(logFile,"Target List [%p]\n",targetList);
 			printIntervalListToFilePtr(targetList->trueList,logFile);fprintf(logFile,"\n");
 			fprintf(logFile,"[computeMean] Length of End Match for Trace[%d] = [%f]\n",i,lengthOfIntervalList(influenceList[i]));
-			fprintf(logFile,"[computeMean] Length of Target[True] Under Constraints = %lf\n",targetLength);
+			fprintf(logFile,"[computeMean] Length of Target[True] for Trace[%d] Under Constraints = %lf\n",i,lengthOfIntervalList(trueList));
+			fprintf(logFile,"[computeMean] Cumulative Length of End Match = %lf\n",influenceLength);
+			fprintf(logFile,"[computeMean] Cumulative Length of Target[True] Under Constraints = %lf\n",targetLength);
 			#endif
 			
 			if(trueList!=NULL){
@@ -1953,6 +1955,32 @@ double computeFalseMean2(struct listOfIntervalListsStruct** target, struct inter
 		return 0.0;
 	}
 }
+
+double computeEndMatchOverlapWithTarget(struct listOfIntervalListsStruct** target, struct intervalListStruct** endMatchList,int truth){
+	#ifdef SUP_DEBUG
+	fprintf(logFile,"[computeEndMatchOverlapWithTarget] STARTED\n");
+	#endif
+	
+	if(endMatchList){
+		int i;
+		double lengthTargetEM = 0.0;
+		double lengthEM = 0.0;
+		for(i=0;i<traceCount;i++){
+			struct intervalListStruct* targetEndMatchList = intersectIntervalList(truth==0?target[i]->falseList:target[i]->trueList,endMatchList[i]);
+			lengthTargetEM += lengthOfIntervalList(targetEndMatchList);
+			deleteIntervalList(targetEndMatchList);
+		}
+		
+		return lengthTargetEM;
+		
+	} else {
+		#ifdef SUP_DEBUG
+		fprintf(logFile,"[computeEndMatchOverlapWithTarget] ENDED: EndMatchList EMPTY\n");
+		#endif
+		return 0.0;
+	}
+}
+
 
 double computeTrueEntropy(struct listOfIntervalListsStruct** target, struct intervalListStruct** endMatchList){
 	#ifdef SUP_DEBUG
@@ -3115,7 +3143,7 @@ _Bool is_stop(struct treeNode* root, int target,struct listOfIntervalListsStruct
 	root->mean = mean;
 	
     if(root->traceLength>0.0 && (mean == 0.0 || mean == 1.0) && fabs(error) == 0.0){
-		printf("IL=%lf updated mean=%lf\n",intervalLength,mean);
+		//printf("IL=%lf updated mean=%lf\n",intervalLength,mean);
 		//if(mean == 0.0) return -1;
 		return 1;
 		
@@ -3156,14 +3184,14 @@ int amsMine2(struct treeNode* original, struct treeNode* duproot,struct listOfIn
 	    
 	    if(is_leaf(original,origDepth)){//CHANGED: duproot to original
 			//original->originalToDupSubtree = duproot;
-			printf("reached to leaf node\n");
+			//printf("reached to leaf node\n");
 			//printf("spid=%d",duproot->splittingPredicate_id);
-			printf("before updating spid=%d\n",duproot->splittingPredicate_id);
+			//printf("before updating spid=%d\n",duproot->splittingPredicate_id);
 			
 			updateLeaf(duproot, pseudoTargetLists,target, numberOfPORVs,numTargets, N);
 			
-			printf("after updating spid=%d\n",duproot->splittingPredicate_id);
-			printf("expanding the tree\n");
+			//printf("after updating spid=%d\n",duproot->splittingPredicate_id);
+			//printf("expanding the tree\n");
 			
 			amsMine(duproot,pseudoTargetLists, target, numberOfPORVs,numTargets, N, dupDepth,target);
 			
@@ -3181,7 +3209,7 @@ int amsMine2(struct treeNode* original, struct treeNode* duproot,struct listOfIn
 	    if(endMatchIntervalList){
 		intervalLength = lengthOfIntervalLists(endMatchIntervalList);
 	    }
-		printf("iL=%lf\n",intervalLength);
+		//printf("iL=%lf\n",intervalLength);
 	    trueMean = computeMean(listOfIntervalSets,targetID,intervalLength,endMatchIntervalList);
 	    falseMean = computeFalseMean(listOfIntervalSets,targetID,intervalLength,endMatchIntervalList);
 	    Htrue = computeTrueEntropy(getListsAtPosition(listOfIntervalSets,targetID),endMatchIntervalList);
@@ -3203,6 +3231,7 @@ int amsMine(struct treeNode* root,struct listOfIntervalListsStruct*** pseudoTarg
  	fflush(logFile);
 	#ifdef MINER_DEBUG
 	fprintf(logFile,"\n[amsMine] STARTED - Depth %d\n",depth);
+	printTruthListToFilePtr(root->truthList,logFile);
 	//fprintf(stdout,"\n[amsMine] STARTED - Depth %d\n",depth);
 	fflush(logFile);
 	#endif
@@ -3237,11 +3266,11 @@ int amsMine(struct treeNode* root,struct listOfIntervalListsStruct*** pseudoTarg
 				fp = fopen(assertFileName,"a");
 			}
 			
-			fprintf(fp,"\n-----------------------------------------------------------------\n");//fprintf(fp,"Assertion Found @1: Consequent - %s\n",root->truthValue==0?(root->mean==0.0?"true":"false"):(root->mean==1.0?"true":"false"));
+			//fprintf(fp,"\n-----------------------------------------------------------------\n");//fprintf(fp,"Assertion Found @1: Consequent - %s\n",root->truthValue==0?(root->mean==0.0?"true":"false"):(root->mean==1.0?"true":"false"));
 			//fprintf(fp,"Continue = %d\n",continueFlag);
-			printTruthListToFilePtr(root->truthList,fp);
+			//printTruthListToFilePtr(root->truthList,fp);
 			printAssertions(root,fp,targetPORV_id);
-			fprintf(fp,"-----------------------------------------------------------------\n");
+			//fprintf(fp,"-----------------------------------------------------------------\n");
 			fflush(fp);
 			fclose(fp);
 			
@@ -3453,11 +3482,11 @@ int amsMine(struct treeNode* root,struct listOfIntervalListsStruct*** pseudoTarg
 			}
 			
 			//FILE* fp = fopen("assertions.txt","a");
-			fprintf(fp,"\n-----------------------------------------------------------------\n");//fprintf(fp,"Assertion Found @2A: Consequent - %s\n",root->left->truthValue==0?(root->left->mean==0.0?"true":"false"):(root->left->mean==1.0?"true":"false"));
+			//fprintf(fp,"\n-----------------------------------------------------------------\n");//fprintf(fp,"Assertion Found @2A: Consequent - %s\n",root->left->truthValue==0?(root->left->mean==0.0?"true":"false"):(root->left->mean==1.0?"true":"false"));
 			//fprintf(fp,"Continue = %d\n",continueFlag);
 			//printTruthListToFilePtr(root->left->truthList,fp);
 			printAssertions(root->left,fp, targetPORV_id);
-			fprintf(fp,"-----------------------------------------------------------------\n");
+			//fprintf(fp,"-----------------------------------------------------------------\n");
 			assertionList = addNodeToList(assertionList,root->left);
 			fclose(fp);
 			//printTruthListToFile(root->left->truthList);
@@ -3597,11 +3626,11 @@ int amsMine(struct treeNode* root,struct listOfIntervalListsStruct*** pseudoTarg
 			}
 			
 			//FILE* fp = fopen("assertions.txt","a");
-			fprintf(fp,"\n-----------------------------------------------------------------\n");//fprintf(fp,"Assertion Found @2B: Consequent - %s\n",root->right->truthValue==0?(root->right->mean==0.0?"true":"false"):(root->right->mean==1.0?"true":"false"));
+			//fprintf(fp,"\n-----------------------------------------------------------------\n");//fprintf(fp,"Assertion Found @2B: Consequent - %s\n",root->right->truthValue==0?(root->right->mean==0.0?"true":"false"):(root->right->mean==1.0?"true":"false"));
 			//fprintf(fp,"Continue = %d\n",continueFlag);
 			//printTruthListToFilePtr(root->right->truthList,fp);
 			printAssertions(root->right,fp, targetPORV_id);
-			fprintf(fp,"-----------------------------------------------------------------\n");
+			//fprintf(fp,"-----------------------------------------------------------------\n");
 			assertionList = addNodeToList(assertionList,root->right);
 			fclose(fp);
 			//printTruthListToFile(root->right->truthList);
@@ -3710,13 +3739,13 @@ int amsMine(struct treeNode* root,struct listOfIntervalListsStruct*** pseudoTarg
 			}
 			
 			//FILE* fp = fopen("assertions.txt","a");
-			fprintf(fp,"\n-----------------------------------------------------------------\n");fprintf(fp,"Assertion Found @0 : Consequent - %s\n",root->truthValue==0?(root->mean==0.0?"true":"false"):(root->mean==1.0?"true":"false"));
-			fprintf(fp,"Continue = %d\n",continueFlag);
+			//fprintf(fp,"\n-----------------------------------------------------------------\n");fprintf(fp,"Assertion Found @0 : Consequent - %s\n",root->truthValue==0?(root->mean==0.0?"true":"false"):(root->mean==1.0?"true":"false"));
+			//fprintf(fp,"Continue = %d\n",continueFlag);
 			fprintf(logFile,"[amsMine] PRINTING ASSERTIONS\n");
 			fflush(logFile);
 			//printTruthListToFilePtr(root->truthList,fp);
 			printAssertions(root,fp, targetPORV_id);
-			fprintf(fp,"-----------------------------------------------------------------\n");
+			//fprintf(fp,"-----------------------------------------------------------------\n");
 			fprintf(logFile,"[amsMine] ADDING NODE TO LIST OF ASSERTION NODES\n");
 			fflush(logFile);
 			assertionList = addNodeToList(assertionList,root);
@@ -3831,8 +3860,18 @@ void printTree(struct treeNode* node,int targetPORV_id){
 	}
 }
 
+void printTreeToFilePtr(struct treeNode* node, FILE *dTree, int targetPORV_id){
+	printTreeNodeToFilePtr(node,dTree,targetPORV_id);
+	if(node){
+		fprintf(dTree,"\nLEFT CHILD:\n");
+		printTreeToFilePtr(node->left,dTree,targetPORV_id);
+		fprintf(dTree,"\nRIGHT CHILD:\n");
+		printTreeToFilePtr(node->right,dTree,targetPORV_id);
+	}
+}
+
 void printTreeNodeToFilePtr(struct treeNode* node, FILE* fp,int targetPORV_id){
-	if(node){                
+	if(node){               
 		if(fp){
 			fprintf(fp,"---------------------TREE NODE ID [%d]----------------------\n",node->id);
 			//fprintf(fp,"INTERVAL SET: \n");
@@ -3849,7 +3888,7 @@ void printTreeNodeToFilePtr(struct treeNode* node, FILE* fp,int targetPORV_id){
 			fprintf(fp,"MEAN\t= %lf\n",node->mean);
 			fprintf(fp,"ERROR\t= %lf\n",node->error);
 			
-			
+			/*
 			int i =0;
 			struct truthAssignmentListStruct* temp = node->truthList;
 			
@@ -3874,6 +3913,7 @@ void printTreeNodeToFilePtr(struct treeNode* node, FILE* fp,int targetPORV_id){
 					fprintf(fp,"[%d] traceLength = [%lf], targetTrue = [%lf], targetFalse = [%lf]\n",j,traceLength,targetTrue,targetFalse);
 				}
 			}
+			*/
 			
 			//fprintf(fp,"Gains:\n");
 			//printFloat2DArraryToFile(N*2,numberOfPORVs,node->gains,fp);
@@ -3886,7 +3926,11 @@ void printTreeNodeToFilePtr(struct treeNode* node, FILE* fp,int targetPORV_id){
 			
 			fprintf(fp,"--------------------------------------------------------\n");                        
 			fflush(fp);
-		}
+		} else printf("\nfp is null\n");
+	} else {
+		if(fp){
+			fprintf(fp,"Node is NULL\n"); fflush(fp);
+		} else printf("\nfp is null\n");
 	}
 }
 
@@ -5358,7 +5402,10 @@ void printAssertionWithTruthToFile(FILE* fp, struct intervalListStruct** targetL
 			}
 			
 			#ifdef ASSERT_PRINT_DEBUG
-				fprintf(fp,"Overlap = [%f]\n",totalOverlap);
+				fprintf(fp,"\n-----------------DEBUG---------------------\n");
+				fprintf(fp,"Length of Evidence = [%f]\n",totalEvidence);
+				fprintf(fp,"Length of Overlap = [%f]\n",totalOverlap);
+				fprintf(fp,"\n---------------DEBUG ENDS------------------\n");
 			#endif
 			
 			correlation = totalOverlap/totalFalseLength;
@@ -5378,6 +5425,13 @@ void printAssertionWithTruthToFile(FILE* fp, struct intervalListStruct** targetL
 				totalOverlap += lengthOfIntervalList(overlap);
 			}
 			
+			#ifdef ASSERT_PRINT_DEBUG
+				fprintf(fp,"\n-----------------DEBUG---------------------\n");
+				fprintf(fp,"Length of Evidence = [%f]\n",totalEvidence);
+				fprintf(fp,"Length of Overlap = [%f]\n",totalOverlap);
+				fprintf(fp,"\n---------------DEBUG ENDS------------------\n");
+			#endif
+
 			correlation = totalOverlap/totalTrueLength;
 			support = totalEvidence/totalTraceLength;
 		}
@@ -5387,8 +5441,11 @@ void printAssertionWithTruthToFile(FILE* fp, struct intervalListStruct** targetL
 		
 		
 		#ifdef ASSERT_PRINT_DEBUG
+		fprintf(fp,"\n-----------------DEBUG---------------------\n");
 		fprintf(fp,"SUPPORT = [%lf]\n",support*100.0);
 		fprintf(fp,"CORRELATION = [%lf]\n",correlation*100.0);
+		fprintf(fp,"\n---------------DEBUG ENDS------------------\n");
+
 		#endif
 		
 		if(correlation == 0.0){ return; }
@@ -5573,7 +5630,7 @@ void printAssertions(struct treeNode* node, FILE* fp, int targetPORV_id){
 	#ifdef SUP_DEBUG
 	fprintf(logFile,"[printAssertions] STARTED\n");
 	#endif
-	if(node->id==4){
+	if(node->id==3){
 		fprintf(logFile,"\nCHECK WHATS HAPPENING HERE --- ABC ---\n");
 	}
 	
@@ -5596,7 +5653,7 @@ void printAssertions(struct treeNode* node, FILE* fp, int targetPORV_id){
 		#endif
 		
 		#ifdef ASSERT_PRINT_DEBUG
-			fprintf(fp,"Constraint List PTR = [%p]\n",constraintList);
+			fprintf(fp,"[printAssertions] Constraint List PTR = [%p]\n",constraintList);
 		#endif
 		
 		//Compute Buckets
@@ -5609,13 +5666,12 @@ void printAssertions(struct treeNode* node, FILE* fp, int targetPORV_id){
 			
 			//Check if error non-zero
 			#ifdef ASSERT_PRINT_DEBUG
-				fprintf(fp,"(Node Error = [%lf]) ==0? [ %s ]\n",node->error,node->error == 0.0?"Yes":"No");
+				fprintf(fp,"[printAssertions] (Node Error = [%lf]) ==0? [ %s ]\n",node->error,node->error == 0.0?"Yes":"No");
 			#endif
 			if(node->error!=0.0){
 				//fprintf(fp,"here - error not zero L4769\n");
 				#ifdef SUP_DEBUG
-				fprintf(logFile,"ENTERING HERE\n");
-				fprintf(logFile,"[%lf]\n",node->error);
+				fprintf(logFile,"[printAssertions] Non-zero Node Error of [%lf]\n",node->error);
 				printTreeNodeToFilePtr(node,logFile,targetPORV_id);
 				#endif
 				
@@ -5666,10 +5722,14 @@ void printAssertions(struct treeNode* node, FILE* fp, int targetPORV_id){
 			//fprintf(fp,"here - before printing assertions\n");
 			struct intervalListStruct** endMatch = endMatchesForPrefix(node->truthList); 
 			double Htrue = computeTrueEntropy(targetTrueFalseList,endMatch);
+			double TrueOverlap = computeEndMatchOverlapWithTarget(targetTrueFalseList,endMatch,1);
 			double Hfalse = computeFalseEntropy(targetTrueFalseList,endMatch);
+			double FalseOverlap = computeEndMatchOverlapWithTarget(targetTrueFalseList,endMatch,0);
 			fprintf(logFile,"[writingAssertions] Htrue = %lf, Hfalse = %lf\n",Htrue, Hfalse);
-			if((float)(((int)(fabs(Htrue)*10e5))/10e5) == 0.0 && (float)(((int)(fabs(Hfalse)*10e5))/10e5) == 0.0){
+			//if((float)(((int)(fabs(Htrue)*10e5))/10e5) == 0.0 && (float)(((int)(fabs(Hfalse)*10e5))/10e5) == 0.0){
+			if(newPrecision(fabs(Htrue),5)==0.0 && TrueOverlap>0.0 && newPrecision(fabs(Hfalse),5)==0.0 && FalseOverlap>0.0){
 				fprintf(logFile,"Target is both True and False\n");
+				fprintf(fp,"Target entropy is zero in both True and False states.\n");
 				#ifdef ASSERT_PRINT_DEBUG
 				fprintf(fp,"HERE If - Entropy is close to 0\n");fflush(fp);
 				fprintf(fp,"here (1) - sending control to printAssertionWithTruthToFile\n");
@@ -5949,6 +6009,23 @@ FILE* getDTreeFilePtr(){
 		return fopen("logs/dtree.txt","w");
 	} else {
 		return fopen("logs/dtree.txt","a");
+	}
+}
+
+FILE* getDTreeFilePtrWithName(char* name){
+	static int opened=0;
+	if(name){
+		char fileNewName[15+strlen(name)];
+		sprintf(fileNewName,"logs/dtree-%s.txt",name);
+		
+		if(!opened){
+			opened = 1;
+			return fopen(fileNewName,"w");
+		} else {
+			return fopen(fileNewName,"a");
+		}
+	} else {
+		return fopen("logs/dtree-no-name-targets.txt","a");
 	}
 }
 

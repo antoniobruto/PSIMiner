@@ -202,6 +202,7 @@ struct intervalListStruct* flattenIntervalSet(struct listOfIntervalListsStruct* 
 struct intervalStruct* intersectIntervals(struct intervalStruct* interval1, struct intervalStruct* interval2);
 struct intervalListStruct* intersectIntervalList(struct intervalListStruct* list1, struct intervalListStruct* list2);
 struct listOfIntervalListsStruct* intersectIntervalSet(struct listOfIntervalListsStruct* intervalSet1, struct intervalListStruct* intervalList2);
+double computeEndMatchOverlapWithTarget(struct listOfIntervalListsStruct** target, struct intervalListStruct** endMatchList,int truth);
 
 //Tree Node
 struct treeNode* createTreeNode(
@@ -263,6 +264,7 @@ void printTreeNode(struct treeNode* node,int targetPORV_id);
 void printTreeNodeToFile(struct treeNode* node,int depth,int targetPORV_id);
 void printTreeNodeToFilePtr(struct treeNode* root,FILE* fp,int targetPORV_id);
 void printTree(struct treeNode* node, int targetPORV_id);
+void printTreeToFilePtr(struct treeNode* node, FILE *dTree, int targetPORV_id);
 
 FILE* processInput(int argc, char* argv[], int* N, double* K, int* depth, int repeatFlag);
 FILE* processConfig(int argc, char* argv[]);
@@ -313,6 +315,7 @@ double getMaxIntervalSet(struct listOfIntervalListsStruct* set);
 int getSmallestBucketID(struct truthAssignmentListStruct* truthtList);
 
 FILE* getDTreeFilePtr();
+FILE* getDTreeFilePtrWithName(char* name);
 struct intervalListStruct* endMatchForPrefix(struct truthAssignmentListStruct* constraintList);
 
 //Predicate Detail
