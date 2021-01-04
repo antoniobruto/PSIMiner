@@ -33,6 +33,10 @@ If this directory does not exist, please create it before running the build scri
 
 For TraceFiles:
 It is assumed that there is a time reference in column 1.
+Note that the change of truth for a predicate occurs at the first timestamp
+at which the change is observed in the trace data. Hence a change of 
+truth for a predicate observed on the last line of the trace file may 
+cause unintentended results. 
 
 The prefix of the name of the assertion file will be the name of the config file.
 
