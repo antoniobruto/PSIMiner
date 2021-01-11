@@ -215,6 +215,7 @@ int main(int argc, char *argv[]) {
 		
 		N = inputConfig->N+1;
 		K = inputConfig->K;
+		strict = inputConfig->strict;
 		
 		listOfIntervalSets = (struct listOfIntervalListsStruct**)malloc(sizeof(struct listOfIntervalListsStruct*)*(inputConfig->traceCount));
 		bzero(listOfIntervalSets,sizeof(struct listOfIntervalListsStruct*)*(inputConfig->traceCount));
@@ -238,7 +239,7 @@ int main(int argc, char *argv[]) {
 		
 		//---------------------------------Parsing Interval Sets--------------------------------------
 		#ifdef MAIN_DEBUG
-			fprintf(logFile,"[AMSMiner] Parsing Intervals.\n");fflush(logFile);
+			fprintf(logFile,"[PSIMiner] Parsing Intervals.\n");fflush(logFile);
 		#endif
 		
 		setbuf(stdout, NULL);
@@ -286,8 +287,8 @@ int main(int argc, char *argv[]) {
 		
                 
 //		#ifdef MAIN_DEBUG
-//		fprintf(logFile,"[AMSMiner] intervalSet = %p\n",intervalSet);
-//		fprintf(logFile,"[AMSMiner] From the Main Codebase:\n");fflush(logFile);
+//		fprintf(logFile,"[PSIMiner] intervalSet = %p\n",intervalSet);
+//		fprintf(logFile,"[PSIMiner] From the Main Codebase:\n");fflush(logFile);
 //		printListOfIntervalListsToFilePtr(intervalSet,logFile);
 //		fflush(logFile);
 //		#endif
@@ -296,7 +297,7 @@ int main(int argc, char *argv[]) {
 		numberOfPORVs = countLists(listOfIntervalSets[0]);
                 
                 #ifdef MAIN_DEBUG
-		fprintf(logFile,"[AMSMiner] Number of PORVs = %d\n",numberOfPORVs);
+		fprintf(logFile,"[PSIMiner] Number of PORVs = %d\n",numberOfPORVs);
                 #endif
 		
 		printPredicateList(predicateMap);
@@ -311,7 +312,7 @@ int main(int argc, char *argv[]) {
         //targetPORV_id = target;			//TODO: Merge this and the previous lines
 
 		//#ifdef MAIN_DEBUG
-		//fprintf(logFile,"[AMSMiner] Target PORV ID: P-%d\n",targetPORV_id);
+		//fprintf(logFile,"[PSIMiner] Target PORV ID: P-%d\n",targetPORV_id);
 		//#endif
                 //--------------------------------------------------------------------------------------------
 			
