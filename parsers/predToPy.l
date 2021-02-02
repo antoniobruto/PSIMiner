@@ -60,8 +60,39 @@
                                 printf("lex: Whitespace found\n");
                                 #endif
                                 
-                        }                    
+                        }
+
+"objective"		{ 				predToPy_multiLine=0;
+                                #ifdef LEX_DEBUG_ON
+                                printf("lex: keyword [objective]\n");
+                                #endif
+                                predToPy_charPos+=yyleng;
+                                strcat(line,yytext);
+                                strcpy(yylval.string,yytext);
+                                return OBJECTIVE;
+				}
+
+"useOverlap"	{ 				predToPy_multiLine=0;
+                                #ifdef LEX_DEBUG_ON
+                                printf("lex: keyword [useOverlap]\n");
+                                #endif
+                                predToPy_charPos+=yyleng;
+                                strcat(line,yytext);
+                                strcpy(yylval.string,yytext);
+                                return USEOVERLAP;
+				}
                         
+
+"strict"		{       predToPy_multiLine=0;
+                                #ifdef LEX_DEBUG_ON
+                                printf("lex: keyword [strict]\n");
+                                #endif
+                                predToPy_charPos+=yyleng;
+                                strcat(line,yytext);
+                                strcpy(yylval.string,yytext);
+                                return STRICT;
+                        }
+
 "traceFile"		{       predToPy_multiLine=0;
                                 #ifdef LEX_DEBUG_ON
                                 printf("lex: keyword [traceFile]\n");
@@ -100,6 +131,16 @@
                                 strcat(line,yytext);
                                 strcpy(yylval.string,yytext);
                                 return DEPTH;
+                        }
+
+"exDepth"			{       predToPy_multiLine=0;
+                                #ifdef LEX_DEBUG_ON
+                                printf("lex: keyword [exDepth]\n");
+                                #endif
+                                predToPy_charPos+=yyleng;
+                                strcat(line,yytext);
+                                strcpy(yylval.string,yytext);
+                                return EXDEPTH;
                         }
                         
 "bestPredCount"		{       predToPy_multiLine=0;
@@ -152,6 +193,15 @@
                                 strcat(line,yytext);
                                 strcpy(yylval.string,yytext);
                                 return PBEGIN;
+                        }
+"targets"                 {       predToPy_multiLine=0;
+                                #ifdef LEX_DEBUG_ON
+                                printf("lex: keyword [targets]\n");
+                                #endif
+                                predToPy_charPos+=yyleng;
+                                strcat(line,yytext);
+                                strcpy(yylval.string,yytext);
+                                return TARGET;
                         }
 
 "end"                   {       predToPy_multiLine=0;

@@ -56,6 +56,9 @@ struct config* createConfig(){
 	inputConfigTemp->tmax = 20;
 	inputConfigTemp->bestGainCount = 5;
 	inputConfigTemp->learnType = 0;
+	inputConfigTemp->strict=0;
+	inputConfigTemp->objective=1;
+	inputConfigTemp->useOverlap=1;
 	inputConfigTemp->traceFileNames = NULL;
 	bzero(inputConfigTemp->traceFileName,sizeof(char)*MAX_STR_LENGTH);
 	bzero(inputConfigTemp->intervalSetFileName,sizeof(char)*MAX_STR_LENGTH);
@@ -97,6 +100,12 @@ int getDepth(struct config* inputConfig){
 	return 0;
 }
 
+int getExDepth(struct config* inputConfig){
+	if(inputConfig){
+		return inputConfig->maxTreeExDepth;
+	}
+	return 0;
+}
 
 int getLearnType(struct config* inputConfig){
 	if(inputConfig){
@@ -287,6 +296,20 @@ void deleteConditionList(struct condition* node){
 		}
 		free(node);
 	}
+}
+
+struct condition* createIdentityResets(struct identifier* root){
+	struct condition* reset = NULL;
+	struct identifier* temp = root;
+	char nameD[MAX_STR_LENGTH];
+	
+	
+	while(temp!=NULL){
+		sprintf(nameD,"%s'",temp->name);
+		reset = addToConditionList(reset,nameD,temp->name,0);
+		temp = temp->next;
+	}
+	return reset;
 }
 
 void printCondition(struct condition* cond){
@@ -1426,6 +1449,7 @@ void printExpressionToFile(FILE* fp, struct file* predicateMap, struct expressio
 		fprintf(fp,"\t\t\t\t\tswitch[%d] = 1\n",id);
 		fprintf(fp,"\t\t\t\t\tl[%d] = float(row[%d])\n",id, timeCol-1);
 		fprintf(fp,"\t\t\t\t\tr[%d] = float(row[%d])+%f\n",id, timeCol-1,epsilon);
+		fprintf(fp,"\t\t\t\t\tmaxTime = r[%d]\n",id);
 		fprintf(fp,"\t\t\t\telse:\n");
 		fprintf(fp,"\t\t\t\t\tr[%d] = float(row[%d])\n",id, timeCol-1);
 		
@@ -1535,7 +1559,7 @@ void printCSV(FILE* fp,struct file* predicateMap,char* csvFile){
                         porvList = porvList->next;
                 }
                 */
-		
+		fprintf(fp,"\n\t\t\tmaxTime = float(row[0])\n");
 		fflush(fp);
 		int exprID = 0;
 		struct expressionList* exprList = predicateMap->exprList;
@@ -1545,7 +1569,7 @@ void printCSV(FILE* fp,struct file* predicateMap,char* csvFile){
 			exprList = exprList->next;
 		}
 		
-		fprintf(fp,"\n\t\t\tmaxTime = float(row[0])\n");
+		//fprintf(fp,"\n\t\t\tmaxTime = float(row[0])\n");
                 fprintf(fp,"\n\t\ti=i+1\n");
                 
                 //Open Closed Switches

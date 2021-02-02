@@ -75,15 +75,14 @@
 
 %%
 
-detailList:	%empty		{
+detailList:	%empty		{	
 							#ifdef YACC_DEBUG_ON 
 								fprintf(stdout,"\nNo details found\n");
 							#endif
 							
 							details = NULL;
 						}
-		| detailList detail
-						{
+		|detailList detail 		{ 
 							#ifdef YACC_DEBUG_ON 
 								printf("PARSER: END\n");
 							#endif
@@ -239,82 +238,83 @@ ineq:
         ;
 
 arithExpr:
-        arithStatement ARITHOP arithExpr
-						{
-								#ifdef YACC_DEBUG_ON 
-										printf("PARSER: Complex Arith Expr\n"); 
-								#endif
-								sprintf($$,"%s %s %s",$1,$2,$3);
-						}
-        | arithStatement
-						{
-								#ifdef YACC_DEBUG_ON 
-										printf("PARSER: Simple Arith Statement\n");
-								#endif
-								strcpy($$,$1);
-						}
+        arithStatement ARITHOP arithExpr               {       
+                                                                #ifdef YACC_DEBUG_ON 
+                                                                        printf("PARSER: Complex Arith Expr\n"); 
+                                                                #endif
+                                                                sprintf($$,"%s %s %s",$1,$2,$3);
+                                                                
+                                                                //strcat($2,$3);strcat($1,$2);strcpy($$,$1);
+                                                        }
+        | arithStatement                                {
+                                                                #ifdef YACC_DEBUG_ON 
+                                                                        printf("PARSER: Simple Arith Statement\n");
+                                                                #endif
+                                                                
+                                                                strcpy($$,$1);
+                                                                
+                                                                //strcpy($$,$1);
+                                                        }
         
         ;
 
 arithStatement:
-          ATOM			{
-							#ifdef YACC_DEBUG_ON 
-									printf("PARSER: Linear Expr is an ID\n");
-							
-							#endif
-							strcpy($$,$1);
-						}
-        | ARITHOP ATOM	{
-							#ifdef YACC_DEBUG_ON 
-									printf("PARSER: Linear Expr is an ID\n");
-							#endif
-							sprintf($$,"%s%s",$1,$2);
-						}
-        | rational		{
-							#ifdef YACC_DEBUG_ON 
-									printf("PARSER: Linear Expr is a Rational\n");
-							#endif
-							strcpy($$,$1);
-						}
+          ATOM                                         {       
+                                                                #ifdef YACC_DEBUG_ON 
+                                                                        printf("PARSER: Linear Expr is an ID\n");
+                                                               
+                                                                #endif
+                                                                strcpy($$,$1);                                                               
+                                                        }
+        | ARITHOP ATOM                                	{
+                                                                #ifdef YACC_DEBUG_ON 
+                                                                        printf("PARSER: Linear Expr is an ID\n");
+                                                                #endif
+                                                                sprintf($$,"%s%s",$1,$2);
+                                                        }
+        | rational                                      {       
+                                                                #ifdef YACC_DEBUG_ON 
+                                                                        printf("PARSER: Linear Expr is a Rational\n");
+                                                                #endif
+                                                                
+                                                                strcpy($$,$1);
+                                                        }
         ;
         
 
 intervalList: 
-	LIST_BEGIN intervalContent LIST_END 	
-						{
-							#ifdef YACC_DEBUG_ON
-								printf("[intervalList]\n");
+	LIST_BEGIN intervalContent LIST_END 	{
+                                                        #ifdef YACC_DEBUG_ON
+                                                                printf("[intervalList]\n");
 							#endif
 							
 							$$ = $2;
 						}
-	|LIST_BEGIN LIST_END	
-						{
-							#ifdef YACC_DEBUG_ON
-								printf("[intervalList] ************************          Empty\n");
+	|LIST_BEGIN LIST_END 	{
+                                                        #ifdef YACC_DEBUG_ON
+                                                                printf("[intervalList] ************************          Empty\n");
 							#endif
 							
-							$$ = NULL;
+							$$ = NULL;        
 				};
 				
 intervalContent: 
-	intervalContent interval 
-						{
-							#ifdef YACC_DEBUG_ON
-									printf("[intervalContent] List\n");
-							#endif
-
+	intervalContent interval 		{       
+                                                        #ifdef YACC_DEBUG_ON
+                                                                printf("[intervalContent] List\n");
+                                                        #endif
+                                                        
 							$$ = addIntervalToList($1,createIntervalList($2));
 							
 							#ifdef YACC_DEBUG_ON
-								printf("Printing Interval List: ");
-								printIntervalList($$);
-								printf("\n");
+                                                                printf("Printing Interval List: ");
+                                                                printIntervalList($$);
+                                                                printf("\n");
 							#endif
 						}
-	|interval 			{	
-							#ifdef YACC_DEBUG_ON
-								printf("[intervalContent] Singular\n");
+	|interval 				{	
+                                                        #ifdef YACC_DEBUG_ON
+                                                                printf("[intervalContent] Singular\n");
 							#endif
 							
 							$$ = createIntervalList($1);
@@ -327,15 +327,15 @@ intervalContent:
 						
 interval: INTERVAL_BEGIN RATIONAL SEPARATOR RATIONAL INTERVAL_END
 						{	
-							#ifdef YACC_DEBUG_ON
-									printf("[interval] [%s:%s)\n",$2,$4);
+                                                        #ifdef YACC_DEBUG_ON
+                                                                printf("[interval] [%s:%s)\n",$2,$4);
 							#endif
 							
 							$$ = createIntervalStruct(atof($2),atof($4));
 							
 							#ifdef YACC_DEBUG_ON
-								printInterval($$);
-								printf("\n");
+                                                                printInterval($$);
+                                                                printf("\n");
 							#endif
 							
 						};

@@ -1,0 +1,338 @@
+ASSERTION LIST: 
+
+
+****************** TARGET [yNN_Below_yNominal] ********************
+
+-----------------------------------------------------------------
+{~KP1 [2] }
+{~KP1 [2] }
+!above0.4|=> ##[ 0.000000 : 4.000000 ] !yNN_Below_yNominal
+SUPPORT		= [86.100000]
+CORRELATION	= [100.000000]
+-----------------------------------------------------------------
+
+******** RELATED ASSERTIONS FOR TARGET [yNN_Above_yNominal] ********
+
+-----------------------------------------------------------------
+{~KP1 [2]  AND ~KP2 [3] }
+{~KP2 [3]  AND ~KP1 [2] }
+!b0.3To0.4 ##[ 0.000000 : 2.000000 ] !above0.4|=> ##[ 0.000000 : 4.000000 ] !yNN_Above_yNominal
+SUPPORT		= [81.575000]
+CORRELATION	= [94.242804]
+-----------------------------------------------------------------
+
+-----------------------------------------------------------------
+{~KP1 [2]  AND KP2 [3] }
+{KP2 [3]  AND ~KP1 [2] }
+b0.3To0.4 ##[ 0.000000 : 2.000000 ] !above0.4|=> ##[ 0.000000 : 4.000000 ] !yNN_Above_yNominal
+SUPPORT		= [13.141667]
+CORRELATION	= [15.182440]
+-----------------------------------------------------------------
+
+******** RELATED ASSERTIONS FOR TARGET [uNN_Below_uNominal] ********
+{~KP1 [2] }
+!above0.4|=> ##[ 0.000000 : 4.000000 ] !uNN_Below_uNominal
+SUPPORT		= [89.500000]
+CORRELATION	= [100.000000]
+
+******** RELATED ASSERTIONS FOR TARGET [uNN_Above_uNominal] ********
+
+-----------------------------------------------------------------
+{~KP1 [2]  AND ~KP2 [3] }
+{~KP2 [3]  AND ~KP1 [2] }
+!b0.3To0.4 ##[ 0.000000 : 2.000000 ] !above0.4|=> ##[ 0.000000 : 4.000000 ] !uNN_Above_uNominal
+SUPPORT		= [83.691667]
+CORRELATION	= [94.380227]
+-----------------------------------------------------------------
+
+-----------------------------------------------------------------
+{~KP1 [2]  AND KP2 [3] }
+{KP2 [3]  AND ~KP1 [2] }
+b0.3To0.4 ##[ 0.000000 : 2.000000 ] !above0.4|=> ##[ 0.000000 : 4.000000 ] !uNN_Above_uNominal
+SUPPORT		= [14.433333]
+CORRELATION	= [16.276666]
+-----------------------------------------------------------------
+
+******** RELATED ASSERTIONS FOR TARGET [yNN_Within_0.5_yNominal] ********
+
+-----------------------------------------------------------------
+{~KP1 [2]  AND ~KP2 [3] }
+{~KP2 [3]  AND ~KP1 [2] }
+!b0.3To0.4 ##[ 0.000000 : 2.000000 ] !above0.4|=> ##[ 0.000000 : 4.000000 ] yNN_Within_0.5_yNominal
+SUPPORT		= [67.575000]
+CORRELATION	= [93.131963]
+-----------------------------------------------------------------
+
+-----------------------------------------------------------------
+{~KP1 [2]  AND KP2 [3] }
+{KP2 [3]  AND ~KP1 [2] }
+b0.3To0.4 ##[ 0.000000 : 2.000000 ] !above0.4|=> ##[ 0.000000 : 4.000000 ] yNN_Within_0.5_yNominal
+SUPPORT		= [9.916667]
+CORRELATION	= [13.667164]
+-----------------------------------------------------------------
+
+******** RELATED ASSERTIONS FOR TARGET [uNN_Within_0.01_uNominal] ********
+
+-----------------------------------------------------------------
+{~KP1 [2]  AND ~KP2 [3] }
+{~KP2 [3]  AND ~KP1 [2] }
+!b0.3To0.4 ##[ 0.000000 : 2.000000 ] !above0.4|=> ##[ 0.000000 : 4.000000 ] uNN_Within_0.01_uNominal
+SUPPORT		= [73.091667]
+CORRELATION	= [93.617248]
+-----------------------------------------------------------------
+
+-----------------------------------------------------------------
+{~KP1 [2]  AND KP2 [3] }
+{KP2 [3]  AND ~KP1 [2] }
+b0.3To0.4 ##[ 0.000000 : 2.000000 ] !above0.4|=> ##[ 0.000000 : 4.000000 ] uNN_Within_0.01_uNominal
+SUPPORT		= [11.158333]
+CORRELATION	= [14.291813]
+-----------------------------------------------------------------
+
+****************** TARGET [P0] ********************
+
+-----------------------------------------------------------------
+{~KP1 [3] }
+{~KP1 [3] }
+!above0.4|=> ##[ 0.000000 : 6.000000 ] !yNN_Above_yNominal
+SUPPORT		= [86.558333]
+CORRELATION	= [100.000000]
+-----------------------------------------------------------------
+
+******** RELATED ASSERTIONS FOR TARGET [yNN_Below_yNominal] ********
+{~KP1 [3] }
+!above0.4|=> ##[ 0.000000 : 6.000000 ] !yNN_Below_yNominal
+SUPPORT		= [86.100000]
+CORRELATION	= [100.000000]
+
+******** RELATED ASSERTIONS FOR TARGET [uNN_Below_uNominal] ********
+{~KP1 [3] }
+!above0.4|=> ##[ 0.000000 : 6.000000 ] !uNN_Below_uNominal
+SUPPORT		= [89.500000]
+CORRELATION	= [100.000000]
+
+******** RELATED ASSERTIONS FOR TARGET [uNN_Above_uNominal] ********
+{~KP1 [3] }
+!above0.4|=> ##[ 0.000000 : 6.000000 ] !uNN_Above_uNominal
+SUPPORT		= [88.675000]
+CORRELATION	= [100.000000]
+
+******** RELATED ASSERTIONS FOR TARGET [yNN_Within_0.5_yNominal] ********
+{~KP1 [3] }
+!above0.4|=> ##[ 0.000000 : 6.000000 ] !yNN_Within_0.5_yNominal
+SUPPORT		= [27.441667]
+CORRELATION	= [100.000000]
+
+******** RELATED ASSERTIONS FOR TARGET [uNN_Within_0.01_uNominal] ********
+{~KP1 [3] }
+!above0.4|=> ##[ 0.000000 : 6.000000 ] !uNN_Within_0.01_uNominal
+SUPPORT		= [21.925000]
+CORRELATION	= [100.000000]
+
+****************** TARGET [P0] ********************
+
+-----------------------------------------------------------------
+{~KP1 [2] }
+{~KP1 [2] }
+!above0.4|=> ##[ 0.000000 : 4.000000 ] !uNN_Below_uNominal
+SUPPORT		= [89.500000]
+CORRELATION	= [100.000000]
+-----------------------------------------------------------------
+
+******** RELATED ASSERTIONS FOR TARGET [yNN_Below_yNominal] ********
+{~KP1 [2] }
+!above0.4|=> ##[ 0.000000 : 4.000000 ] !yNN_Below_yNominal
+SUPPORT		= [86.100000]
+CORRELATION	= [100.000000]
+
+******** RELATED ASSERTIONS FOR TARGET [yNN_Above_yNominal] ********
+
+-----------------------------------------------------------------
+{~KP1 [2]  AND ~KP2 [3] }
+{~KP2 [3]  AND ~KP1 [2] }
+!b0.3To0.4 ##[ 0.000000 : 2.000000 ] !above0.4|=> ##[ 0.000000 : 4.000000 ] !yNN_Above_yNominal
+SUPPORT		= [81.575000]
+CORRELATION	= [94.242804]
+-----------------------------------------------------------------
+
+-----------------------------------------------------------------
+{~KP1 [2]  AND KP2 [3] }
+{KP2 [3]  AND ~KP1 [2] }
+b0.3To0.4 ##[ 0.000000 : 2.000000 ] !above0.4|=> ##[ 0.000000 : 4.000000 ] !yNN_Above_yNominal
+SUPPORT		= [13.141667]
+CORRELATION	= [15.182440]
+-----------------------------------------------------------------
+
+******** RELATED ASSERTIONS FOR TARGET [uNN_Above_uNominal] ********
+
+-----------------------------------------------------------------
+{~KP1 [2]  AND ~KP2 [3] }
+{~KP2 [3]  AND ~KP1 [2] }
+!b0.3To0.4 ##[ 0.000000 : 2.000000 ] !above0.4|=> ##[ 0.000000 : 4.000000 ] !uNN_Above_uNominal
+SUPPORT		= [83.691667]
+CORRELATION	= [94.380227]
+-----------------------------------------------------------------
+
+-----------------------------------------------------------------
+{~KP1 [2]  AND KP2 [3] }
+{KP2 [3]  AND ~KP1 [2] }
+b0.3To0.4 ##[ 0.000000 : 2.000000 ] !above0.4|=> ##[ 0.000000 : 4.000000 ] !uNN_Above_uNominal
+SUPPORT		= [14.433333]
+CORRELATION	= [16.276666]
+-----------------------------------------------------------------
+
+******** RELATED ASSERTIONS FOR TARGET [yNN_Within_0.5_yNominal] ********
+
+-----------------------------------------------------------------
+{~KP1 [2]  AND ~KP2 [3] }
+{~KP2 [3]  AND ~KP1 [2] }
+!b0.3To0.4 ##[ 0.000000 : 2.000000 ] !above0.4|=> ##[ 0.000000 : 4.000000 ] yNN_Within_0.5_yNominal
+SUPPORT		= [67.575000]
+CORRELATION	= [93.131963]
+-----------------------------------------------------------------
+
+-----------------------------------------------------------------
+{~KP1 [2]  AND KP2 [3] }
+{KP2 [3]  AND ~KP1 [2] }
+b0.3To0.4 ##[ 0.000000 : 2.000000 ] !above0.4|=> ##[ 0.000000 : 4.000000 ] yNN_Within_0.5_yNominal
+SUPPORT		= [9.916667]
+CORRELATION	= [13.667164]
+-----------------------------------------------------------------
+
+******** RELATED ASSERTIONS FOR TARGET [uNN_Within_0.01_uNominal] ********
+
+-----------------------------------------------------------------
+{~KP1 [2]  AND ~KP2 [3] }
+{~KP2 [3]  AND ~KP1 [2] }
+!b0.3To0.4 ##[ 0.000000 : 2.000000 ] !above0.4|=> ##[ 0.000000 : 4.000000 ] uNN_Within_0.01_uNominal
+SUPPORT		= [73.091667]
+CORRELATION	= [93.617248]
+-----------------------------------------------------------------
+
+-----------------------------------------------------------------
+{~KP1 [2]  AND KP2 [3] }
+{KP2 [3]  AND ~KP1 [2] }
+b0.3To0.4 ##[ 0.000000 : 2.000000 ] !above0.4|=> ##[ 0.000000 : 4.000000 ] uNN_Within_0.01_uNominal
+SUPPORT		= [11.158333]
+CORRELATION	= [14.291813]
+-----------------------------------------------------------------
+
+****************** TARGET [P0] ********************
+
+-----------------------------------------------------------------
+{~KP1 [3] }
+{~KP1 [3] }
+!above0.4|=> ##[ 0.000000 : 6.000000 ] !uNN_Above_uNominal
+SUPPORT		= [88.675000]
+CORRELATION	= [100.000000]
+-----------------------------------------------------------------
+
+******** RELATED ASSERTIONS FOR TARGET [yNN_Below_yNominal] ********
+{~KP1 [3] }
+!above0.4|=> ##[ 0.000000 : 6.000000 ] !yNN_Below_yNominal
+SUPPORT		= [86.100000]
+CORRELATION	= [100.000000]
+
+******** RELATED ASSERTIONS FOR TARGET [yNN_Above_yNominal] ********
+{~KP1 [3] }
+!above0.4|=> ##[ 0.000000 : 6.000000 ] !yNN_Above_yNominal
+SUPPORT		= [86.558333]
+CORRELATION	= [100.000000]
+
+******** RELATED ASSERTIONS FOR TARGET [uNN_Below_uNominal] ********
+{~KP1 [3] }
+!above0.4|=> ##[ 0.000000 : 6.000000 ] !uNN_Below_uNominal
+SUPPORT		= [89.500000]
+CORRELATION	= [100.000000]
+
+******** RELATED ASSERTIONS FOR TARGET [yNN_Within_0.5_yNominal] ********
+{~KP1 [3] }
+!above0.4|=> ##[ 0.000000 : 6.000000 ] !yNN_Within_0.5_yNominal
+SUPPORT		= [27.441667]
+CORRELATION	= [100.000000]
+
+******** RELATED ASSERTIONS FOR TARGET [uNN_Within_0.01_uNominal] ********
+{~KP1 [3] }
+!above0.4|=> ##[ 0.000000 : 6.000000 ] !uNN_Within_0.01_uNominal
+SUPPORT		= [21.925000]
+CORRELATION	= [100.000000]
+
+****************** TARGET [P0] ********************
+
+-----------------------------------------------------------------
+{~KP1 [3] }
+{~KP1 [3] }
+!above0.4|=> ##[ 0.000000 : 6.000000 ] yNN_Within_0.5_yNominal
+SUPPORT		= [72.558333]
+CORRELATION	= [100.000000]
+-----------------------------------------------------------------
+
+******** RELATED ASSERTIONS FOR TARGET [yNN_Below_yNominal] ********
+{~KP1 [3] }
+!above0.4|=> ##[ 0.000000 : 6.000000 ] yNN_Below_yNominal
+SUPPORT		= [13.900083]
+CORRELATION	= [100.000000]
+
+******** RELATED ASSERTIONS FOR TARGET [yNN_Above_yNominal] ********
+{~KP1 [3] }
+!above0.4|=> ##[ 0.000000 : 6.000000 ] yNN_Above_yNominal
+SUPPORT		= [13.441792]
+CORRELATION	= [100.000000]
+
+******** RELATED ASSERTIONS FOR TARGET [uNN_Below_uNominal] ********
+{~KP1 [3] }
+!above0.4|=> ##[ 0.000000 : 6.000000 ] uNN_Below_uNominal
+SUPPORT		= [10.500000]
+CORRELATION	= [100.000000]
+
+******** RELATED ASSERTIONS FOR TARGET [uNN_Above_uNominal] ********
+{~KP1 [3] }
+!above0.4|=> ##[ 0.000000 : 6.000000 ] uNN_Above_uNominal
+SUPPORT		= [11.325000]
+CORRELATION	= [100.000000]
+
+******** RELATED ASSERTIONS FOR TARGET [uNN_Within_0.01_uNominal] ********
+{~KP1 [3] }
+!above0.4|=> ##[ 0.000000 : 6.000000 ] uNN_Within_0.01_uNominal
+SUPPORT		= [78.075000]
+CORRELATION	= [100.000000]
+
+****************** TARGET [P0] ********************
+
+-----------------------------------------------------------------
+{~KP1 [3] }
+{~KP1 [3] }
+!above0.4|=> ##[ 0.000000 : 6.000000 ] uNN_Within_0.01_uNominal
+SUPPORT		= [78.075000]
+CORRELATION	= [100.000000]
+-----------------------------------------------------------------
+
+******** RELATED ASSERTIONS FOR TARGET [yNN_Below_yNominal] ********
+{~KP1 [3] }
+!above0.4|=> ##[ 0.000000 : 6.000000 ] yNN_Below_yNominal
+SUPPORT		= [13.900083]
+CORRELATION	= [100.000000]
+
+******** RELATED ASSERTIONS FOR TARGET [yNN_Above_yNominal] ********
+{~KP1 [3] }
+!above0.4|=> ##[ 0.000000 : 6.000000 ] yNN_Above_yNominal
+SUPPORT		= [13.441792]
+CORRELATION	= [100.000000]
+
+******** RELATED ASSERTIONS FOR TARGET [uNN_Below_uNominal] ********
+{~KP1 [3] }
+!above0.4|=> ##[ 0.000000 : 6.000000 ] uNN_Below_uNominal
+SUPPORT		= [10.500000]
+CORRELATION	= [100.000000]
+
+******** RELATED ASSERTIONS FOR TARGET [uNN_Above_uNominal] ********
+{~KP1 [3] }
+!above0.4|=> ##[ 0.000000 : 6.000000 ] uNN_Above_uNominal
+SUPPORT		= [11.325000]
+CORRELATION	= [100.000000]
+
+******** RELATED ASSERTIONS FOR TARGET [yNN_Within_0.5_yNominal] ********
+{~KP1 [3] }
+!above0.4|=> ##[ 0.000000 : 6.000000 ] yNN_Within_0.5_yNominal
+SUPPORT		= [72.558333]
+CORRELATION	= [100.000000]
