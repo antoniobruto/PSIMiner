@@ -355,19 +355,7 @@ int main(int argc, char *argv[]) {
 			totalTrueLength += lengthOfIntervalList(getListAtPosition(listOfIntervalSets[i],targetPORV_id)->trueList);
 		totalFalseLength = totalTraceLength-totalTrueLength;
 		   */
-                //Prepare Decision Tree Root Node
-                struct treeNode* root = createTreeNode(
-                                                        NULL,//Truth List
-                                                        listOfIntervalSets,//IntervalSet
-                                                        learnedIntervalSets,
-														0,0,totalTraceLength,NULL,NULL);
-
-                decisionTree = root; //TODO: This and the previous line may be combined.
-                
-                //Compute Additional Interval Lists for Sequence Generation: Backward Influence for the Target
-                //Compute Pseudo-Targets
-                //struct listOfIntervalListsStruct* backwardInfluence = prepareBackwardInfluenceTraces(listOfIntervalSets,target,N,K,strict);
-		
+         
 		//Prepare Decision Tree Root Node
 		struct treeNode* root = createTreeNode(
 												NULL,//Truth List
