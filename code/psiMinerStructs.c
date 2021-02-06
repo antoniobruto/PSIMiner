@@ -15,7 +15,8 @@
 //#define VERBOSE_LOW
 //#define ALLOW_CLEANING
 //#define VERBOSE_HIGH
-#define VERBOSE_STD
+//#define PAUSE_DEBUG
+//#define VERBOSE_STD
 
 #ifndef MAX_STR_LENGTH
 #define MAX_STR_LENGTH 10240
@@ -3284,7 +3285,9 @@ struct treeNode* findBestGain(struct listOfIntervalListsStruct** localIntervalSe
 				fprintf(logFile,"[findBestGain] Nothing was learned.\n");fflush(logFile);
 				fprintf(stdout,"[findBestGain] Nothing was learned.\n");fflush(logFile);
 				currentNode->splittingPredicate_id = -1;
-				choicePause();
+				#ifdef PAUSE_DEBUG				
+					choicePause();
+				#endif
 				return currentNode;
 			}
 		} else {//No need for learning.
@@ -6616,6 +6619,8 @@ int prepareToLearn(struct predicateDetail* details, struct treeNode* currentNode
 		fprintf(fp,"trace_length = %lf\n",influenceLength);
 		fprintf(fp,"bias = %d\n",targetBias);
 		fprintf(fp,"tschedule = linear\n");
+		fprintf(fp,"strict = %d\n",strict);
+
 		printVariableListToFilePtr(idList,fp);
 		
 		/*

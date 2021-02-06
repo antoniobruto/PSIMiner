@@ -68,6 +68,7 @@ def read_from_config(config_file_name, signal_list, other_arguments):
     target_read = 0
     trace_length = 0
     fptr = open(config_file_name,'r+')
+    strict = 0
     for row in fptr:
         if row == '\n':
             continue
@@ -146,6 +147,9 @@ def read_from_config(config_file_name, signal_list, other_arguments):
         if( line[0] == 'tmin'):
             tmin = line[1]
             continue
+        if( line[0] == 'strict'):
+            strict = line[1]
+            continue
         if( line[0] == 'dataset_file'):
             if(line[0] == 'dataset_file'):
                 csv_files_list = line[1].split(',')
@@ -188,6 +192,7 @@ def read_from_config(config_file_name, signal_list, other_arguments):
     other_arguments.append(trace_length)
     other_arguments.append(target_interval)
     other_arguments.append(bias)
+    other_arguments.append(strict)
 
 # computes complements the interval
 def complement_interval(interval):
@@ -289,8 +294,18 @@ def minkowski_sum(interval,k):
     stop_computing = 0
     for entry in interval:
         temp = []
-        temp.append(entry[0])
+        start = entry[0] + float(k)
+        if(start >= initial_trace_length):
+            end = initial_trace_length
+            stop_computing = 1
+
         end = entry[1] + float(k)
+        
+        if( strict == 0):
+            temp.append(entry[0])
+        else:
+            temp.append(start)
+        
         if(end >= initial_trace_length):
             end = initial_trace_length
             stop_computing = 1
@@ -309,13 +324,23 @@ def minkowski_difference(interval,k):
     for entry in reversed(interval) :
         temp = []
         start = entry[0] - float(k)
+        end = entry[1] - float(k)
         if( start < 0  ):
             temp.append(0)
-            temp.append(entry[1])
+            if( strict == 0 ):
+                temp.append(entry[1])
+            else:
+                if( end < 0  ):
+                    temp.append(0)
+                else:
+                    temp.append(end)
             stop_computing = 1
         else:
             temp.append(start)
-            temp.append(entry[1])
+            if( strict == 0 ):
+                temp.append(entry[1])
+            else:
+                temp.append(end)
         n_interval.append(temp)
         if(stop_computing == 1):
             break
@@ -1095,6 +1120,9 @@ if __name__ == "__main__":
 
     global bias
     bias = int(other_arguments[8])
+
+    global strict
+    strict = int(other_arguments[9])
 
     target_false_interval = [complement_interval(i) for i in target_interval]
 
