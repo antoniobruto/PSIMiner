@@ -76,8 +76,8 @@ struct file{
 	struct identifier* varList;
 	struct PORV* porvList;
 	struct identifier* predicates;
-        struct expressionList* exprList;
-        struct expressionList* targetList;
+	struct expressionList* exprList;
+	struct expressionList* targetList;
 };
 
 struct config{

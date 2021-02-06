@@ -27,6 +27,7 @@
 #define epsilon 0.0001
 
 int timeCol = 0;
+extern FILE* logFile;
 /*-----------------------Operator Maps-------------------------*/
 
 char* operatorMap(int op){	
@@ -116,12 +117,22 @@ int getLearnType(struct config* inputConfig){
 
 void printConfigToFilePtr(struct config* configuration, FILE* fp){
 	if(configuration && fp){
-		fprintf(fp,"dataset_file = %s\n",configuration->traceFileName);
+		fprintf(fp,"dataset_file = ");
+		struct identifier* names = configuration->traceFileNames;
+		while(names){
+			fprintf(fp,"%s",names->name);
+			if(names->next){
+				fprintf(fp,", ");
+			} else {
+				fprintf(fp,"\n");
+			}
+			names = names->next;
+		}
 		fprintf(fp,"m = %d\n",configuration->bestGainCount);
 		fprintf(fp,"k = %lf\n",configuration->K);
 		fprintf(fp,"tmax = %d\n",(int)configuration->tmax);
 		fprintf(fp,"tmin = %d\n",(int)configuration->tmin);
-		fprintf(fp,"trace_length = %lf\n",configuration->traceLength);
+		//fprintf(fp,"trace_length = %lf\n",configuration->traceLength);
 		fprintf(fp,"n = %d\n",configuration->N);
 	}
 }
@@ -1240,14 +1251,18 @@ int getExpressionCount(struct expressionList* exprList){
 }
 
 struct expressionList* getExpressionAtPosition(struct expressionList *exprList, int position){
+	fprintf(logFile,"[getExpressionAtPosition] STARTED\n");fflush(logFile);
 	if(exprList){
 		int count = 0;
 		while(exprList){
 			count++;
-			if(count==position)
+			if(count==position){
+				fprintf(logFile,"[getExpressionAtPosition] ENDED\n");fflush(logFile);
 				return exprList;
+			}
 			exprList = exprList->next;
 		}
+		fprintf(logFile,"[getExpressionAtPosition] ENDED\n");fflush(logFile);
 		return NULL;
 	}
 }

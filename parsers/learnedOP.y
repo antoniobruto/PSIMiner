@@ -21,7 +21,8 @@
         extern char learnedOP_line[MAX_STR_LENGTH],oldLine[MAX_STR_LENGTH];
         extern FILE *yyin;
         extern char* yytext;
-	extern int learnedOP_multiLine;
+		extern int learnedOP_multiLine;
+		extern int traceCount;
         //Global Objects
         extern struct predicateDetail* details;
         
@@ -41,10 +42,12 @@
                 TEST_NO_LOGICAL = 8,
                 EXPR_INVALID = 9
         };
+        
+        struct intervalListStruct** listOfTraceIntervalLists = NULL;
 %}
 
 //Lexical Tokens
-%token <string> GAIN INTERVALS BUCKET BEGINPRED ENDPRED ATOM EEQ LIST_BEGIN LIST_END INTERVAL_BEGIN INTERVAL_END SEPARATOR RATIONAL OPENROUND CLOSEROUND ARITHOP EQ LEQ GEQ LT GT;
+%token <string> GAIN INTERVALS_BEGIN INTERVALS_END BUCKET BEGINPRED ENDPRED ATOM EEQ LIST_BEGIN LIST_END SEPARATOR RATIONAL OPENROUND CLOSEROUND ARITHOP EQ LEQ GEQ LT GT INTERVAL_BEGIN INTERVAL_END;
 
 //Start Production Rule
 %start detailList
@@ -57,6 +60,7 @@
 	struct predicateDetail* predDetail;
 	struct intervalStruct* intval;
 	struct intervalListStruct* intervalList;
+	struct intervalListStruct** traceIntervalSet;
 	int code;
 }
 
@@ -65,7 +69,8 @@
 %type <porvType> porv;
 %type <predDetail> detailList detail;
 %type <intval> interval;
-%type <intervalList> intervalContent intervalList intervalExpr;
+%type <intervalList> intervalContent intervalList;
+%type <traceIntervalSet> traceIntervalLists traceIntervalList intervalSet;
 %type <code> ineq  bucketExpr;
 
 %%
@@ -93,7 +98,7 @@ detailList:	%empty		{
 	;
 
 detail:
-		BEGINPRED porv gainExpr bucketExpr intervalExpr ENDPRED
+		BEGINPRED porv gainExpr bucketExpr intervalSet ENDPRED
 						{
 							#ifdef YACC_DEBUG_ON 
                                                         printf("PARSER: Predicate Deatail\n");
@@ -119,41 +124,80 @@ bucketExpr:	BUCKET EEQ rational			{
 							
 							$$ = atoi($3);
 						};
-						
-intervalExpr:	INTERVALS EEQ intervalList		{
+
+intervalSet: INTERVALS_BEGIN traceIntervalLists INTERVALS_END {
 							#ifdef YACC_DEBUG_ON 
-                                                        printf("PARSER: Interval Expression\n");
+								printf("PARSER: Interval Set\n");
+							#endif
+							$$ = listOfTraceIntervalLists;
+							listOfTraceIntervalLists = NULL;
+						};
+
+traceIntervalLists: traceIntervalList traceIntervalLists {
+							#ifdef YACC_DEBUG_ON 
+								printf("PARSER: Trace Interval Lists\n");
 							#endif
 							
-							$$ = $3;
+						} 
+				| traceIntervalList 
+						{
+							#ifdef YACC_DEBUG_ON 
+								printf("PARSER: Trace Interval Lists\n");
+							#endif
 						};
-						
-						
-rational: RATIONAL                     {       
+
+traceIntervalList: rational intervalList {
+							#ifdef YACC_DEBUG_ON 
+								printf("PARSER: Trace Interval List\n");
+							#endif
+							if(listOfTraceIntervalLists==NULL){
+								listOfTraceIntervalLists = (struct intervalListStruct**)malloc(sizeof(struct intervalListStruct*)*traceCount);
+								
+								bzero(listOfTraceIntervalLists,sizeof(struct intervalListStruct*)*traceCount);
+								
+								#ifdef YACC_DEBUG_ON 
+									printf("PARSER: Created TraceIntervalList Array of Trace Interval Lists\n");
+								#endif
+								
+							}
+							int traceID = atoi($1);
+							if(traceID>=traceCount){
+								printf("Error: The traceID exceeds the number of traced in the configuration.\n");
+								exit(0);
+							} else {
+								#ifdef YACC_DEBUG_ON 
+									printf("PARSER: Adding to list of interval lists\n");
+								#endif
+								listOfTraceIntervalLists[traceID] = $2;
+							}
+							
+							
+						};
+
+rational: RATIONAL					 	{
                                                 #ifdef YACC_DEBUG_ON 
                                                         printf("PARSER: Linear Expr is a Rational [%s]\n",$1);
                                                 #endif
-                                                
+
                                                 //$$=createCondition($1,EF_dummy,-1);
                                                 strcpy($$,$1);
                                         }
         | ARITHOP RATIONAL
-                                        {       
+                                        {
                                                 #ifdef YACC_DEBUG_ON 
                                                         printf("PARSER: Linear Expr is a Rational[%s%s]\n",$1,$2);
                                                 #endif
-                                                
+
                                                 //$$=createCondition($1,EF_dummy,-1);
                                                 sprintf($$,"%s%s",$1,$2);
                                                 //strcpy($$,$1);
-                                        }
-        ;        
+                                        };
 
-porv:   ATOM ineq arithExpr			{       
+porv:   ATOM ineq arithExpr			{
                                                         #ifdef YACC_DEBUG_ON 
                                                                 printf("PARSER: porv: ATOM ineq arithExpr\n");
                                                         #endif
-                                                        
+
                                                         $$ = createPORV(createCondition($1,$3,$2),0,0);
 						}
         ;
@@ -294,8 +338,7 @@ interval: INTERVAL_BEGIN RATIONAL SEPARATOR RATIONAL INTERVAL_END
                                                                 printf("\n");
 							#endif
 							
-						};        
-        
+						};
 %%
 
 

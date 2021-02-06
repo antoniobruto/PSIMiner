@@ -1,0 +1,331 @@
+[AMSMiner] Parsing Intervals.
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED
+[addListToListOfIntervalLists] STARTED
+[addListToListOfIntervalLists] Root Not Null
+[getLastListOfIntervalsInList] STARTED
+[getLastListOfIntervalsInList] ENDED
+[addListToListOfIntervalLists] ENDED

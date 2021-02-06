@@ -45,6 +45,7 @@ struct identifier* idList = NULL;
 struct config* inputConfig = NULL;
 
 struct PORV* learnedPORVs = NULL;
+//struct listOfIntervalListsStruct** learnedIntervalSets = NULL;
 struct listOfIntervalListsStruct* learnedIntervalSet = NULL;
 int learnedPORVCount = 0;
 int continueFlag = 0;
@@ -136,18 +137,19 @@ void copyContents(struct treeNode* root, struct treeNode* newRoot){
 	newRoot->learnedPredicates =  root->learnedPredicates;
 }
 
-struct treeNode* duplicateTree(struct treeNode* root, int ind){
+struct treeNode* duplicateTree(struct treeNode* root, int ind, struct listOfIntervalListsStruct** learnedIntervalSets){
 	if(root == NULL) return NULL;
 	//printf("@ ");
 	struct treeNode* duproot = createTreeNode(
                                                   NULL,//Truth List
                                                   listOfIntervalSets,//IntervalSet
+												  learnedIntervalSets,
                                                   0,0,totalTraceLength,NULL,NULL);
 	//root->originalToDup[ind] = newroot;
 	duproot->dupToOriginal = root;
 	copyContents(root,duproot);
-	duproot->left = duplicateTree(root->left,ind);
-	duproot->right = duplicateTree(root->right,ind);
+	duproot->left = duplicateTree(root->left,ind, learnedIntervalSets);
+	duproot->right = duplicateTree(root->right,ind, learnedIntervalSets);
 	return duproot;
 }
 
@@ -167,6 +169,9 @@ void deleteExtraLists(struct listOfIntervalListsStruct* lists, int numberOfPORVs
 }
 
 int main(int argc, char *argv[]) {
+	//Declarations
+	struct listOfIntervalListsStruct** learnedIntervalSets = NULL;
+	
 	checkCreateLogDir();
 	clock_t begin_process_input,end_process_input,begin_gen_tree,end_gen_tree;
 	
@@ -215,10 +220,15 @@ int main(int argc, char *argv[]) {
 		
 		N = inputConfig->N+1;
 		K = inputConfig->K;
+
+		traceCount = inputConfig->traceCount;
 		strict = inputConfig->strict;
 		
 		listOfIntervalSets = (struct listOfIntervalListsStruct**)malloc(sizeof(struct listOfIntervalListsStruct*)*(inputConfig->traceCount));
 		bzero(listOfIntervalSets,sizeof(struct listOfIntervalListsStruct*)*(inputConfig->traceCount));
+		
+		learnedIntervalSets = (struct listOfIntervalListsStruct**)malloc(sizeof(struct listOfIntervalListsStruct*)*(traceCount));
+		bzero(learnedIntervalSets,sizeof(struct listOfIntervalListsStruct*)*(traceCount));
 		
 		traceLengths = (double*)malloc(sizeof(double)*inputConfig->traceCount);
 
@@ -345,18 +355,14 @@ int main(int argc, char *argv[]) {
 			totalTrueLength += lengthOfIntervalList(getListAtPosition(listOfIntervalSets[i],targetPORV_id)->trueList);
 		totalFalseLength = totalTraceLength-totalTrueLength;
 		   */
-                //Prepare Decision Tree Root Node
-                struct treeNode* root = createTreeNode(
-                                                        NULL,//Truth List
-                                                        listOfIntervalSets,//IntervalSet
-                                                        0,0,totalTraceLength,NULL,NULL);
-
-                decisionTree = root; //TODO: This and the previous line may be combined.
-                
-                //Compute Additional Interval Lists for Sequence Generation: Backward Influence for the Target
-                //Compute Pseudo-Targets
-                //struct listOfIntervalListsStruct* backwardInfluence = prepareBackwardInfluenceTraces(listOfIntervalSets,target,N,K,strict);
-		
+         
+		//Prepare Decision Tree Root Node
+		struct treeNode* root = createTreeNode(
+												NULL,//Truth List
+												listOfIntervalSets,learnedIntervalSets,//IntervalSets
+												0,0,totalTraceLength,NULL,NULL);
+			
+		decisionTree = root; //TODO: This and the previous line may be combined.
 		
 		//printf("after=%d\n",printLengthOfIntervalLists(lists));  
                 // At this point target, and numberOfPORVs+1 to numberOfPORVs+(N-1) are the target interval lists
@@ -419,6 +425,7 @@ int main(int argc, char *argv[]) {
 				struct treeNode* newroot = createTreeNode(
 														NULL,//Truth List
 														listOfIntervalSets,//IntervalSet
+														learnedIntervalSets,
 														0,0,totalTraceLength,NULL,NULL);
 				printf("Total true Length = %lf\n",totalTrueLength);
 				prepareBackwardInfluenceTraces(listOfIntervalSets,targetPORVID[i],N,K,strict);
@@ -448,7 +455,7 @@ int main(int argc, char *argv[]) {
 				error = computeEntropy(getListsAtPosition(listOfIntervalSets,targetID),(endMatchIntervalList));
 				printf("mean=%lf\n",mean);
 				exit(0);*/
-				prepareRoot(newroot,listOfIntervalSets,pseudoTargetLists,targetPORVID[i],numberOfPORVs,numTargets,N);
+				prepareRoot(newroot,listOfIntervalSets,learnedIntervalSets,pseudoTargetLists,targetPORVID[i],numberOfPORVs,numTargets,N);
 				printf("[PSIMiner] spid=%d\n",newroot->splittingPredicate_id);
 				//exit(0);
 				printf("[PSIMiner] Calling PSI-Miner for target= %d\n",targetPORVID[i]);
@@ -464,7 +471,7 @@ int main(int argc, char *argv[]) {
 				
 				fprintf(aFile,"\n****************** TARGET [%s] ********************\n",newTargetName);
 				fclose(aFile);
-				amsMine(newroot,pseudoTargetLists,targetPORVID[i],numberOfPORVs,numTargets,N,depthOrig,targetPORVID[i]);
+				amsMine(newroot,pseudoTargetLists,targetPORVID[i],numberOfPORVs,numTargets,N,depthOrig,targetPORVID[i],learnedIntervalSets);
 				printf("[PSIMiner] Completed PSI-Mining for target= %d\n",targetPORVID[i]);
 				
 				dTree = getDTreeFilePtrWithName(targetName);
@@ -490,7 +497,7 @@ int main(int argc, char *argv[]) {
 						prepareBackwardInfluenceTraces(listOfIntervalSets,targetPORVID[j],N,K,strict);
 						//newroot->originalToDup = (struct treeNode**)malloc(sizeof(struct treeNode*)*(numTargets));
 						//printf("1\n");
-						duproot = duplicateTree(newroot, j); //maintain correspondence here
+						duproot = duplicateTree(newroot, j,learnedIntervalSets); //maintain correspondence here
 						totalTrueLength=totalTrueLengthList[j];
 						totalFalseLength=totalFalseLengthList[j];
 						//printf("1\n");
@@ -515,7 +522,7 @@ int main(int argc, char *argv[]) {
 						fprintf(aFile,"\n******** RELATED ASSERTIONS FOR TARGET [%s] ********\n",newTargetName);
 						fclose(aFile);
 					
-						amsMine2(newroot, duproot,pseudoTargetLists, targetPORVID[j], numberOfPORVs,numTargets, N, depthOrig, depthDup,1,listOfIntervalSets);
+						amsMine2(newroot, duproot,pseudoTargetLists, targetPORVID[j], numberOfPORVs,numTargets, N, depthOrig, depthDup,1,listOfIntervalSets,learnedIntervalSets);
 						for(int k=0;k<traceCount;k++)
 						{
 							//printf("before=%d for trace=%d\n",printLengthOfIntervalLists(listOfIntervalSets[k]),k);
