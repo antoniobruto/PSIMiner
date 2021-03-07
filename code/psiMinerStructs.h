@@ -350,4 +350,14 @@ int amsMine2(struct treeNode* original, struct treeNode* duproot,struct listOfIn
 int checkCreateLogDir();
 int ignorePredicate(int predicateID);
 double newPrecision(double n, double i);
+
+//Methods from Code-Refactor
+FILE* getAssertionFile();
+void processAssertionNode(struct listOfIntervalListsStruct** learnedIntervalSets, struct treeNode* node, int targetPORV_id);
+void printAssertionsToFile(struct listOfIntervalListsStruct** learnedIntervalSets, struct treeNode* node, int targetPORV_id);
+_Bool is_assertion_node(struct treeNode* root);
+_Bool stop_learn(int depth,struct treeNode* root);
+struct truthAssignmentListStruct* createTruthListFalse(struct truthAssignmentListStruct* src, int predicateID, int bucket, int predicateType);
+struct truthAssignmentListStruct* createTruthListTrue(struct truthAssignmentListStruct* src, int predicateID, int bucket, int predicateType);
+void prepareTreeNode(struct treeNode** root,struct truthAssignmentListStruct* constraintList, struct listOfIntervalListsStruct **listOfIntervalSets,  struct listOfIntervalListsStruct **learnedIntervalSets, double traceLength, int targetPredicateID, struct intervalListStruct **endMatchIntervalList, struct indexCouple *exploredList);
 #endif

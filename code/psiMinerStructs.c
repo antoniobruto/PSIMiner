@@ -3564,55 +3564,13 @@ int amsMine(struct treeNode* root, struct listOfIntervalListsStruct*** pseudoTar
 		
 		//Get list of zero error positions
 		
-		if(root->traceLength>0.0 && (root->mean == 0.0 || root->mean == 1.0) && fabs(root->error) == 0.0){
-			#ifdef VERBOSE_LOW
-			fprintf(logFile,"\n-----------------------------------------------------------------\nAssertion Found @1: Consequent - %s\n",root->truthValue==0?(root->mean==0.0?"true":"false"):(root->mean==1.0?"true":"false"));
-			#endif
-			FILE* fp;
-			if(assertFileName==NULL){
-				fp = fopen("assertions.txt","a");
-			} else {
-				//printf("filename = [%s]\n");
-				fp = fopen(assertFileName,"a");
-			}
-			
-			//fprintf(fp,"\n-----------------------------------------------------------------\n");//fprintf(fp,"Assertion Found @1: Consequent - %s\n",root->truthValue==0?(root->mean==0.0?"true":"false"):(root->mean==1.0?"true":"false"));
-			//fprintf(fp,"Continue = %d\n",continueFlag);
-			//printTruthListToFilePtr(root->truthList,fp);
-			printAssertions(learnedIntervalSets,root,fp,targetPORV_id);
-			//fprintf(fp,"-----------------------------------------------------------------\n");
-			fflush(fp);
-			fclose(fp);
-			
-			#ifdef VERBOSE_LOW
-			printTruthListToFilePtr(root->truthList,logFile);
-			fprintf(logFile,"\n------------ Printing Sequence For Assertion: -----------\n");
-			printSequencePositionsToFile(root->parent,logFile);
-			fprintf(logFile,"\n---------------------------------------------------------\n");
-			fprintf(logFile,"\nAdding to Cov:\n");
-			#endif
-			
-			assertCount++;
-			
-			#ifdef VERBOSE_LOW
-			printIntervalListToFilePtr(coveredList,logFile);
-			fprintf(logFile,"\n");
-			#endif
-			assertionList = addNodeToList(assertionList,root);
-			
+		if(is_assertion_node(root)){
+			processAssertionNode(learnedIntervalSets,root,targetPORV_id);
 			if(continueFlag == 0){ return 1;}
 		}
 		fflush(logFile);
 		
-		if(root->traceLength==0.0){			
-			return 1;
-		}
-		
-		#ifdef MINER_DEBUG
-		fprintf(logFile,"[amsMine] >>> No Termination\n");
-		#endif
-		
-		if(depth == 0 || root->splittingPredicate_id == -1){
+		if(stop_learn(depth,root)){
 			#ifdef VERBOSE_LOW
 			fprintf(logFile,"[amsMine] %s - ENDING HERE\n\n",depth==0?"Depth Expired":"No further improvement in gain. (Splitting Predicate is -1)");
 			#endif
@@ -3620,44 +3578,18 @@ int amsMine(struct treeNode* root, struct listOfIntervalListsStruct*** pseudoTar
 		}
 		
 		#ifdef MINER_DEBUG
-		fprintf(logFile,"[amsMine] Computing TruthLists\n");
-		#endif
+		fprintf(logFile,"[amsMine] Computing Constraint List for P[%d] : False\n",root->splittingPredicate_id);
+		#endif		
 		
-		struct truthAssignmentListStruct* newTruthList_false = duplicateTruthAssignmentList(root->truthList);
-		struct truthAssignmentListStruct* newTruthList_true = duplicateTruthAssignmentList(root->truthList);
-		
-		struct truthAssignmentStruct* asgmtFalse = createTruthAssignment(root->splittingPredicate_id,0,root->targetInfluence);
-		struct truthAssignmentStruct* asgmtTrue = createTruthAssignment(root->splittingPredicate_id,1,root->targetInfluence);
-		
-		//Mark the type of predicate as 0 (from current knowledge) or 1 (from learned knowledge)
-		printf("Assignment Type: [%d]\n",root->predType);
-		asgmtFalse->type = root->predType;
-		asgmtTrue->type = root->predType;
-		
-		addToTruthAssignmentList(&newTruthList_false,createTruthListStruct(asgmtFalse));
-		addToTruthAssignmentList(&newTruthList_true,createTruthListStruct(asgmtTrue));
-		
-		#ifdef MINER_DEBUG
-		fprintf(logFile,"[amsMine] Truth List -- FALSE \n");
-		printTruthListToFilePtr(newTruthList_false,logFile); 
-		fprintf(logFile,"\n[amsMine] --------------------\n");
-		fprintf(logFile,"[amsMine] Truth List -- TRUE \n");
-		printTruthListToFilePtr(newTruthList_true,logFile);
-		fprintf(logFile,"\n[amsMine] --------------------\n");
-		#endif
-		
-		
+		struct truthAssignmentListStruct* newTruthList_false = createTruthListFalse(root->truthList,root->splittingPredicate_id,root->targetInfluence,root->predType);
+		struct truthAssignmentListStruct* newTruthList_true = createTruthListTrue(root->truthList,root->splittingPredicate_id,root->targetInfluence,root->predType);
+				
 		#ifdef MINER_DEBUG
 		fprintf(logFile,"[amsMine] Computing Constrained Interval Sets\n");
 		#endif
 		
-		#ifdef MINER_DEBUG
-		fprintf(logFile,"[amsMine] Computing Predicate List for P[%d] : False\n",root->splittingPredicate_id);
-		#endif
-		
 		//Get the influence lists for each partial prefix.
 		struct intervalListStruct** endMatchIntervalList_false = endMatchesForPrefix(newTruthList_false, learnedIntervalSets);	//TODO: Change Name of list to represent that it contains intervals
-		
 		struct intervalListStruct** endMatchIntervalList_true = endMatchesForPrefix(newTruthList_true, learnedIntervalSets);	//TODO: Change Name of list to represent that it contains intervals
 		
 		//Compute influence lengths
@@ -3717,51 +3649,7 @@ int amsMine(struct treeNode* root, struct listOfIntervalListsStruct*** pseudoTar
 			
 			fflush(stdout);
 			#endif
-			root->left = createTreeNode( 
-				newTruthList_false,
-				listOfIntervalSets,
-				learnedIntervalSets,
-				-1,
-				-1,
-				falseLength,
-				NULL,
-				NULL	
-			);
-			
-			int mininmumBucketID = getSmallestBucketID(newTruthList_false);
-			int targetID = mininmumBucketID==0?target:(numberOfPORVs+mininmumBucketID);
-			double trueMean, falseMean, Htrue, Hfalse;
-			int dominantTruth;
-			root->left->trueFalseFlag=0;
-			
-			if(targetBias == -1){
-				falseMean = computeFalseMean(listOfIntervalSets,targetID,falseLength,endMatchIntervalList_false);
-				//Hfalse = computeFalseEntropy(getListsAtPosition(listOfIntervalSets,targetID),endMatchIntervalList_false);//cumulative?computeCumulativeFalseEntropy(intervalSet,endMatchIntervalList_false,mininmumBucketID):computeFalseEntropy(getListAtPosition(intervalSet,targetID),endMatchIntervalList_false);
-				dominantTruth = 0;
-				root->left->mean = falseMean;
-				root->left->error = computeEntropy(getListsAtPosition(listOfIntervalSets,targetID),(endMatchIntervalList_false));;//Hfalse;
-			} else if(targetBias == +1){
-				trueMean = computeMean(listOfIntervalSets,targetID,falseLength,endMatchIntervalList_false);
-				//Htrue = computeTrueEntropy(getListsAtPosition(listOfIntervalSets,targetID),endMatchIntervalList_false);//cumulative?computeCumulativeTrueEntropy(intervalSet,endMatchIntervalList_false,mininmumBucketID):computeTrueEntropy(getListAtPosition(intervalSet,targetID),endMatchIntervalList_false);
-				dominantTruth = 1;
-				root->left->mean = trueMean;
-				root->left->error = computeEntropy(getListsAtPosition(listOfIntervalSets,targetID),(endMatchIntervalList_false));//Htrue;
-			} else {
-				trueMean = computeMean(listOfIntervalSets,targetID,falseLength,endMatchIntervalList_false);
-				falseMean = computeFalseMean(listOfIntervalSets,targetID,falseLength,endMatchIntervalList_false);
-				Htrue = computeTrueEntropy(getListsAtPosition(listOfIntervalSets,targetID),endMatchIntervalList_false);//cumulative?computeCumulativeTrueEntropy(intervalSet,endMatchIntervalList_false,mininmumBucketID):computeTrueEntropy(getListAtPosition(intervalSet,targetID),endMatchIntervalList_false);
-				Hfalse = computeFalseEntropy(getListsAtPosition(listOfIntervalSets,targetID),endMatchIntervalList_false);//cumulative?computeCumulativeFalseEntropy(intervalSet,endMatchIntervalList_false,mininmumBucketID):computeFalseEntropy(getListAtPosition(intervalSet,targetID),endMatchIntervalList_false);
-				if(fabs(Htrue) == 0.0 && fabs(Hfalse)==0.0)
-					root->left->trueFalseFlag=1;
-				
-				dominantTruth = Htrue<=Hfalse?1:0;//error(trueMean)<error(falseMean)?1:0;
-				root->left->mean = dominantTruth==0?falseMean:trueMean;
-				root->left->error = computeEntropy(getListsAtPosition(listOfIntervalSets,targetID),(endMatchIntervalList_false));//cumulative?computeCumulativeEntropy(intervalSet,endMatchIntervalList_false,mininmumBucketID):computeEntropy(getListAtPosition(intervalSet,targetID),(endMatchIntervalList_false));//error(root->left->mean);
-			} 
-				
-			root->left->parent = root;
-			root->left->explored = duplicateIndexCouple(root->explored);
-			root->left->truthValue = dominantTruth;
+			prepareTreeNode(&(root->left), newTruthList_false, listOfIntervalSets, learnedIntervalSets, falseLength,target, endMatchIntervalList_false, root->explored);
 			
 			#ifdef MINER_DEBUG
 				fprintf(logFile,"[amsMine] After creating Left (FALSE) Node\nThe Constraint Set");
@@ -3846,54 +3734,7 @@ int amsMine(struct treeNode* root, struct listOfIntervalListsStruct*** pseudoTar
 			fflush(stdout);
 			#endif
 			
-			int mininmumBucketID = getSmallestBucketID(newTruthList_true);
-			int targetID = mininmumBucketID==0?target:(numberOfPORVs+mininmumBucketID);
-				
-			root->right = createTreeNode( newTruthList_true,
-							listOfIntervalSets,
-							learnedIntervalSets,
-							-1,
-							-1,
-							trueLength,
-							NULL,
-							NULL	
-			);
-				
-				double trueMean, falseMean, Htrue, Hfalse;
-				int dominantTruth;
-				
-			root->right->trueFalseFlag=0;
-				
-			if(targetBias == -1){
-				falseMean = computeFalseMean(listOfIntervalSets,targetID,trueLength,endMatchIntervalList_true);
-				//Hfalse = computeFalseEntropy(getListsAtPosition(listOfIntervalSets,targetID),endMatchIntervalList_true);//cumulative?computeCumulativeFalseEntropy(intervalSet,endMatchIntervalList_true,mininmumBucketID):computeFalseEntropy(getListAtPosition(intervalSet,targetID),endMatchIntervalList_true);
-				dominantTruth = 0;
-				root->right->mean = falseMean;
-				root->right->error = computeEntropy(getListsAtPosition(listOfIntervalSets,targetID),(endMatchIntervalList_true));//Hfalse;
-			} else if(targetBias == +1){
-				trueMean = computeMean(listOfIntervalSets,targetID,trueLength,endMatchIntervalList_true);
-				//Htrue = computeTrueEntropy(getListsAtPosition(listOfIntervalSets,targetID),endMatchIntervalList_true);//cumulative?computeCumulativeTrueEntropy(intervalSet,endMatchIntervalList_true,mininmumBucketID):computeTrueEntropy(getListAtPosition(intervalSet,targetID),endMatchIntervalList_true);
-				dominantTruth = 1;
-				root->right->mean = trueMean;
-				root->right->error = computeEntropy(getListsAtPosition(listOfIntervalSets,targetID),(endMatchIntervalList_true));//Htrue;
-			} else {
-				trueMean = computeMean(listOfIntervalSets,targetID,trueLength,endMatchIntervalList_true);
-				falseMean = computeFalseMean(listOfIntervalSets,targetID,trueLength,endMatchIntervalList_true);
-				Htrue = computeTrueEntropy(getListsAtPosition(listOfIntervalSets,targetID),endMatchIntervalList_true);//cumulative?computeCumulativeTrueEntropy(intervalSet,endMatchIntervalList_true,mininmumBucketID):computeTrueEntropy(getListAtPosition(intervalSet,targetID),endMatchIntervalList_true);
-				Hfalse = computeFalseEntropy(getListsAtPosition(listOfIntervalSets,targetID),endMatchIntervalList_true);//cumulative?computeCumulativeFalseEntropy(intervalSet,endMatchIntervalList_true,mininmumBucketID):computeFalseEntropy(getListAtPosition(intervalSet,targetID),endMatchIntervalList_true);
-				
-				if(fabs(Htrue) == 0.0 && fabs(Hfalse)==0.0)
-					root->right->trueFalseFlag=1;
-				
-				dominantTruth = Htrue<=Hfalse?1:0;//error(trueMean)<error(falseMean)?1:0;
-				root->right->mean = dominantTruth==0?falseMean:trueMean;
-				root->right->error = computeEntropy(getListsAtPosition(listOfIntervalSets,targetID),(endMatchIntervalList_true));//cumulative?computeCumulativeEntropy(intervalSet,endMatchIntervalList_true,mininmumBucketID):computeEntropy(getListAtPosition(intervalSet,targetID),(endMatchIntervalList_true));//error(root->left->mean);
-			} 
-				
-			root->right->parent = root;
-			root->right->truthValue = dominantTruth;
-			root->right->explored = duplicateIndexCouple(root->explored);
-			
+			prepareTreeNode(&(root->right), newTruthList_true, listOfIntervalSets, learnedIntervalSets, trueLength, target, endMatchIntervalList_true, root->explored);
 			
 			#ifdef MINER_DEBUG
 			fprintf(logFile,"[amsMine] Right (TRUE) Node Created.\n");
@@ -5964,9 +5805,9 @@ void printAssertions(struct listOfIntervalListsStruct** learnedIntervalSets, str
 	fprintf(logFile,"[printAssertions] STARTED\n");
 	#endif
 
-	if(node->id==3){
-		fprintf(logFile,"\nCHECK WHATS HAPPENING HERE --- ABC ---\n");
-	}
+	//if(node->id==3){
+	//	fprintf(logFile,"\nCHECK WHATS HAPPENING HERE --- ABC ---\n");
+	//}
 
 	if(node && fp){
 		#ifdef SUP_DEBUG
@@ -6817,4 +6658,136 @@ int ignorePredicate(int predicateID){
 double newPrecision(double n, double i) 
 { 
     return floor(pow(10,i)*n)/pow(10,i); 
+}
+
+FILE* getAssertionFile(){
+	if(assertFileName==NULL){
+		return fopen("assertions.txt","a");
+	} else {
+		//printf("filename = [%s]\n");
+		return fopen(assertFileName,"a");
+	}
+}
+
+//Code-Refactor
+
+void processAssertionNode(struct listOfIntervalListsStruct** learnedIntervalSets, struct treeNode* node, int targetPORV_id){
+	#ifdef VERBOSE_LOW
+	fprintf(logFile,"\n-----------------------------------------------------------------\nAssertion Found @1: Consequent - %s\n",root->truthValue==0?(root->mean==0.0?"true":"false"):(root->mean==1.0?"true":"false"));
+	#endif
+	
+	printAssertionsToFile(learnedIntervalSets,node,targetPORV_id);
+	
+	#ifdef VERBOSE_LOW
+	printTruthListToFilePtr(root->truthList,logFile);
+	fprintf(logFile,"\n------------ Printing Sequence For Assertion: -----------\n");
+	printSequencePositionsToFile(root->parent,logFile);
+	fprintf(logFile,"\n---------------------------------------------------------\n");
+	fprintf(logFile,"\nAdding to Cov:\n");
+	#endif
+	
+	assertCount++;
+	
+	#ifdef VERBOSE_LOW
+	printIntervalListToFilePtr(coveredList,logFile);
+	fprintf(logFile,"\n");
+	#endif
+	assertionList = addNodeToList(assertionList,node);
+}
+
+void printAssertionsToFile(struct listOfIntervalListsStruct** learnedIntervalSets, struct treeNode* node, int targetPORV_id){
+	FILE* fp = getAssertionFile();
+	printAssertions(learnedIntervalSets,node,fp,targetPORV_id);
+	fflush(fp);
+	fclose(fp);
+}
+
+_Bool is_assertion_node(struct treeNode* root){
+    if(root->traceLength>0.0 && (root->mean == 0.0 || root->mean == 1.0) && fabs(root->error) == 0.0){
+		return 1;
+    }
+    return 0;
+}
+
+_Bool stop_learn(int depth,struct treeNode* root){
+    if(depth == 0 || root->splittingPredicate_id == -1){
+		return 1;
+    }
+    return 0;
+}
+
+/* Add Predicate, Bucket and False truth, to a new Constraint List */
+struct truthAssignmentListStruct* createTruthListFalse(struct truthAssignmentListStruct* src, int predicateID, int bucket, int predicateType){
+	struct truthAssignmentListStruct* newTruthList_false = duplicateTruthAssignmentList(src);
+	struct truthAssignmentStruct* asgmtFalse = createTruthAssignment(predicateID,0,bucket);
+	asgmtFalse->type = predicateType;//Mark the type of predicate as 0 (from current knowledge) or 1 (from learned knowledge)
+	addToTruthAssignmentList(&newTruthList_false,createTruthListStruct(asgmtFalse));
+	return newTruthList_false;
+	#ifdef MINER_DEBUG
+		fprintf(logFile,"[createTruthListFalse] Truth List -- FALSE \n");
+		printTruthListToFilePtr(newTruthList_false,logFile); 
+		fprintf(logFile,"\n[createTruthListFalse] --------------------\n");
+	#endif
+		
+}
+
+/* Add Predicate, Bucket and True truth, to a new Constraint List */
+struct truthAssignmentListStruct* createTruthListTrue(struct truthAssignmentListStruct* src, int predicateID, int bucket, int predicateType){
+	struct truthAssignmentListStruct* newTruthList_true = duplicateTruthAssignmentList(src);
+	struct truthAssignmentStruct* asgmtTrue = createTruthAssignment(predicateID,1,bucket);
+	asgmtTrue->type = predicateType;//Mark the type of predicate as 0 (from current knowledge) or 1 (from learned knowledge)
+	addToTruthAssignmentList(&newTruthList_true,createTruthListStruct(asgmtTrue));
+	return newTruthList_true;
+	#ifdef MINER_DEBUG
+		fprintf(logFile,"[createTruthListTrue] Truth List -- TRUE \n");
+		printTruthListToFilePtr(newTruthList_true,logFile);
+		fprintf(logFile,"\n[createTruthListTrue] --------------------\n");
+	#endif
+}
+
+//Prepare Child Node
+void prepareTreeNode(struct treeNode** root,struct truthAssignmentListStruct* constraintList, struct listOfIntervalListsStruct **listOfIntervalSets,  struct listOfIntervalListsStruct **learnedIntervalSets, double traceLength, int targetPredicateID, struct intervalListStruct **endMatchIntervalList, struct indexCouple *exploredList){
+	*root = createTreeNode( 
+		constraintList,
+		listOfIntervalSets,
+		learnedIntervalSets,
+		-1,
+		-1,
+		traceLength,
+		NULL,
+		NULL	
+	);
+	
+	int mininmumBucketID = getSmallestBucketID(constraintList);
+	int targetID = mininmumBucketID==0?targetPredicateID:(numberOfPORVs+mininmumBucketID);
+	double trueMean, falseMean, Htrue, Hfalse;
+	int dominantTruth;
+	(*root)->trueFalseFlag=0;
+	
+	if(targetBias == -1){
+		falseMean = computeFalseMean(listOfIntervalSets,targetID,traceLength,endMatchIntervalList);
+		dominantTruth = 0;
+		(*root)->mean = falseMean;
+		(*root)->error = computeEntropy(getListsAtPosition(listOfIntervalSets,targetID),(endMatchIntervalList));;//Hfalse;
+	} else if(targetBias == +1){
+		trueMean = computeMean(listOfIntervalSets,targetID,traceLength,endMatchIntervalList);
+		dominantTruth = 1;
+		(*root)->mean = trueMean;
+		(*root)->error = computeEntropy(getListsAtPosition(listOfIntervalSets,targetID),(endMatchIntervalList));//Htrue;
+	} else {
+		trueMean = computeMean(listOfIntervalSets,targetID,traceLength,endMatchIntervalList);
+		falseMean = computeFalseMean(listOfIntervalSets,targetID,traceLength,endMatchIntervalList);
+		Htrue = computeTrueEntropy(getListsAtPosition(listOfIntervalSets,targetID),endMatchIntervalList);//cumulative?computeCumulativeTrueEntropy(intervalSet,endMatchIntervalList_false,mininmumBucketID):computeTrueEntropy(getListAtPosition(intervalSet,targetID),endMatchIntervalList_false);
+		Hfalse = computeFalseEntropy(getListsAtPosition(listOfIntervalSets,targetID),endMatchIntervalList);//cumulative?computeCumulativeFalseEntropy(intervalSet,endMatchIntervalList_false,mininmumBucketID):computeFalseEntropy(getListAtPosition(intervalSet,targetID),endMatchIntervalList_false);
+		if(fabs(Htrue) == 0.0 && fabs(Hfalse)==0.0)
+			(*root)->trueFalseFlag=1;
+		
+		dominantTruth = Htrue<=Hfalse?1:0;
+		(*root)->mean = dominantTruth==0?falseMean:trueMean;
+		(*root)->error = computeEntropy(getListsAtPosition(listOfIntervalSets,targetID),(endMatchIntervalList));//cumulative?computeCumulativeEntropy(intervalSet,endMatchIntervalList_false,mininmumBucketID):computeEntropy(getListAtPosition(intervalSet,targetID),(endMatchIntervalList_false));//error(root->left->mean);
+	} 
+		
+	(*root)->parent = root;
+	(*root)->explored = duplicateIndexCouple(exploredList);
+	(*root)->truthValue = dominantTruth;
 }

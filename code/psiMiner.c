@@ -479,7 +479,7 @@ int main(int argc, char *argv[]) {
 				printTreeToFilePtr(newroot,dTree,targetPORVID[i]);
 				fflush(dTree); fclose(dTree);
 				//exit(0);
-				printTruthList(newroot->right->truthList);
+				//printTruthList(newroot->right->truthList);
 				for(int k=0;k<traceCount;k++)
 				{
 					//printf("before=%d for trace=%d\n",printLengthOfIntervalLists(listOfIntervalSets[k]),k);
